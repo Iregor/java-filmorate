@@ -23,36 +23,42 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if(UserValidator.validate(user, users)) {
-            if(user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-                log.info("У пользователь \"{}\" отсутствует имя. " +
-                        "Имя автоматически назначено от поля \"Login\"." +
-                        "Новое имя пользователя - {}.", user.getLogin(), user.getName());
+        UserValidator.validate(user);
+
+        for (User userFromBase : users.values()) {
+            if(userFromBase.getEmail().equals(user.getEmail())) {
+                log.info("The user with this email is already registered.");
+                return null;
             }
-            user.setId(userId++);
-            users.put(user.getId(), user);
-            log.info("Пользователь \"{}\" добавлен. В базе {} пользовател{}.",user.getLogin(), users.size(), ending());
-            return user;
+            if(userFromBase.getLogin().equals(user.getLogin())) {
+                log.info("The user with this login is already registered.");
+                return null;
+            }
         }
-        return null;
+
+        if(user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("The name is automatically assigned from the \"Login\" field. " +
+                    "The new name is {}.", user.getLogin());
+        }
+
+        user.setId(userId++);
+        users.put(user.getId(), user);
+        log.info("User \"{}\" added. The database contains {} user(s).", user.getLogin(), users.size());
+        return user;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if(UserValidator.validate(user, users)) {
-            users.put(user.getId(), user);
-            log.info("Пользователь c идентификатором \"{}\" обновлен.",user.getId());
-            return user;
-        }
-        return null;
-    }
+        UserValidator.validate(user);
 
-    private String ending() {
-        String[] ends = new String[]{"ь", "я", "ей"};
-        if ((users.size() > 4) & (users.size() < 21)) return ends[2];
-        else if ((users.size() % 10) == 1) return ends[0];
-        else if (((users.size() % 10) > 1) & ((users.size() % 10) < 5)) return ends[1];
-        else return ends[0];
+        if(user.getId() != null && !users.containsKey(user.getId())) {
+            log.info("User ID {} missing. ", user.getId());
+            throw new NullPointerException("User ID " + user.getId() + " missing.");
+        }
+
+        users.put(user.getId(), user);
+        log.info("User ID {} updated. ",user.getId());
+        return user;
     }
 }

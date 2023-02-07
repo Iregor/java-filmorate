@@ -19,137 +19,70 @@ class UserValidatorTest {
     }
 
     @Test
-    void validateUser_returnException_emailWithoutAt() {
+    void validateUser_throwValidateException_emailWithoutAt() {
         User user = new User("Emailemail.ru", "User1", "Юзер 1", "1994-11-25");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
-                () -> UserValidator.validate(user, users)
+                () -> UserValidator.validate(user)
         );
         assertEquals(exception.getMessage(),
                 "Почта должна быть заполнена и содержать символ \"@\". ");
     }
 
     @Test
-    void validateUser_returnException_nullEmail() {
+    void validateUser_throwValidateException_nullEmail() {
         User user = new User(null, "User1", "Юзер 1", "1994-11-25");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
-                () -> UserValidator.validate(user, users)
+                () -> UserValidator.validate(user)
         );
         assertEquals(exception.getMessage(),
                 "Почта должна быть заполнена и содержать символ \"@\". ");
     }
 
     @Test
-    void validateUser_returnException_nullLogin() {
+    void validateUser_throwValidateException_nullLogin() {
         User user = new User("Email@email.ru", null, "Юзер 1", "1994-11-25");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
-                () -> UserValidator.validate(user, users)
+                () -> UserValidator.validate(user)
         );
         assertEquals(exception.getMessage(),
                 "Логин не может быть пустым или содержать пробелы. ");
     }
 
     @Test
-    void validateUser_returnException_loginWithSpace() {
+    void validateUser_throwValidateException_loginWithSpace() {
         User user = new User("Email@email.ru", "Login 1", "Юзер 1", "1994-11-25");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
-                () -> UserValidator.validate(user, users)
+                () -> UserValidator.validate(user)
         );
         assertEquals(exception.getMessage(),
                 "Логин не может быть пустым или содержать пробелы. ");
     }
 
     @Test
-    void validateUser_returnException_withFutureBirthday() {
+    void validateUser_throwValidateException_withFutureBirthday() {
         User user = new User("Email@email.ru", "Login", "Юзер 1", "2994-11-25");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
-                () -> UserValidator.validate(user, users)
+                () -> UserValidator.validate(user)
         );
         assertEquals(exception.getMessage(),
                 "Дата рождения не может быть в будущем. ");
     }
 
     @Test
-    void validateUser_returnException_userEmailInBase() {
-        User user = new User("Email@email.ru", "Login", "Юзер 1", "1994-11-25");
-        if(UserValidator.validate(user, users)) {
-            user.setId(13);
-            users.put(user.getId(), user);
-        }
-
-        User newUser = new User("Email@email.ru", "Log123in", "Юзер 1", "1994-11-25");
-        final ValidateException exception = assertThrows(
-                ValidateException.class,
-                () -> {
-                    if(UserValidator.validate(newUser, users)) {
-                        newUser.setId(10);
-                        users.put(newUser.getId(), newUser);
-                    }
-                }
-        );
-        assertEquals(exception.getMessage(),
-                "Пользователь с данной почтой уже зарегистрирован. ");
-    }
-
-    @Test
-    void validateUser_returnException_userLoginInBase() {
-        User user = new User("Email@email.ru", "Login", "Юзер 1", "1994-11-25");
-        if(UserValidator.validate(user, users)) {
-            user.setId(13);
-            users.put(user.getId(), user);
-        }
-
-        User newUser = new User("Email@em123ail.ru", "Login", "Юз123ер 1", "1981-12-13");
-        final ValidateException exception = assertThrows(
-                ValidateException.class,
-                () -> {
-                    if(UserValidator.validate(newUser, users)) {
-                        newUser.setId(10);
-                        users.put(newUser.getId(), newUser);
-                    }
-                }
-        );
-        assertEquals(exception.getMessage(),
-                "Данный логин занят. ");
-    }
-
-    @Test
-    void validateUser_returnException_wrongUserId() {
-        User user = new User("Email@email.ru", "Login", "Юзер 1", "1994-11-25");
-        if(UserValidator.validate(user, users)) {
-            user.setId(13);
-            users.put(user.getId(), user);
-        }
-
-        User newUser = new User("E123l@email.ru", "L123ogin", "Юз123ер 1", "1981-12-13");
-        newUser.setId(234);
-        final ValidateException exception = assertThrows(
-                ValidateException.class,
-                () -> {
-                    if(UserValidator.validate(newUser, users)) {
-                        users.put(newUser.getId(), newUser);
-                    }
-                }
-        );
-        assertEquals(exception.getMessage(),
-                "Пользователь с таким идентификатором отсутствует. ");
-    }
-
-    @Test
-    void validateUser_returnManyException_wrongUser() {
+    void validateUser_throwManyMessageOfValidateException_wrongUser() {
         User user = new User(null, null, "Юзер 1", "2994-11-25");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> {
-                    if(UserValidator.validate(user, users)) {
-                        user.setId(12);
-                        users.put(user.getId(), user);
+                    UserValidator.validate(user);
+                    user.setId(12);
+                    users.put(user.getId(), user);
                     }
-                }
         );
         assertEquals(exception.getMessage(),
                 "Почта должна быть заполнена и содержать символ \"@\". " +
@@ -158,25 +91,11 @@ class UserValidatorTest {
     }
 
     @Test
-    void validateUser_returnManyException_userInBase() {
-        User user = new User("Email@email.ru", "Login", "Юзер 1", "1994-11-25");
-        if(UserValidator.validate(user, users)) {
-            user.setId(12);
-            users.put(user.getId(), user);
-        }
-
-        final ValidateException exception = assertThrows(
-                ValidateException.class,
-                () -> {
-                    if(UserValidator.validate(user, users)) {
-                        user.setId(12);
-                        users.put(user.getId(), user);
-                    }
-                }
-        );
-        assertEquals(exception.getMessage(),
-                "Пользователь с данной почтой уже зарегистрирован. " +
-                        "Данный логин занят. ");
+    void validateUser_addingUser_correctlyUser() {
+        User user = new User("Email@email.ru", "User1", "Юзер 1", "1994-11-25");
+        UserValidator.validate(user);
+        user.setId(25);
+        users.put(user.getId(), user);
+        assertEquals(user, users.get(25));
     }
-
 }

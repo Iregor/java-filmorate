@@ -23,30 +23,33 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if(FilmValidator.validate(film, films)) {
-            film.setId(filmId++);
-            films.put(film.getId(), film);
-            log.info("Фильм \"{}\" добавлен. В базе {} фильм{}.",film.getName(), films.size(), ending());
-            return film;
+        FilmValidator.validate(film);
+
+        for (Film filmFromBase : films.values()) {
+            if(filmFromBase.getName().equals(film.getName())
+                    && filmFromBase.getReleaseDate().equals(film.getReleaseDate())) {
+                log.info("Movie added earlier at ID {}.", filmFromBase.getId());
+                return null;
+            }
         }
-        return null;
+
+        film.setId(filmId++);
+        films.put(film.getId(), film);
+        log.info("Movie \"{}\" added. The database contains {} film(s).",film.getName(), films.size());
+        return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if(FilmValidator.validate(film, films)) {
-            films.put(film.getId(), film);
-            log.info("Фильм c идентификатором \"{}\" обновлен.",film.getId());
-            return film;
-        }
-        return null;
-    }
+        FilmValidator.validate(film);
 
-    private String ending() {
-        String[] ends = new String[]{"", "а", "ов"};
-        if ((films.size() > 4) & (films.size() < 21)) return ends[2];
-        else if ((films.size() % 10) == 1) return ends[0];
-        else if (((films.size() % 10) > 1) & ((films.size() % 10) < 5)) return ends[1];
-        else return ends[0];
+        if(film.getId() != null && !films.containsKey(film.getId())) {
+            log.info("Movie ID {} missing. ", film.getId());
+            throw new NullPointerException("Movie ID " + film.getId() + " missing.");
+        }
+
+        films.put(film.getId(), film);
+        log.info("Movie ID {} updated.", film.getId());
+        return film;
     }
 }

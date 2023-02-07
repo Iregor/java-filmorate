@@ -5,7 +5,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 
 public class FilmValidator {
     public static final int MAX_LENGTH_DESCRIPTION = 200;
@@ -13,7 +12,7 @@ public class FilmValidator {
     public static final LocalDate OLDEST_DATE_RELEASE
             = LocalDate.of(1895, 12, 28);
 
-    public static boolean validate(Film film, HashMap<Integer, Film> films) {
+    public static void validate(Film film) {
         StringBuilder exceptionMessage = new StringBuilder();
 
         if(film.getName() == null || film.getName().isBlank()) {
@@ -36,21 +35,5 @@ public class FilmValidator {
         if(!exceptionMessage.toString().isBlank()) {
             throw new ValidateException(exceptionMessage.toString());
         }
-
-        Integer hashOfFilm = film.getName().hashCode() + film.getReleaseDate().hashCode();
-        HashMap<Integer, Film> hashFilms = new HashMap<>();
-        for (Film filmFromMap : films.values()) {
-            hashFilms.put(filmFromMap.getName().hashCode() +
-                    filmFromMap.getReleaseDate().hashCode(), filmFromMap);
-        }
-
-        if (film.getId() == null
-                && hashFilms.containsKey(hashOfFilm)) {
-            throw new ValidateException("Фильм уже числится в базе под идентификатором "
-                    + hashFilms.get(hashOfFilm).getId() + ". ");
-        } else if(film.getId() != null && !films.containsKey(film.getId())) {
-            throw new ValidateException("Фильм с таким идентификатором отсутствует. ");
-        }
-        return true;
     }
 }
