@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
@@ -15,7 +14,7 @@ import java.util.HashMap;
 @RequestMapping("/films")
 public class FilmController {
     private static int filmId = 1;
-    private HashMap<Integer, Film> films = new HashMap<>();
+    private final HashMap<Integer, Film> films = new HashMap<>();
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -24,26 +23,30 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if(!FilmValidator.validate(film)) {
-            return null;
+        if(FilmValidator.validate(film, films)) {
+            film.setId(filmId++);
+            films.put(film.getId(), film);
+            log.info("Фильм \"{}\" добавлен. В базе {} фильм{}.",film.getName(), films.size(), ending());
+            return film;
         }
-        if(films.containsValue(film)) {
-            throw new ValidateException("Фильм уже в базе.");
-        }
-        film.setId(filmId++);
-        films.put(film.getId(), film);
-        return film;
+        return null;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if(!FilmValidator.validate(film)) {
-            return null;
+        if(FilmValidator.validate(film, films)) {
+            films.put(film.getId(), film);
+            log.info("Фильм c идентификатором \"{}\" обновлен.",film.getId());
+            return film;
         }
-        if(!films.containsKey(film.getId())) {
-            throw new NullPointerException("Фильм с таким идентификатором отсутствует.");
-        }
-        films.put(film.getId(), film);
-        return film;
+        return null;
+    }
+
+    private String ending() {
+        String[] ends = new String[]{"", "а", "ов"};
+        if ((films.size() > 4) & (films.size() < 21)) return ends[2];
+        else if ((films.size() % 10) == 1) return ends[0];
+        else if (((films.size() % 10) > 1) & ((films.size() % 10) < 5)) return ends[1];
+        else return ends[0];
     }
 }
