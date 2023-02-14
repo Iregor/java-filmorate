@@ -7,6 +7,9 @@
 *.zip
 *.tar.gz
 *.rar
+*.cmd
+*.md
+mvnw
 hs_err_pid*
 out/
 target/
