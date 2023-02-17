@@ -40,13 +40,13 @@ public class UserController {
             log.info(exc.getMessage());
             throw new ResponseStatusException(BAD_REQUEST, "Ошибка валидации пользователя.");
         }
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Пользователь успешно обновлен" + user);
-            return user;
+        if (!users.containsKey(user.getId())) {
+            log.info("Пользователя id = " + user.getId() + " нет в базе.");
+            throw new ResponseStatusException(NOT_FOUND, "Unable to find resource");
         }
-        log.info("Пользователя id = " + user.getId() + " нет в базе.");
-        throw new ResponseStatusException(NOT_FOUND, "Unable to find resource");
+        users.put(user.getId(), user);
+        log.info("Пользователь успешно обновлен" + user);
+        return user;
     }
 
     @GetMapping
@@ -65,38 +65,27 @@ public class UserController {
 
     private void validateUserData(User user) throws ValidationException{
         if (user.getEmail() == null || user.getLogin() == null || user.getBirthday() == null) {
-            throw new ValidationException("Ошибка валидации пользователя: " + user + ". " + "Ошибки: Не указаны требуемые поля.");
+            throw new ValidationException("Не указаны требуемые поля: " + user);
         }
 
         if (user.getName() == null || user.getName().isBlank()){
             user.setName(user.getLogin());
         }
 
-        StringBuilder sb = new StringBuilder();
-        boolean notValidated = false;
-
         if (user.getEmail().isBlank()) {
-            sb.append("Пустой email. ");
-            notValidated = true;
+            throw new ValidationException("Пустой email: " + user);
         }
         if (!user.getEmail().contains("@")) {
-            sb.append("В email отсутствует символ @. ");
-            notValidated = true;
+            throw new ValidationException("В email отсутствует символ @: " + user);
         }
         if (user.getLogin().isBlank()){
-            sb.append("Пустой логин. ");
-            notValidated = true;
+            throw new ValidationException("Пустой логин: " + user);
         }
         if (user.getLogin().contains(" ")){
-            sb.append("Недопустимый символ пробела. ");
-            notValidated = true;
+            throw new ValidationException("Недопустимый символ пробела: " + user);
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            sb.append("Указана ненаступившая дата рождения. ");
-            notValidated = true;
-        }
-        if (notValidated) {
-            throw new ValidationException("Ошибка валидации пользователя: " + user + ". " + "Ошибки: " + sb);
+            throw new ValidationException("Указана ненаступившая дата рождения: " + user);
         }
     }
 }

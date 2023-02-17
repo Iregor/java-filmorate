@@ -41,13 +41,13 @@ public class FilmController {
             log.info(exc.getMessage());
             throw new ResponseStatusException(BAD_REQUEST, "Ошибка валидации фильма.");
         }
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Фильм успешно обновлен" + film);
-            return film;
+        if (!films.containsKey(film.getId())) {
+            log.info("Фильма id = " + film.getId() + " нет в базе.");
+            throw new ResponseStatusException(NOT_FOUND, "Unable to find resource");
         }
-        log.info("Фильма id = " + film.getId() + " нет в базе.");
-        throw new ResponseStatusException(NOT_FOUND, "Unable to find resource");
+        films.put(film.getId(), film);
+        log.info("Фильм успешно обновлен" + film);
+        return film;
     }
 
     @GetMapping
@@ -67,30 +67,19 @@ public class FilmController {
     private void validateFilmData(Film film) throws ValidationException {
         if (film.getName() == null || film.getDescription() == null ||
                 film.getReleaseDate() == null || film.getDuration() == null) {
-            throw new ValidationException("Ошибка валидации фильма: " + film + ". " + "Ошибки: Не указаны требуемые поля.");
+            throw new ValidationException("Не указаны требуемые поля: " + film);
         }
-
-        StringBuilder sb = new StringBuilder();
-        boolean notValidated = false;
-
         if (film.getName().isBlank()) {
-            sb.append("Пустое название фильма. ");
-            notValidated = true;
+            throw new ValidationException("Указано пустое название: " + film);
         }
         if (film.getDescription().length() >= 200) {
-            sb.append("Длина описания больше 200 символов. ");
-            notValidated = true;
+            throw new ValidationException("Длина описания больше 200 символов: " + film);
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            sb.append("Дата предшествует первому кинопоказу. ");
-            notValidated = true;
+            throw new ValidationException("Дата предшествует первому кинопоказу: " + film);
         }
         if (film.getDuration() < 0){
-            sb.append("Отрицательная продолжительность фильма. ");
-            notValidated = true;
-        }
-        if (notValidated){
-            throw new ValidationException("Ошибка валидации фильма: " + film + ". " + "Ошибки: " + sb);
+            throw new ValidationException("Отрицательная продолжительность фильма: " + film);
         }
     }
 }
