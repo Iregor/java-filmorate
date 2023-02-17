@@ -20,16 +20,76 @@ public class UserControllerValidationTest {
     @BeforeEach
     public void createTestInitialData() {
         userController = new UserController();
-        user1 = new User( " ", "abc", "Igor", LocalDate.of(1991,1, 1));
-        user2 = new User( "abc.ru", "abc", "Igor", LocalDate.of(1991,1, 1));
-        user3 = new User( "abc@yandex.ru", "", "Igor", LocalDate.of(1991,1, 1));
-        user4 = new User( "abc@yandex.ru", "abc ", "Igor", LocalDate.of(1991,1, 1));
-        user5 = new User( "abc@yandex.ru", "abc", "Igor", LocalDate.of(2991,1, 1));
-        user6 = new User( "abc@yandex.ru", "abc", "Igor", LocalDate.of(1991,1, 1));
-        user7 = new User( null, "abc", "Igor", LocalDate.of(1991,1, 1));
-        user8 = new User( "abc@yandex.ru", null, "Igor", LocalDate.of(1991,1, 1));
-        user9 = new User( "abc@yandex.ru", "abc", null, LocalDate.of(1991,1, 1));
-        user10 = new User( "abc@yandex.ru", "abc", "Igor", null);
+
+        user1 = User.builder()
+                .email("")
+                .login("abc")
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user2 = User.builder()
+                .email("abc.ru")
+                .login("abc")
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user3 = User.builder()
+                .email("abc@yandex.ru")
+                .login("")
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user4 = User.builder()
+                .email("abc@yandex.ru")
+                .login("abc ")
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user5 = User.builder()
+                .email("abc@yandex.ru")
+                .login("abc")
+                .name("Igor")
+                .birthday(LocalDate.of(2991,1, 1))
+                .build();
+
+        user6 = User.builder()
+                .email("abc@yandex.ru")
+                .login("abc")
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user7 = User.builder()
+                .email(null)
+                .login("abc")
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user8 = User.builder()
+                .email("abc@yandex.ru")
+                .login(null)
+                .name("Igor")
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user9 = User.builder()
+                .email("abc@yandex.ru")
+                .login("abc")
+                .name(null)
+                .birthday(LocalDate.of(1991,1, 1))
+                .build();
+
+        user10 = User.builder()
+                .email("abc@yandex.ru")
+                .login("abc")
+                .name("Igor")
+                .birthday(null)
+                .build();
     }
 
     @Test

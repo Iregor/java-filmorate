@@ -6,6 +6,7 @@ import model.Film;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class FilmController {
     int currentId = 0;
 
     @PostMapping
-    public Film add(@RequestBody Film film) {
+    public Film add(@Valid @RequestBody Film film) {
         try {
             validateFilmData(film);
         } catch (ValidationException exc){
@@ -34,7 +35,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@RequestBody Film film) {
+    public Film update(@Valid @RequestBody Film film) {
         try {
             validateFilmData(film);
         } catch (ValidationException exc){
@@ -46,7 +47,7 @@ public class FilmController {
             throw new ResponseStatusException(NOT_FOUND, "Unable to find resource");
         }
         films.put(film.getId(), film);
-        log.info("Фильм успешно обновлен" + film);
+        log.info("Фильм успешно обновлен: " + film);
         return film;
     }
 

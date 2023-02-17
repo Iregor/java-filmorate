@@ -6,6 +6,7 @@ import model.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -19,7 +20,7 @@ public class UserController {
     private HashMap<Integer, User> users = new HashMap<>();
     int currentId = 0;
     @PostMapping
-    public User add(@RequestBody User user) {
+    public User add(@Valid @RequestBody User user) {
         try {
             validateUserData(user);
         } catch (ValidationException exc){
@@ -33,7 +34,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User user) {
+    public User update(@Valid @RequestBody User user) {
         try {
             validateUserData(user);
         } catch (ValidationException exc) {
