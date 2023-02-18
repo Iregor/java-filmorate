@@ -6,16 +6,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Set;
 
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerValidationTest {
+    private static Validator validator;
+    static {
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.usingContext().getValidator();
+    }
 
     FilmController filmController;
+    Set<ConstraintViolation<Film>> violations;
     Film film1, film2, film3, film4, film5, film6, film7, film8, film9, film10;
     ResponseStatusException valExc;
 
@@ -92,26 +101,45 @@ public class FilmControllerValidationTest {
 
     @Test
     public void nameValidationTest(){
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film1));
+        violations = validator.validate(film1);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(film5);
+        assertEquals(1, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film1));
         assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film5));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
     }
 
     @Test
     public void descriptionValidationTest(){
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film2));
+
+        violations = validator.validate(film2);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(film6);
+        assertEquals(1, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film2));
         assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film6));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
     }
 
     @Test
     public void releaseDateValidationTest(){
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film3));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
+        violations = validator.validate(film3);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(film7);
+        assertEquals(0, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film3));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
 
         valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film7));
         assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
@@ -119,15 +147,24 @@ public class FilmControllerValidationTest {
 
     @Test
     public void durationDateValidationTest(){
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film4));
+        violations = validator.validate(film4);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(film8);
+        assertEquals(1, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film4));
         assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film8));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
     }
 
     @Test
     public void correctFilmValidationTest(){
+        violations = validator.validate(film9);
+        assertEquals(0, violations.size());
+
         filmController.add(film9);
         assertTrue(filmController.films().contains(film9));
     }

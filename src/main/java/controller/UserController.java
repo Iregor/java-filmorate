@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -65,15 +64,15 @@ public class UserController {
     }
 
     private void validateUserData(User user) throws ValidationException{
-        if (user.getEmail() == null || user.getLogin() == null || user.getBirthday() == null) {
+/*        if (user.getEmail() == null || user.getLogin() == null || user.getBirthday() == null) {
             throw new ValidationException("Не указаны требуемые поля: " + user);
-        }
+        }*/
 
         if (user.getName() == null || user.getName().isBlank()){
             user.setName(user.getLogin());
         }
 
-        if (user.getEmail().isBlank()) {
+/*        if (user.getEmail().isBlank()) {
             throw new ValidationException("Пустой email: " + user);
         }
         if (!user.getEmail().contains("@")) {
@@ -87,6 +86,6 @@ public class UserController {
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Указана ненаступившая дата рождения: " + user);
-        }
+        }*/
     }
 }

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class User {
     int id;
     @Email
-    @NotNull
+    @NotBlank
     String email;
     @NotBlank
     @Pattern(regexp = "\\S+")

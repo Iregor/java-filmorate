@@ -7,13 +7,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserControllerValidationTest {
 
+    private static Validator validator;
+    static {
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.usingContext().getValidator();
+    }
     UserController userController;
+    Set<ConstraintViolation<User>> violations;
     User user1, user2, user3, user4, user5, user6, user7, user8, user9, user10;
     ResponseStatusException valExc;
 
@@ -95,43 +106,73 @@ public class UserControllerValidationTest {
     @Test
     public void emailValidationTest(){
 
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user1));
+        violations = validator.validate(user1);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(user2);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(user7);
+        assertEquals(1, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user1));
         assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user2));
         assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user7));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));*/
     }
 
     @Test
     public void loginValidationTest(){
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user3));
+        violations = validator.validate(user3);
+        assertEquals(2, violations.size());
+
+        violations = validator.validate(user4);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(user8);
+        assertEquals(1, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user3));
         assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user4));
         assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user8));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));*/
     }
 
     @Test
     public void birthValidationTest(){
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user5));
+        violations = validator.validate(user5);
+        assertEquals(1, violations.size());
+
+        violations = validator.validate(user10);
+        assertEquals(1, violations.size());
+
+/*        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user5));
         assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
 
         valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user10));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
+        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));*/
     }
 
     @Test
-    public void correctUserValidationTest() throws ValidationException{
-        userController.add(user6);
+    public void correctUserValidationTest() {
+        violations = validator.validate(user6);
+        assertEquals(0, violations.size());
+
+        violations = validator.validate(user9);
+        assertEquals(0, violations.size());
+
+/*        userController.add(user6);
         assertTrue(userController.users().contains(user6));
 
         userController.add(user9);
-        assertTrue(userController.users().contains(user9));
+        assertTrue(userController.users().contains(user9));*/
     }
 }

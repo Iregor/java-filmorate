@@ -66,7 +66,7 @@ public class FilmController {
     }
 
     private void validateFilmData(Film film) throws ValidationException {
-        if (film.getName() == null || film.getDescription() == null ||
+ /*       if (film.getName() == null || film.getDescription() == null ||
                 film.getReleaseDate() == null || film.getDuration() == null) {
             throw new ValidationException("Не указаны требуемые поля: " + film);
         }
@@ -75,12 +75,12 @@ public class FilmController {
         }
         if (film.getDescription().length() >= 200) {
             throw new ValidationException("Длина описания больше 200 символов: " + film);
-        }
+        }*/
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Дата предшествует первому кинопоказу: " + film);
         }
-        if (film.getDuration() < 0){
+/*        if (film.getDuration() < 0){
             throw new ValidationException("Отрицательная продолжительность фильма: " + film);
-        }
+        }*/
     }
 }
