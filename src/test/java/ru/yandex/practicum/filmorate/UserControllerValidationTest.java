@@ -114,15 +114,6 @@ public class UserControllerValidationTest {
 
         violations = validator.validate(user7);
         assertEquals(1, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user1));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user2));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user7));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));*/
     }
 
     @Test
@@ -135,15 +126,6 @@ public class UserControllerValidationTest {
 
         violations = validator.validate(user8);
         assertEquals(1, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user3));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user4));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user8));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));*/
     }
 
     @Test
@@ -153,12 +135,6 @@ public class UserControllerValidationTest {
 
         violations = validator.validate(user10);
         assertEquals(1, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user5));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> userController.add(user10));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации пользователя."));*/
     }
 
     @Test
@@ -168,11 +144,5 @@ public class UserControllerValidationTest {
 
         violations = validator.validate(user9);
         assertEquals(0, violations.size());
-
-/*        userController.add(user6);
-        assertTrue(userController.users().contains(user6));
-
-        userController.add(user9);
-        assertTrue(userController.users().contains(user9));*/
     }
 }

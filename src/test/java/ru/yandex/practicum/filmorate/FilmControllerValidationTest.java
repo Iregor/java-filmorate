@@ -106,12 +106,6 @@ public class FilmControllerValidationTest {
 
         violations = validator.validate(film5);
         assertEquals(1, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film1));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film5));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
     }
 
     @Test
@@ -122,12 +116,6 @@ public class FilmControllerValidationTest {
 
         violations = validator.validate(film6);
         assertEquals(1, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film2));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film6));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
     }
 
     @Test
@@ -136,13 +124,7 @@ public class FilmControllerValidationTest {
         assertEquals(1, violations.size());
 
         violations = validator.validate(film7);
-        assertEquals(0, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film3));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
-
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film7));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
+        assertEquals(1, violations.size());
     }
 
     @Test
@@ -152,12 +134,6 @@ public class FilmControllerValidationTest {
 
         violations = validator.validate(film8);
         assertEquals(1, violations.size());
-
-/*        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film4));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));
-
-        valExc = assertThrows(ResponseStatusException.class, () -> filmController.add(film8));
-        assertTrue(valExc.getMessage().contains("Ошибка валидации фильма."));*/
     }
 
     @Test

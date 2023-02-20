@@ -23,6 +23,7 @@ public class Film {
     @NotNull
     @Size(max = 200, message = "validation.name.size.too_long")
     String description;
+
     @NotNull
     @AfterDate("1895-12-28")
     LocalDate releaseDate;
