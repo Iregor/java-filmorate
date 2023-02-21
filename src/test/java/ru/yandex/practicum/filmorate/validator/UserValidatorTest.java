@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserValidatorTest {
 
-    private HashMap<Integer, User> users;
+    private HashMap<Long, User> users;
 
     @BeforeEach
     void beforeEach() {
@@ -80,7 +80,7 @@ class UserValidatorTest {
                 ValidateException.class,
                 () -> {
                     UserValidator.validate(user);
-                    user.setId(12);
+                    user.setId(12L);
                     users.put(user.getId(), user);
                     }
         );
@@ -94,8 +94,8 @@ class UserValidatorTest {
     void validateUser_addingUser_correctlyUser() {
         User user = new User("Email@email.ru", "User1", "Юзер 1", "1994-11-25");
         UserValidator.validate(user);
-        user.setId(25);
+        user.setId(25L);
         users.put(user.getId(), user);
-        assertEquals(user, users.get(25));
+        assertEquals(user, users.get(25L));
     }
 }

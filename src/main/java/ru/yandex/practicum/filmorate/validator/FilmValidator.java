@@ -28,6 +28,11 @@ public class FilmValidator {
                     .append(OLDEST_DATE_RELEASE.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
                     .append("г. ");
         }
+
+        if(LocalDate.now().isBefore(film.getReleaseDate())) {
+            exceptionMessage.append("Дата релиза не может быть позже текущего момента. ");
+        }
+
         if(!(film.getDuration() > MIN_DURATION_OF_FILM)) {
             exceptionMessage.append("Продолжительность фильма должна быть больше " + MIN_DURATION_OF_FILM + ". ");
         }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.*;
 
 class FilmValidatorTest {
-    private HashMap<Integer, Film> films;
+    private HashMap<Long, Film> films;
 
     @BeforeEach
     void beforeEach() {
@@ -113,8 +113,8 @@ class FilmValidatorTest {
     void validateFilm_addingFilm_correctlyFilm() {
         Film film = new Film("Фильм 1", "Описание фильма 1", "2004-11-25", 140);
         FilmValidator.validate(film);
-        film.setId(25);
+        film.setId(25L);
         films.put(film.getId(), film);
-        assertEquals(film, films.get(25));
+        assertEquals(film, films.get(25L));
     }
 }
