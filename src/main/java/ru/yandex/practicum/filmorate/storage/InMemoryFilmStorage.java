@@ -17,29 +17,23 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final HashMap<Long, Film> films = new HashMap<>();
 
     @Override
-    public Collection<Film> findAll() {
-        return films.values();
-    }
-
-    @Override
-    public Collection<Film> filterFilms(String name, LocalDate after, LocalDate before) {
-        return findAll()
+    public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
+        return films.values()
                 .stream()
                 .filter(film -> {
-                    if (name == null) {
-                        return true;
-                    }
-                    return film.getName().equals(name);
+                    if (name == null) return true;
+                    return film.getName().contains(name);
                 })
-                .filter(film -> (film.getReleaseDate().isAfter(after) && (film.getReleaseDate().isBefore(before))))
+                .filter(film -> film.getReleaseDate().isAfter(after))
+                .filter(film -> film.getReleaseDate().isBefore(before))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Film findFilmById(Long id) {
-        if(!films.containsKey(id)) {
+    public Film findById(Long id) {
+        if (!films.containsKey(id)) {
             log.warn(String.format("Film %d is not found.", filmId));
-            throw new NullPointerException(String.format("Film %d is not found.", filmId));
+            return null;
         }
         return films.get(id);
     }
@@ -49,7 +43,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         FilmValidator.validate(film);
 
         for (Film filmFromBase : films.values()) {
-            if(filmFromBase.getName().equals(film.getName())
+            if (filmFromBase.getName().equals(film.getName())
                     && filmFromBase.getReleaseDate().equals(film.getReleaseDate())) {
                 log.info("Movie added earlier at ID {}.", filmFromBase.getId());
                 return null;
@@ -58,7 +52,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         film.setId(filmId++);
         films.put(film.getId(), film);
-        log.info("Movie \"{}\" added. The database contains {} film(s).",film.getName(), films.size());
+        log.info("Movie \"{}\" added. The database contains {} film(s).", film.getName(), films.size());
         return film;
     }
 
@@ -66,7 +60,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film update(Film film) {
         FilmValidator.validate(film);
 
-        if(film.getId() != null && !films.containsKey(film.getId())) {
+        if (film.getId() != null && !films.containsKey(film.getId())) {
             log.info("Movie ID {} missing. ", film.getId());
             throw new NullPointerException("Movie ID " + film.getId() + " missing.");
         }

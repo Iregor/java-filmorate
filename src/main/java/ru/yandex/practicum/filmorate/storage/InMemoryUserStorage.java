@@ -20,9 +20,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User findById(Long userId) {
-        if(!users.containsKey(userId)) {
+        if (!users.containsKey(userId)) {
             log.warn(String.format("User %d is not found.", userId));
-            throw new NullPointerException(String.format("User %d is not found.", userId));
+            return null;
         }
         return users.get(userId);
     }
@@ -31,17 +31,17 @@ public class InMemoryUserStorage implements UserStorage {
     public User create(User user) {
         UserValidator.validate(user);
         for (User userFromBase : users.values()) {
-            if(userFromBase.getEmail().equals(user.getEmail())) {
+            if (userFromBase.getEmail().equals(user.getEmail())) {
                 log.info("The user with this email is already registered.");
                 return null;
             }
-            if(userFromBase.getLogin().equals(user.getLogin())) {
+            if (userFromBase.getLogin().equals(user.getLogin())) {
                 log.info("The user with this login is already registered.");
                 return null;
             }
         }
 
-        if(user.getName() == null || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("The name is automatically assigned from the \"Login\" field. " +
                     "The new name is {}.", user.getLogin());
@@ -57,13 +57,13 @@ public class InMemoryUserStorage implements UserStorage {
     public User update(User user) {
         UserValidator.validate(user);
 
-        if(user.getId() != null && !users.containsKey(user.getId())) {
+        if (user.getId() != null && !users.containsKey(user.getId())) {
             log.info("User ID {} missing. ", user.getId());
             throw new NullPointerException("User ID " + user.getId() + " missing.");
         }
 
         users.put(user.getId(), user);
-        log.info("User ID {} updated. ",user.getId());
+        log.info("User ID {} updated. ", user.getId());
         return user;
     }
 }

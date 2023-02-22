@@ -6,11 +6,9 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 public interface FilmStorage {
-    Collection<Film> findAll();
+    Collection<Film> findAll(String name, LocalDate after, LocalDate before);
 
-    Collection<Film> filterFilms(String name, LocalDate after, LocalDate before);
-
-    Film findFilmById(Long id);
+    Film findById(Long id);
 
     Film create(Film film);
 
