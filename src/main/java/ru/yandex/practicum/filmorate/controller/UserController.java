@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -24,7 +26,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public User findById(@PathVariable Long userId) {
         if (userService.findById(userId) == null) {
-            throw new NullPointerException(String.format("User %d is not found.", userId));
+            throw new IncorrectObjectIdException(String.format("User %d is not found.", userId));
         }
         return userService.findById(userId);
     }
@@ -51,11 +53,17 @@ public class UserController {
 
     @PutMapping("{userId}/friends/{friendId}")
     public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.addFriend(userId, friendId);
+        Map<String, Long> result = userService.addFriend(userId, friendId);
+        if(result != null) {
+            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
+        }
     }
 
     @DeleteMapping("{userId}/friends/{friendId}")
     public void delFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.delFriend(userId, friendId);
+        Map<String, Long> result = userService.delFriend(userId, friendId);
+        if(result != null) {
+            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
+        }
     }
 }

@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_RELEASE;
@@ -34,14 +36,35 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
-    public void like(Long filmId, Long userId) {
+    public Map<String, Long> like(Long filmId, Long userId) {
+        Map<String, Long> result = validateFilmDataRequest(filmId, userId);
+        if (!result.isEmpty()) {
+            return result;
+        }
         filmStorage.findById(filmId).getLikes().add(userId);
         userStorage.findById(userId).getLikeFilms().add(filmId);
+        return null;
     }
 
-    public void dislike(Long filmId, Long userId) {
+    public Map<String, Long> dislike(Long filmId, Long userId) {
+        Map<String, Long> result = validateFilmDataRequest(filmId, userId);
+        if (!result.isEmpty()) {
+            return result;
+        }
         filmStorage.findById(filmId).getLikes().remove(userId);
         userStorage.findById(userId).getLikeFilms().remove(filmId);
+        return null;
+    }
+
+    private Map<String, Long> validateFilmDataRequest(Long filmId, Long userId) {
+        Map<String, Long> result = new HashMap<>();
+        if (filmStorage.findById(filmId) == null) {
+            result.put("filmId", filmId);
+        }
+        if (userStorage.findById(userId) == null) {
+            result.put("userId", userId);
+        }
+        return result;
     }
 
     public Collection<Film> getMostPopularFilms(Integer size) {

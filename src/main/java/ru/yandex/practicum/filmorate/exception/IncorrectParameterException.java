@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.exception;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class IncorrectParameterException extends RuntimeException {
     private final String parameter;
-
-    public IncorrectParameterException(String parameter) {
-        this.parameter = parameter;
-    }
 
     public String getParameter() {
         return parameter;

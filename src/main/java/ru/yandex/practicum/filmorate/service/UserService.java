@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,15 +32,37 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public void addFriend(Long userId, Long friendId) {
+    public Map<String, Long> addFriend(Long userId, Long friendId) {
+        Map<String, Long> result = validateUserDataRequest(userId, friendId);
+        if (!result.isEmpty()) {
+            return result;
+        }
         userStorage.findById(userId).getFriends().add(friendId);
         userStorage.findById(friendId).getFriends().add(userId);
+        return null;
     }
 
-    public void delFriend(Long userId, Long friendId) {
+    public Map<String, Long> delFriend(Long userId, Long friendId) {
+        Map<String, Long> result = validateUserDataRequest(userId, friendId);
+        if (!result.isEmpty()) {
+            return result;
+        }
         userStorage.findById(userId).getFriends().remove(friendId);
         userStorage.findById(friendId).getFriends().remove(userId);
+        return null;
     }
+
+    private Map<String, Long> validateUserDataRequest(Long userId, Long friendId) {
+        Map<String, Long> result = new HashMap<>();
+        if (userStorage.findById(userId) == null) {
+            result.put("userId", userId);
+        }
+        if (userStorage.findById(friendId) == null) {
+            result.put("friendId", friendId);
+        }
+        return result;
+    }
+
 
     public Collection<User> getFriends(Long userId) {
         return userStorage
