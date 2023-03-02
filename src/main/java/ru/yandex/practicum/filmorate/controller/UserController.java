@@ -1,64 +1,69 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    private static int userId = 1;
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-        return users.values();
+        return userService.findAll();
+    }
+
+    @GetMapping("/{userId}")
+    public User findById(@PathVariable Long userId) {
+        if (userService.findById(userId) == null) {
+            throw new IncorrectObjectIdException(String.format("User %d is not found.", userId));
+        }
+        return userService.findById(userId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public Collection<User> getFriends(@PathVariable Long userId) {
+        return userService.getFriends(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{friendId}")
+    public Collection<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long friendId) {
+        return userService.getCommonFriends(userId, friendId);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        UserValidator.validate(user);
-
-        for (User userFromBase : users.values()) {
-            if(userFromBase.getEmail().equals(user.getEmail())) {
-                log.info("The user with this email is already registered.");
-                return null;
-            }
-            if(userFromBase.getLogin().equals(user.getLogin())) {
-                log.info("The user with this login is already registered.");
-                return null;
-            }
-        }
-
-        if(user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.info("The name is automatically assigned from the \"Login\" field. " +
-                    "The new name is {}.", user.getLogin());
-        }
-
-        user.setId(userId++);
-        users.put(user.getId(), user);
-        log.info("User \"{}\" added. The database contains {} user(s).", user.getLogin(), users.size());
-        return user;
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        UserValidator.validate(user);
+        return userService.update(user);
+    }
 
-        if(user.getId() != null && !users.containsKey(user.getId())) {
-            log.info("User ID {} missing. ", user.getId());
-            throw new NullPointerException("User ID " + user.getId() + " missing.");
+    @PutMapping("{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        Map<String, Long> result = userService.addFriend(userId, friendId);
+        if(result != null) {
+            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
         }
+    }
 
-        users.put(user.getId(), user);
-        log.info("User ID {} updated. ",user.getId());
-        return user;
+    @DeleteMapping("{userId}/friends/{friendId}")
+    public void delFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        Map<String, Long> result = userService.delFriend(userId, friendId);
+        if(result != null) {
+            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
+        }
     }
 }
