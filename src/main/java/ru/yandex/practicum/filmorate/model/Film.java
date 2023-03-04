@@ -1,6 +1,6 @@
-package model;
+package ru.yandex.practicum.filmorate.model;
 
-import validation.AfterDate;
+import ru.yandex.practicum.filmorate.validation.AfterDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
