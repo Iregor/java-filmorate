@@ -1,4 +1,4 @@
-package model;
+package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,5 +30,13 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+    }
+
+    public User(User user) {
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.login = user.getLogin();
+        this.name = user.getName();
+        this.birthday = user.getBirthday();
     }
 }

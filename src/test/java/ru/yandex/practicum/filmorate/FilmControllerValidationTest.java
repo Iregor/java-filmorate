@@ -1,10 +1,14 @@
 package ru.yandex.practicum.filmorate;
 
-import controller.FilmController;
-import model.Film;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.yandex.practicum.filmorate.controller.FilmController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -22,7 +26,6 @@ public class FilmControllerValidationTest {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.usingContext().getValidator();
     }
-
     FilmController filmController;
     Set<ConstraintViolation<Film>> violations;
     Film film1, film2, film3, film4, film5, film6, film7, film8, film9, film10;
@@ -30,7 +33,7 @@ public class FilmControllerValidationTest {
 
     @BeforeEach
     public void createTestInitialData() {
-        filmController = new FilmController();
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
         film1 = Film.builder()
                 .name(null)
                 .description("abc")
@@ -141,7 +144,7 @@ public class FilmControllerValidationTest {
         violations = validator.validate(film9);
         assertEquals(0, violations.size());
 
-        filmController.add(film9);
-        assertTrue(filmController.films().contains(film9));
+        filmController.createFilm(film9);
+        assertTrue(filmController.findAllFilms().contains(film9));
     }
 }

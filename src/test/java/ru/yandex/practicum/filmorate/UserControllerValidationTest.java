@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate;
 
-import controller.UserController;
-import exceptions.ValidationException;
-import model.User;
+import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -30,7 +32,7 @@ public class UserControllerValidationTest {
 
     @BeforeEach
     public void createTestInitialData() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
 
         user1 = User.builder()
                 .email("")
