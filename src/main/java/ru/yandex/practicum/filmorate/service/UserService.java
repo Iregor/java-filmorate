@@ -93,17 +93,16 @@ public class UserService {
     }
 
     public List<User> findCommonFriends (Integer ... userIds) {
-//        реализована метод с возможностью поиска общих друзей для любого количества пользователей
+//        реализована логика с возможностью поиска общих друзей для любого количества пользователей
 //        на входе метода id всех пользователей для поиска общих друзей
         HashMap<Integer, Integer> commonFriendsCounters = new HashMap<>();
-        Set<Integer> userFriendSet;
-        Set<Integer> commonFriendsIds = new HashSet<>();
+        List<Integer> usersFriendsList = new ArrayList<>();
 
         for (Integer userId : userIds) {
-            userFriendSet = userStorage.findPersonalFriendSetIds(userId);
-            for (Integer friendId : userFriendSet) {
-                commonFriendsCounters.put(friendId, commonFriendsCounters.getOrDefault(friendId, 0) + 1);
-            }
+            usersFriendsList.addAll(userStorage.findPersonalFriendSetIds(userId));
+        }
+        for (Integer friendId : usersFriendsList) {
+            commonFriendsCounters.put(friendId, commonFriendsCounters.getOrDefault(friendId, 0) + 1);
         }
 
         log.info("Common friend list of users with id: " + Arrays.toString(userIds) + " was successfully provided.");

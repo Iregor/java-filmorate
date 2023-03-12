@@ -57,13 +57,13 @@ public class FilmService {
 
     public Set<Integer> addLike (Integer filmId, Integer userId) {
         Set<Integer> filmLikeSet = filmStorage.findFilmLikeSet(filmId);
-        if (filmLikeSet.add(userId)) {
-            log.info("Film with id: {} obtained like from user with id: {} successfully.", filmId, userId);
-            return filmStorage.updateFilmLikeSet(filmId, filmLikeSet);
-        } else {
+        boolean likeAdded = filmLikeSet.add(userId);
+        if (!likeAdded) {
             log.warn("User with id: {} already conveyed his like to film with id: {}.", userId, filmId);
             throw new ResponseStatusException(CONFLICT, String.format("User with id: %d already conveyed his like to film with id: %d.", userId, filmId));
         }
+        log.info("Film with id: {} obtained like from user with id: {} successfully.", filmId, userId);
+        return filmStorage.updateFilmLikeSet(filmId, filmLikeSet);
     }
 
     public Set<Integer> deleteLike (Integer filmId, Integer userId) {
