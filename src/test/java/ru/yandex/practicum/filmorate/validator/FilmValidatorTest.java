@@ -21,7 +21,8 @@ class FilmValidatorTest {
 
     @Test
     void validateFilm_throwValidateException_nullName() {
-        Film film = new Film(null, "Описание фильма 1", "1994-11-25", 140);
+        Film film = new Film(null, "Описание фильма 1",
+                "1994-11-25", 140, "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -32,7 +33,8 @@ class FilmValidatorTest {
 
     @Test
     void validateFilm_throwValidateException_blankName() {
-        Film film = new Film("    ", "Описание фильма 1", "1994-11-25", 140);
+        Film film = new Film("    ", "Описание фильма 1",
+                "1994-11-25", 140, "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -47,7 +49,8 @@ class FilmValidatorTest {
                 "Описание фильма 1 Описание фильма 1 Описание фильма 1 " +
                 "Описание фильма 1 Описание фильма 1 Описание фильма 1 " +
                 "Описание фильма 1 Описание фильма 1 Описание фильма 1 " +
-                "Описание фильма 1 Описание фильма 1 Описание фильма 1", "1994-11-25", 140);
+                "Описание фильма 1 Описание фильма 1 Описание фильма 1",
+                "1994-11-25", 140, "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -58,7 +61,8 @@ class FilmValidatorTest {
 
     @Test
     void validateFilm_throwValidateException_oldestDate() {
-        Film film = new Film("Фильм 1", "Описание фильма 1", "1884-11-25", 140);
+        Film film = new Film("Фильм 1", "Описание фильма 1",
+                "1884-11-25", 140,  "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -71,7 +75,8 @@ class FilmValidatorTest {
 
     @Test
     void validateFilm_throwValidateException_zeroDuration() {
-        Film film = new Film("Фильм 1", "Описание фильма 1", "2004-11-25", 0);
+        Film film = new Film("Фильм 1", "Описание фильма 1",
+                "2004-11-25", 0, "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -82,7 +87,8 @@ class FilmValidatorTest {
 
     @Test
     void validateFilm_throwValidateException_negativeDuration() {
-        Film film = new Film("Фильм 1", "Описание фильма 1", "2004-11-25", -100);
+        Film film = new Film("Фильм 1", "Описание фильма 1",
+                "2004-11-25", -100, "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -97,7 +103,8 @@ class FilmValidatorTest {
                 "Описание фильма 1 Описание фильма 1 Описание фильма 1 " +
                 "Описание фильма 1 Описание фильма 1 Описание фильма 1 " +
                 "Описание фильма 1 Описание фильма 1 Описание фильма 1 " +
-                "Описание фильма 1 Описание фильма 1 Описание фильма 1", "1224-11-25", -100);
+                "Описание фильма 1 Описание фильма 1 Описание фильма 1",
+                "1224-11-25", -100, "NC-17");
         final ValidateException exception = assertThrows(
                 ValidateException.class,
                 () -> FilmValidator.validate(film)
@@ -111,7 +118,8 @@ class FilmValidatorTest {
 
     @Test
     void validateFilm_addingFilm_correctlyFilm() {
-        Film film = new Film("Фильм 1", "Описание фильма 1", "2004-11-25", 140);
+        Film film = new Film("Фильм 1", "Описание фильма 1",
+                "2004-11-25", 140, "NC-17");
         FilmValidator.validate(film);
         film.setId(25L);
         films.put(film.getId(), film);
