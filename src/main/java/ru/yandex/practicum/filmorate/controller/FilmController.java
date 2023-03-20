@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
@@ -22,7 +23,7 @@ import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
-    public final FilmService filmService;
+    private final FilmService filmService;
 
     @GetMapping
     public Collection<Film> findAll(
@@ -54,14 +55,14 @@ public class FilmController {
     }
 
     @GetMapping(value ="{filmId}", produces = APPLICATION_JSON_VALUE)
-    public Film findById(@PathVariable Long filmId) {
-        if (filmService.findById(filmId) == null) {
+    public Film findById(@PathVariable Long filmId) { ///// kosyak
+        if (filmService.findById(filmId).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Film %d is not found.", filmId));
         }
-        return filmService.findById(filmId);
+        return filmService.findById(filmId).get();
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Film create(@Valid @RequestBody Film film) {
         return filmService.create(film);
     }

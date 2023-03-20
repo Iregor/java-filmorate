@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
@@ -16,6 +17,7 @@ import java.util.Map;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @GetMapping
@@ -25,20 +27,10 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public User findById(@PathVariable Long userId) {
-        if (userService.findById(userId) == null) {
+        if (userService.findById(userId).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("User %d is not found.", userId));
         }
-        return userService.findById(userId);
-    }
-
-    @GetMapping("/{userId}/friends")
-    public Collection<User> getFriends(@PathVariable Long userId) {
-        return userService.getFriends(userId);
-    }
-
-    @GetMapping("/{userId}/friends/common/{friendId}")
-    public Collection<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long friendId) {
-        return userService.getCommonFriends(userId, friendId);
+        return userService.findById(userId).get();
     }
 
     @PostMapping
@@ -49,6 +41,11 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         return userService.update(user);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public Collection<User> getFriends(@PathVariable Long userId) {
+        return userService.getFriends(userId);
     }
 
     @PutMapping("{userId}/friends/{friendId}")
@@ -65,5 +62,10 @@ public class UserController {
         if(result != null) {
             throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
         }
+    }
+
+    @GetMapping("/{userId}/friends/common/{friendId}")
+    public Collection<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long friendId) {
+        return userService.getCommonFriends(userId, friendId);
     }
 }

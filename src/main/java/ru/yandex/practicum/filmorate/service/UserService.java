@@ -1,27 +1,45 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
 
-    public Collection<User> findAll() {
-        return userStorage.findAll();
+    private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
+    private final LikesStorage likesStorage;
+
+    @Autowired
+    public UserService(@Qualifier("userDb") UserStorage userStorage,
+                       @Qualifier("friendDb") FriendStorage friendStorage,
+                       @Qualifier("likesDb") LikesStorage likesStorage) {
+        this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
+        this.likesStorage = likesStorage;
     }
 
-    public User findById(Long userId) {
-        return userStorage.findById(userId);
+    public Collection<User> findAll() { // вынести оснастку в другой класс
+        Collection<User> result = userStorage.findAll();
+        result.forEach(this::makeData);
+        return result;
+    }
+
+    public Optional<User> findById(Long userId) { // вынести оснастку в другой класс
+        Optional<User> result = userStorage.findById(userId);
+        if (result.isEmpty()) {
+            return result;
+        }
+        makeData(result.get());
+        return result;
     }
 
     public User create(User user) {
@@ -37,8 +55,7 @@ public class UserService {
         if (!result.isEmpty()) {
             return result;
         }
-        userStorage.findById(userId).getFriends().add(friendId);
-        userStorage.findById(friendId).getFriends().add(userId);
+        friendStorage.addFriend(userId, friendId);
         return null;
     }
 
@@ -47,43 +64,41 @@ public class UserService {
         if (!result.isEmpty()) {
             return result;
         }
-        userStorage.findById(userId).getFriends().remove(friendId);
-        userStorage.findById(friendId).getFriends().remove(userId);
+        friendStorage.delFriend(userId, friendId);
         return null;
+    }
+
+    public Collection<User> getFriends(Long userId) {
+        return userStorage.findAll()
+                .stream()
+                .filter(user -> friendStorage
+                        .getFriends(userId)
+                        .contains(user.getId()))
+                .collect(Collectors.toList());
+    }
+
+    public Collection<User> getCommonFriends(Long userId, Long friendId) {
+        return userStorage.findAll()
+                .stream()
+                .filter(user -> friendStorage
+                        .getCommonFriends(userId, friendId)
+                        .contains(user.getId()))
+                .collect(Collectors.toList());
     }
 
     private Map<String, Long> validateUserDataRequest(Long userId, Long friendId) {
         Map<String, Long> result = new HashMap<>();
-        if (userStorage.findById(userId) == null) {
+        if (userStorage.findById(userId).isEmpty()) {
             result.put("userId", userId);
         }
-        if (userStorage.findById(friendId) == null) {
+        if (userStorage.findById(friendId).isEmpty()) {
             result.put("friendId", friendId);
         }
         return result;
     }
 
-
-    public Collection<User> getFriends(Long userId) {
-        return userStorage
-                .findAll()
-                .stream()
-                .filter(user -> userStorage.findById(userId).getFriends().contains(user.getId()))
-                .collect(Collectors.toList());
+    private void makeData(User user) {
+        user.setFriends(new HashSet<>(friendStorage.getFriends(user.getId())));
+        user.setLikeFilms(new HashSet<>(likesStorage.getUserLikes(user.getId())));
     }
-
-    public Collection<User> getCommonFriends(Long userId, Long friendId) {
-        Set<Long> commonFriendId = userStorage
-                .findById(userId)
-                .getFriends()
-                .stream()
-                .filter(userStorage.findById(friendId).getFriends()::contains)
-                .collect(Collectors.toSet());
-
-        return userStorage
-                .findAll()
-                .stream()
-                .filter(user -> commonFriendId.contains(user.getId()))
-                .collect(Collectors.toList());
-    }
-}
+ }
