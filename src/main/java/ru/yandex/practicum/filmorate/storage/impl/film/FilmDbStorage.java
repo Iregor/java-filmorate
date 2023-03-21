@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
@@ -58,18 +60,48 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film create(Film film) { // добавить получение объекта из базы и создать класс
+    public Film create(Film film) {
         jdbcTemplate.update(
-                "INSERT INTO \"films\" (\"rating_id\", \"name\", \"description\", \"release_date\", \"length\", \"rate\")" +
-                        "VALUES (?,?,?,?,?,?)",
+                "INSERT INTO \"films\" (\"rating_id\", \"name\", \"description\", " +
+                        "\"release_date\", \"length\", \"rate\")" +
+                        "VALUES (?, ?, ?, ?, ?, ?)",
                 film.getMpa().getId(), film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getRate());
-        return getFilmFromDb(film);
+
+        Film result = getFilmFromDb(film);
+
+        for (Genre genre : film.getGenres()) {
+            jdbcTemplate.update(
+                    "INSERT INTO \"film_genres\" (\"film_id\", \"genre_id\")" +
+                            "VALUES (?, ?)" ,
+                    result.getId(), genre.getId());
+        }
+
+        return result;
     }
 
     @Override
     public Film update(Film film) {
-        return null;
+        if(findById(film.getId()).isEmpty()) {
+            throw new IncorrectObjectIdException(String.format("Film %d is not found.", film.getId()));
+        }
+
+        jdbcTemplate.update(
+                "UPDATE \"films\" " +
+                        "SET \"name\" = ?, \"description\" = ?, \"release_date\" = ?, \"length\" = ? ," +
+                        " \"rate\" = ?, \"rating_id\" = ? " +
+                        "WHERE \"film_id\" = ? ",
+                film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRate(),
+                film.getMpa().getId(), film.getId());
+
+        for (Genre genre : film.getGenres()) {
+            jdbcTemplate.update(
+                    "INSERT INTO \"film_genres\" (\"film_id\", \"genre_id\")" +
+                            "VALUES (?, ?)" ,
+                    film.getId(), genre.getId());
+        }
+
+        return film;
     }
 
     private Film getFilmFromDb(Film film) {

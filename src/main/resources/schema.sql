@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS "film_categories" CASCADE;
+DROP TABLE IF EXISTS "film_genres" CASCADE;
 DROP TABLE IF EXISTS "friendship" CASCADE;
 DROP TABLE IF EXISTS "genres" CASCADE;
 DROP TABLE IF EXISTS "likes" CASCADE;
@@ -26,10 +26,10 @@ CREATE TABLE IF NOT EXISTS "genres" (
                                             "name" VARCHAR(200) UNIQUE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "film_categories" (
+CREATE TABLE IF NOT EXISTS "film_genres" (
                                                  "film_id" BIGINT NOT NULL,
-                                                 "category_id" BIGINT NOT NULL,
-                                                 PRIMARY KEY ("film_id", "category_id")
+                                                 "genre_id" BIGINT NOT NULL,
+                                                 PRIMARY KEY ("film_id", "genre_id")
 );
 
 CREATE TABLE IF NOT EXISTS "users" (
@@ -55,16 +55,16 @@ CREATE TABLE IF NOT EXISTS "likes" (
 );
 
 ALTER TABLE "films" DROP CONSTRAINT IF EXISTS "fk_films_rating_id";
-ALTER TABLE "film_categories" DROP CONSTRAINT IF EXISTS "fk_films_category_film_id";
-ALTER TABLE "film_categories" DROP CONSTRAINT IF EXISTS "fk_film_category_category_id";
+ALTER TABLE "film_genres" DROP CONSTRAINT IF EXISTS "fk_films_genres_film_id";
+ALTER TABLE "film_genres" DROP CONSTRAINT IF EXISTS "fk_film_genres_genres_id";
 ALTER TABLE "friendship" DROP CONSTRAINT IF EXISTS "fk_friendship_user_id";
 ALTER TABLE "friendship" DROP CONSTRAINT IF EXISTS "fk_friendship_friend_id";
 ALTER TABLE "likes" DROP CONSTRAINT IF EXISTS "fk_likes_film_id";
 ALTER TABLE "likes" DROP CONSTRAINT IF EXISTS "fk_likes_user_id";
 
 ALTER TABLE "films" ADD CONSTRAINT "fk_films_rating_id" FOREIGN KEY ("rating_id") REFERENCES "rating_mpa" ("rating_id");
-ALTER TABLE "film_categories" ADD CONSTRAINT "fk_films_category_film_id" FOREIGN KEY ("film_id") REFERENCES "films" ("film_id");
-ALTER TABLE "film_categories" ADD CONSTRAINT "fk_film_category_category_id" FOREIGN KEY ("category_id") REFERENCES "genres" ("genre_id");
+ALTER TABLE "film_genres" ADD CONSTRAINT "fk_films_genres_film_id" FOREIGN KEY ("film_id") REFERENCES "films" ("film_id");
+ALTER TABLE "film_genres" ADD CONSTRAINT "fk_film_genres_genres_id" FOREIGN KEY ("genre_id") REFERENCES "genres" ("genre_id");
 ALTER TABLE "friendship" ADD CONSTRAINT "fk_friendship_user_id" FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
 ALTER TABLE "friendship" ADD CONSTRAINT "fk_friendship_friend_id" FOREIGN KEY ("friend_id") REFERENCES "users" ("user_id");
 ALTER TABLE "likes" ADD CONSTRAINT "fk_likes_film_id" FOREIGN KEY ("film_id") REFERENCES "films" ("film_id");

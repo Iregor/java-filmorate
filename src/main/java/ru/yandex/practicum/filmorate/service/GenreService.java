@@ -24,6 +24,10 @@ public class GenreService {
         return genreStorage.findAll();
     }
 
+    public Collection<Genre> findAllByFilmId(Long filmId) {
+        return genreStorage.findAllByFilmId(filmId);
+    }
+
     public Optional<Genre> findById(Long id) {
         return genreStorage.findById(id);
     }

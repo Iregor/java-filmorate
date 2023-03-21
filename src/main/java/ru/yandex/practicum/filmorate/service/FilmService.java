@@ -5,16 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_RELEASE;
@@ -40,24 +38,47 @@ public class FilmService {
     }
 
     public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
-        return filmStorage.findAll(name, after, before);
+        Collection<Film> result = filmStorage.findAll(name, after, before);
+        result.forEach(this::makeData);
+        return result;
     }
 
-    public Optional<Film> findById(Long id) {
-        return filmStorage.findById(id);
+    public Optional<Film> findById(Long filmId) {
+        Optional<Film> result = filmStorage.findById(filmId);
+        if (result.isEmpty()) {
+            return result;
+        }
+        makeData(result.get());
+        return result;
     }
 
     public Film create(Film film) { //// добить оснастку или перенести в другой метод
         Film result = filmStorage.create(film);
-        result.setMpa(mpaStorage.findById(result.getMpa().getId()).get());
+        makeData(result);
         return result;
     }
 
     public Film update(Film film) {
-        return filmStorage.update(film);
+        Collection<Genre> genreFromDb = genreStorage.findAllByFilmId(film.getId());
+        genreFromDb.removeAll(film.getGenres());
+        genreFromDb.forEach(genre -> genreStorage.delFilmGenre(film.getId(), genre.getId()));
+        Film result = filmStorage.update(film);
+        makeData(result);
+        return result;
     }
 
-    public Map<String, Long> like(Long filmId, Long userId) {
+    public Collection<Film> getMostPopularFilms(Integer size) {
+        Collection<Film> result = filmStorage
+                .findAll(null, OLDEST_DATE_RELEASE, LocalDate.now())
+                .stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .limit(size)
+                .collect(Collectors.toList());
+        result.forEach(this::makeData);
+        return result;
+    }
+
+    public Map<String, Long> like(Long filmId, Long userId) { // переделать
         Map<String, Long> result = validateFilmDataRequest(filmId, userId);
         if (!result.isEmpty()) {
             return result;
@@ -67,7 +88,7 @@ public class FilmService {
         return null;
     }
 
-    public Map<String, Long> dislike(Long filmId, Long userId) {
+    public Map<String, Long> dislike(Long filmId, Long userId) { // переделать
         Map<String, Long> result = validateFilmDataRequest(filmId, userId);
         if (!result.isEmpty()) {
             return result;
@@ -88,12 +109,8 @@ public class FilmService {
         return result;
     }
 
-    public Collection<Film> getMostPopularFilms(Integer size) {
-        return filmStorage
-                .findAll(null, OLDEST_DATE_RELEASE, LocalDate.now())
-                .stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .limit(size)
-                .collect(Collectors.toList());
+    private void makeData(Film film) {
+        film.setMpa(mpaStorage.findById(film.getMpa().getId()).get());
+        film.setGenres(new HashSet<>(genreStorage.findAllByFilmId(film.getId())));
     }
 }

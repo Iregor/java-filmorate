@@ -24,14 +24,17 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> findAll() {
-        String sql = "select * from \"rating_mpa\"order by \"rating_id\" ";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
+        return jdbcTemplate.query(
+                "SELECT * FROM \"rating_mpa\" " +
+                        "ORDER BY \"rating_id\" ",
+                (rs, rowNum) -> makeMpa(rs));
     }
 
     @Override
     public Optional<Mpa> findById(Long id) {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
-                "select * from \"rating_mpa\" where \"rating_id\" = ?", id);
+                "SELECT * FROM \"rating_mpa\" " +
+                        "WHERE \"rating_id\" = ?", id);
         if(mpaRows.next()) {
             Mpa mpa = new Mpa(
                     mpaRows.getLong("rating_id"),
@@ -73,7 +76,8 @@ public class MpaDbStorage implements MpaStorage {
 
     private Mpa getMpaFromDb(String name) {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"rating_mpa\" WHERE \"name\" = ? ", name);
+                "SELECT * FROM \"rating_mpa\" " +
+                        "WHERE \"name\" = ? ", name);
         if(mpaRows.next()) {
             return new Mpa(
                     mpaRows.getLong("genre_id"),

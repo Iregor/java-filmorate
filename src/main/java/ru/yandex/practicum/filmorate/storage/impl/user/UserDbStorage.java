@@ -23,8 +23,10 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-        String sql = "SELECT * FROM \"users\" ORDER BY \"user_id\" ";
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
+        return jdbcTemplate.query(
+                "SELECT * FROM \"users\" " +
+                        "ORDER BY \"user_id\" ",
+                (rs, rowNum) ->
                 new User(rs.getLong("user_id"),
                 rs.getString("email"),
                 rs.getString("login"),

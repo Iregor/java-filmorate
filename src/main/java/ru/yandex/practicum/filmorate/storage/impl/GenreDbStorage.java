@@ -24,14 +24,27 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> findAll() {
-        String sql = "select * from \"genres\"order by \"genre_id\" ";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs));
+        return jdbcTemplate.query(
+                "SELECT * FROM \"genres\" " +
+                        "ORDER BY \"genre_id\" ",
+                (rs, rowNum) -> makeGenre(rs));
+    }
+
+    @Override
+    public Collection<Genre> findAllByFilmId(Long filmId) {
+        return jdbcTemplate.query(
+                "SELECT \"film_genres\".\"genre_id\", \"name\"\n" +
+                        "FROM \"film_genres\"\n" +
+                        "JOIN \"genres\" AS g ON g.\"genre_id\" = \"film_genres\".\"genre_id\"\n" +
+                        "WHERE \"film_id\" = ?",
+                (rs, rowNum) -> makeGenre(rs), filmId);
     }
 
     @Override
     public Optional<Genre> findById(Long id) {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
-                "select * from \"genres\" where \"genre_id\" = ?", id);
+                "SELECT * FROM \"genres\" " +
+                        "WHERE \"genre_id\" = ?", id);
         if(genreRows.next()) {
             Genre genre = new Genre(
                     genreRows.getLong("genre_id"),
@@ -65,6 +78,13 @@ public class GenreDbStorage implements GenreStorage {
         return genre;
     }
 
+    @Override
+    public void delFilmGenre(Long filmId, Long genreId) {
+        jdbcTemplate.update(
+                "DELETE FROM \"film_genres\" WHERE \"film_id\" = ? AND \"genre_id\" = ? ",
+                filmId, genreId);
+    }
+
     private Genre makeGenre(ResultSet rs) throws SQLException {
         Long id = rs.getLong("genre_id");
         String name = rs.getString("name");
@@ -73,7 +93,8 @@ public class GenreDbStorage implements GenreStorage {
 
     private Genre getGenreFromDb(String name) {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"genres\" WHERE \"name\" = ? ", name);
+                "SELECT * FROM \"genres\" " +
+                        "WHERE \"name\" = ? ", name);
         if(genreRows.next()) {
             return new Genre(
                     genreRows.getLong("genre_id"),
