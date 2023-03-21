@@ -18,7 +18,6 @@ import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_
 @Slf4j
 @Service
 public class FilmService {
-
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
     private final MpaStorage mpaStorage;
@@ -48,17 +47,18 @@ public class FilmService {
     public Optional<Film> findById(Long filmId) {
         Optional<Film> result = filmStorage.findById(filmId);
         if (result.isEmpty()) {
-            log.warn("Film {} is not found,", filmId);
+            log.warn("Film {} is not found.", filmId);
             return result;
         }
         makeData(result.get());
-        log.info("Film {} is found", result.get().getId());
+        log.info("Film {} is found.", result.get().getId());
         return result;
     }
 
-    public Film create(Film film) { //// добить оснастку или перенести в другой метод
+    public Film create(Film film) {
         Film result = filmStorage.create(film);
         makeData(result);
+        log.info("Film {} {} added.", result.getId(), result.getName());
         return result;
     }
 
@@ -68,6 +68,7 @@ public class FilmService {
         genreFromDb.forEach(genre -> genreStorage.delFilmGenre(film.getId(), genre.getId()));
         Film result = filmStorage.update(film);
         makeData(result);
+        log.info("Film {} updated.", result.getId());
         return result;
     }
 
@@ -79,24 +80,29 @@ public class FilmService {
                 .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
                 .limit(size)
                 .collect(Collectors.toList());
+        log.info("Found {} movie(s).", result.size());
         return result;
     }
 
     public Map<String, Long> like(Long filmId, Long userId) {
         Map<String, Long> result = validateFilmDataRequest(filmId, userId);
         if (!result.isEmpty()) {
+            log.warn("Data {} is not found.", result);
             return result;
         }
         likesStorage.like(filmId, userId);
+        log.info("User {} liked film {}.", userId, filmId);
         return null;
     }
 
     public Map<String, Long> dislike(Long filmId, Long userId) {
         Map<String, Long> result = validateFilmDataRequest(filmId, userId);
         if (!result.isEmpty()) {
+            log.warn("Data {} is not found.", result);
             return result;
         }
         likesStorage.dislike(filmId, userId);
+        log.info("User {} disliked film {}.", userId, filmId);
         return null;
     }
 

@@ -21,18 +21,30 @@ public class MpaService {
     }
 
     public Collection<Mpa> findAll() {
-        return mpaStorage.findAll();
+        Collection<Mpa> result = mpaStorage.findAll();
+        log.info("Found {} MPA rating(s).", result.size());
+        return result;
     }
 
-    public Optional<Mpa> findById(Long id) {
-        return mpaStorage.findById(id);
+    public Optional<Mpa> findById(Long mpaId) {
+        Optional<Mpa> result = mpaStorage.findById(mpaId);
+        if (result.isEmpty()) {
+            log.warn("MPA rating {} is not found.", mpaId);
+            return result;
+        }
+        log.info("MPA rating {} is found.", result.get().getId());
+        return result;
     }
 
     public Mpa create(Mpa mpa) {
-        return mpaStorage.create(mpa);
+        Mpa result = mpaStorage.create(mpa);
+        log.info("MPA rating {} {} added.", result.getId(), result.getName());
+        return result;
     }
 
     public Mpa update(Mpa mpa) {
-        return mpaStorage.update(mpa);
+        Mpa result = mpaStorage.update(mpa);
+        log.info("MPA rating {} updated.", result.getId());
+        return result;
     }
 }

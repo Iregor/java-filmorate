@@ -32,12 +32,14 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> findAllByFilmId(Long filmId) {
-        return jdbcTemplate.query(
+        Collection<Genre> result = jdbcTemplate.query(
                 "SELECT \"film_genres\".\"genre_id\", \"name\"\n" +
                         "FROM \"film_genres\"\n" +
                         "JOIN \"genres\" AS g ON g.\"genre_id\" = \"film_genres\".\"genre_id\"\n" +
                         "WHERE \"film_id\" = ?",
                 (rs, rowNum) -> makeGenre(rs), filmId);
+        log.info("Found {} genre(s).", result.size());
+        return result;
     }
 
     @Override

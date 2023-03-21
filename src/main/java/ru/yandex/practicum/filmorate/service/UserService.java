@@ -39,60 +39,73 @@ public class UserService {
     public Optional<User> findById(Long userId) { // вынести оснастку в другой класс
         Optional<User> result = userStorage.findById(userId);
         if (result.isEmpty()) {
-            log.warn("Film {} is not found,", userId);
+            log.warn("User {} is not found.", userId);
             return result;
         }
         makeData(result.get());
-        log.info("User {} is found", result.get().getId());
+        log.info("User {} is found.", result.get().getId());
         return result;
     }
 
     public User create(User user) {
         User result = userStorage.create(user);
         makeData(result);
+        log.info("User {} {} added.", result.getId(), result.getLogin());
         return result;
     }
 
     public User update(User user) {
         User result = userStorage.update(user);
         makeData(result);
+        log.info("User {} updated.", result.getId());
         return result;
     }
 
     public Map<String, Long> addFriend(Long userId, Long friendId) {
         Map<String, Long> result = validateUserDataRequest(userId, friendId);
         if (!result.isEmpty()) {
+            log.warn("Data {} is not found.", result);
             return result;
         }
         friendStorage.addFriend(userId, friendId);
+        log.info("User {} added user {} to friends.", userId, friendId);
         return null;
     }
 
     public Map<String, Long> delFriend(Long userId, Long friendId) {
         Map<String, Long> result = validateUserDataRequest(userId, friendId);
         if (!result.isEmpty()) {
+            log.warn("Data {} is not found.", result);
             return result;
         }
         friendStorage.delFriend(userId, friendId);
+        log.info("User {} deleted user {} from friends.", userId, friendId);
         return null;
+
     }
 
     public Collection<User> getFriends(Long userId) {
-        return userStorage.findAll()
+        Collection<User> result = userStorage.findAll()
                 .stream()
                 .filter(user -> friendStorage
                         .getFriends(userId)
                         .contains(user.getId()))
                 .collect(Collectors.toList());
+        result.forEach(this::makeData);
+        log.info("Found {} user(s).", result.size());
+        return result;
     }
 
     public Collection<User> getCommonFriends(Long userId, Long friendId) {
-        return userStorage.findAll()
+        Collection<User> result = userStorage.findAll()
                 .stream()
                 .filter(user -> friendStorage
                         .getCommonFriends(userId, friendId)
                         .contains(user.getId()))
                 .collect(Collectors.toList());
+        result.forEach(this::makeData);
+        log.info("Found {} user(s).", result.size());
+        return result;
     }
 
     private Map<String, Long> validateUserDataRequest(Long userId, Long friendId) {

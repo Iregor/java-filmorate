@@ -21,22 +21,30 @@ public class GenreService {
     }
 
     public Collection<Genre> findAll() {
-        return genreStorage.findAll();
+        Collection<Genre> result = genreStorage.findAll();
+        log.info("Found {} genre(s).", result.size());
+        return result;
     }
 
-    public Collection<Genre> findAllByFilmId(Long filmId) {
-        return genreStorage.findAllByFilmId(filmId);
-    }
-
-    public Optional<Genre> findById(Long id) {
-        return genreStorage.findById(id);
+    public Optional<Genre> findById(Long genreId) {
+        Optional<Genre> result = genreStorage.findById(genreId);
+        if (result.isEmpty()) {
+            log.warn("Genre {} is not found.", genreId);
+            return result;
+        }
+        log.info("Genre {} is found.", result.get().getId());
+        return result;
     }
 
     public Genre create(Genre genre) {
-        return genreStorage.create(genre);
+        Genre result = genreStorage.create(genre);
+        log.info("Genre {} {} added.", result.getId(), result.getName());
+        return result;
     }
 
     public Genre update(Genre genre) {
-        return genreStorage.update(genre);
+        Genre result = genreStorage.update(genre);
+        log.info("Genre {} updated.", result.getId());
+        return result;
     }
 }
