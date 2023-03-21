@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -30,24 +32,31 @@ public class UserService {
     public Collection<User> findAll() { // вынести оснастку в другой класс
         Collection<User> result = userStorage.findAll();
         result.forEach(this::makeData);
+        log.info("Found {} user(s).", result.size());
         return result;
     }
 
     public Optional<User> findById(Long userId) { // вынести оснастку в другой класс
         Optional<User> result = userStorage.findById(userId);
         if (result.isEmpty()) {
+            log.warn("Film {} is not found,", userId);
             return result;
         }
         makeData(result.get());
+        log.info("User {} is found", result.get().getId());
         return result;
     }
 
     public User create(User user) {
-        return userStorage.create(user);
+        User result = userStorage.create(user);
+        makeData(result);
+        return result;
     }
 
     public User update(User user) {
-        return userStorage.update(user);
+        User result = userStorage.update(user);
+        makeData(result);
+        return result;
     }
 
     public Map<String, Long> addFriend(Long userId, Long friendId) {

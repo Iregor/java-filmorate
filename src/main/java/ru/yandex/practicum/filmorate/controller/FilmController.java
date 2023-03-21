@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
@@ -14,8 +13,8 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_RELEASE;
 
 @Slf4j
@@ -54,15 +53,16 @@ public class FilmController {
         return filmService.getMostPopularFilms(count);
     }
 
-    @GetMapping(value ="{filmId}", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value ="{filmId}")
     public Film findById(@PathVariable Long filmId) { ///// kosyak
-        if (filmService.findById(filmId).isEmpty()) {
+        Optional<Film> result = filmService.findById(filmId);
+        if (result.isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Film %d is not found.", filmId));
         }
-        return filmService.findById(filmId).get();
+        return result.get();
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         return filmService.create(film);
     }

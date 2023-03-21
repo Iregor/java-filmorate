@@ -11,8 +11,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.Collection;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -26,11 +25,12 @@ public class GenreController {
         return genreService.findAll();
     }
 
-    @GetMapping(value ="{genreId}", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value ="{genreId}")
     public Genre findById(@PathVariable Long genreId) {
-        if (genreService.findById(genreId).isEmpty()) {
+        Optional<Genre> result = genreService.findById(genreId);
+        if (result.isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genreId));
         }
-        return genreService.findById(genreId).get();
+        return result.get();
     }
 }

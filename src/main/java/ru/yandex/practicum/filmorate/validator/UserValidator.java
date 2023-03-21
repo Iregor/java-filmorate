@@ -17,7 +17,7 @@ public class UserValidator {
         if(user.getLogin() == null
                 || user.getLogin().isBlank()
                 || user.getLogin().contains(" ")) {
-            exceptionMessage.append("Логин не может быть пустым или содержать пробелы. ");
+            exceptionMessage.append("Логин не может быть пустым или содержать пробелы. "); // перенести в аннотацию
         }
         if(user.getBirthday().isAfter(LocalDate.now())) {
             exceptionMessage.append("Дата рождения не может быть в будущем. ");

@@ -22,8 +22,8 @@ public class FriendDbStorage implements FriendStorage {
     public Collection<Long> getFriends(Long userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM \"friendship\" " +
-                "WHERE \"user_id\" = ?"
-                , (rs, rowNum) -> rs.getLong("friend_id"), userId);
+                "WHERE \"user_id\" = ?",
+                (rs, rowNum) -> rs.getLong("friend_id"), userId);
     }
 
     @Override

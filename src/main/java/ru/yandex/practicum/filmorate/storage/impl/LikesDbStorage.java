@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 @Slf4j
@@ -19,8 +20,9 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public void like(Long filmId, Long userId) {
         jdbcTemplate.update(
-                "INSERT INTO \"likes\" (\"film_id\", \"user_id\") VALUES (?, ?)",
-                filmId, userId);
+                "INSERT INTO \"likes\" (\"film_id\", \"user_id\", \"date\") VALUES (?, ?, ?)",
+                filmId, userId, LocalDate.now());
+        log.debug("User {} liked film {}", userId, filmId);
     }
 
     @Override
@@ -29,12 +31,11 @@ public class LikesDbStorage implements LikesStorage {
                 "DELETE FROM \"likes\" " +
                 "WHERE \"film_id\" = ? AND \"user_id\" = ? ",
                 filmId, userId);
-
+        log.debug("User {} disliked film {}", userId, filmId);
     }
 
     @Override
     public Collection<Long> getUserLikes(Long userId) {
-
         return jdbcTemplate.query(
                 "SELECT * FROM \"likes\" " +
                 "WHERE \"user_id\" = ?",

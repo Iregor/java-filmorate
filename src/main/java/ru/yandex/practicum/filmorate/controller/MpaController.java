@@ -11,8 +11,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.Collection;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -26,11 +25,12 @@ public class MpaController {
         return mpaService.findAll();
     }
 
-    @GetMapping(value ="{mpaId}", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value ="{mpaId}")
     public Mpa findById(@PathVariable Long mpaId) {
-        if (mpaService.findById(mpaId).isEmpty()) {
+        Optional<Mpa> result = mpaService.findById(mpaId);
+        if (result.isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Mpa %d is not found.", mpaId));
         }
-        return mpaService.findById(mpaId).get();
+        return result.get();
     }
 }

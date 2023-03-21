@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -25,30 +23,36 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
+    private final LikesStorage likesStorage;
 
     @Autowired
     public FilmService(@Qualifier("userDb") UserStorage userStorage,
                        @Qualifier("filmDb") FilmStorage filmStorage,
                        @Qualifier("mpaDb") MpaStorage mpaStorage,
-                       @Qualifier("genreDb") GenreStorage genreStorage) {
+                       @Qualifier("genreDb") GenreStorage genreStorage,
+                       @Qualifier("likesDb") LikesStorage likesStorage) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
         this.mpaStorage = mpaStorage;
         this.genreStorage = genreStorage;
+        this.likesStorage = likesStorage;
     }
 
     public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
         Collection<Film> result = filmStorage.findAll(name, after, before);
         result.forEach(this::makeData);
+        log.info("Found {} movie(s).", result.size());
         return result;
     }
 
     public Optional<Film> findById(Long filmId) {
         Optional<Film> result = filmStorage.findById(filmId);
         if (result.isEmpty()) {
+            log.warn("Film {} is not found,", filmId);
             return result;
         }
         makeData(result.get());
+        log.info("Film {} is found", result.get().getId());
         return result;
     }
 
@@ -69,32 +73,30 @@ public class FilmService {
 
     public Collection<Film> getMostPopularFilms(Integer size) {
         Collection<Film> result = filmStorage
-                .findAll(null, OLDEST_DATE_RELEASE, LocalDate.now())
-                .stream()
+                .findAll(null, OLDEST_DATE_RELEASE, LocalDate.now());
+        result.forEach(this::makeData);
+        result = result.stream()
                 .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
                 .limit(size)
                 .collect(Collectors.toList());
-        result.forEach(this::makeData);
         return result;
     }
 
-    public Map<String, Long> like(Long filmId, Long userId) { // переделать
+    public Map<String, Long> like(Long filmId, Long userId) {
         Map<String, Long> result = validateFilmDataRequest(filmId, userId);
         if (!result.isEmpty()) {
             return result;
         }
-        filmStorage.findById(filmId).get().getLikes().add(userId);
-        userStorage.findById(userId).get().getLikeFilms().add(filmId);
+        likesStorage.like(filmId, userId);
         return null;
     }
 
-    public Map<String, Long> dislike(Long filmId, Long userId) { // переделать
+    public Map<String, Long> dislike(Long filmId, Long userId) {
         Map<String, Long> result = validateFilmDataRequest(filmId, userId);
         if (!result.isEmpty()) {
             return result;
         }
-        filmStorage.findById(filmId).get().getLikes().remove(userId);
-        userStorage.findById(userId).get().getLikeFilms().remove(filmId);
+        likesStorage.dislike(filmId, userId);
         return null;
     }
 
@@ -110,7 +112,9 @@ public class FilmService {
     }
 
     private void makeData(Film film) {
-        film.setMpa(mpaStorage.findById(film.getMpa().getId()).get());
+        Optional<Mpa> mpa = mpaStorage.findById(film.getMpa().getId());
+        mpa.ifPresent(film::setMpa);
         film.setGenres(new HashSet<>(genreStorage.findAllByFilmId(film.getId())));
+        film.setLikes(new HashSet<>(likesStorage.getFilmLikes(film.getId())));
     }
 }

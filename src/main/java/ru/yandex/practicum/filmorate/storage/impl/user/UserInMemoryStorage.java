@@ -23,7 +23,6 @@ public class UserInMemoryStorage implements UserStorage {
     @Override
     public Optional<User> findById(Long userId) {
         if (!users.containsKey(userId)) {
-            log.warn(String.format("User %d is not found.", userId));
             return Optional.empty();
         }
         return Optional.of(users.get(userId));
@@ -34,38 +33,36 @@ public class UserInMemoryStorage implements UserStorage {
         UserValidator.validate(user);
         for (User userFromBase : users.values()) {
             if (userFromBase.getEmail().equals(user.getEmail())) {
-                log.info("The user with this email is already registered.");
+                log.debug("The user with this email is already registered.");
                 return null;
             }
             if (userFromBase.getLogin().equals(user.getLogin())) {
-                log.info("The user with this login is already registered.");
+                log.debug("The user with this login is already registered.");
                 return null;
             }
         }
 
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.info("The name is automatically assigned from the \"Login\" field. " +
+            log.debug("The name is automatically assigned from the \"Login\" field. " +
                     "The new name is {}.", user.getLogin());
         }
 
         user.setId(userId++);
         users.put(user.getId(), user);
-        log.info("User \"{}\" added. The database contains {} user(s).", user.getLogin(), users.size());
+        log.debug("User {} added. The database contains {} user(s).", user.getLogin(), users.size());
         return user;
     }
 
     @Override
     public User update(User user) {
         UserValidator.validate(user);
-
         if (user.getId() != null && !users.containsKey(user.getId())) {
-            log.info("User ID {} missing. ", user.getId());
+            log.debug("User ID {} missing. ", user.getId());
             throw new NullPointerException("User ID " + user.getId() + " missing.");
         }
-
         users.put(user.getId(), user);
-        log.info("User ID {} updated. ", user.getId());
+        log.debug("User ID {} updated. ", user.getId());
         return user;
     }
 }

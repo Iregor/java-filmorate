@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -27,10 +28,11 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public User findById(@PathVariable Long userId) {
-        if (userService.findById(userId).isEmpty()) {
+        Optional<User> result = userService.findById(userId);
+        if (result.isEmpty()) {
             throw new IncorrectObjectIdException(String.format("User %d is not found.", userId));
         }
-        return userService.findById(userId).get();
+        return result.get();
     }
 
     @PostMapping

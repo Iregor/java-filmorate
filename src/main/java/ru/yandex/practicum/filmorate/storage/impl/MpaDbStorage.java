@@ -39,10 +39,10 @@ public class MpaDbStorage implements MpaStorage {
             Mpa mpa = new Mpa(
                     mpaRows.getLong("rating_id"),
                     mpaRows.getString("name"));
-            log.info("Найден рейтинг: {} {}", mpa.getId(), mpa.getName());
+            log.debug("Rating is found: {} {}", mpa.getId(), mpa.getName());
             return Optional.of(mpa);
         } else {
-            log.info("Рейтинг с идентификатором {} не найден.", id);
+            log.debug("Rating {} is not found.", id);
             return Optional.empty();
         }
     }
@@ -83,7 +83,7 @@ public class MpaDbStorage implements MpaStorage {
                     mpaRows.getLong("genre_id"),
                     mpaRows.getString("name"));
         } else {
-            log.info("Данные не найдены.");
+            log.debug("Data is not found.");
             return null;
         }
     }

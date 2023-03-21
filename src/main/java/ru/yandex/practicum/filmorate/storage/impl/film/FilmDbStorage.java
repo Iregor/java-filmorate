@@ -51,10 +51,10 @@ public class FilmDbStorage implements FilmStorage {
                     filmRows.getInt("rate"),
                     filmRows.getInt("rating_id")
             );
-            log.info("Найден фильм: {} {}", film.getId(), film.getName());
+            log.debug("Film found: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
-            log.info("Фильм с идентификатором {} не найден.", id);
+            log.debug("Film {} is not found.", id);
             return Optional.empty();
         }
     }
@@ -118,7 +118,7 @@ public class FilmDbStorage implements FilmStorage {
                     filmRows.getInt("rate"),
                     filmRows.getInt("rating_id"));
         } else {
-            log.info("Данные не найдены.");
+            log.debug("Data is not found.");
             return null;
         }
     }

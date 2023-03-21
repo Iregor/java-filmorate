@@ -49,10 +49,10 @@ public class GenreDbStorage implements GenreStorage {
             Genre genre = new Genre(
                     genreRows.getLong("genre_id"),
                     genreRows.getString("name"));
-            log.info("Найден рейтинг: {} {}", genre.getId(), genre.getName());
+            log.debug("Genre found: {} {}", genre.getId(), genre.getName());
             return Optional.of(genre);
         } else {
-            log.info("Рейтинг с идентификатором {} не найден.", id);
+            log.debug("Genre {} is not found.", id);
             return Optional.empty();
         }
     }
@@ -100,7 +100,7 @@ public class GenreDbStorage implements GenreStorage {
                     genreRows.getLong("genre_id"),
                     genreRows.getString("name"));
         } else {
-            log.info("Данные не найдены.");
+            log.debug("Data is not found.");
             return null;
         }
     }

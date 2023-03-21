@@ -39,15 +39,16 @@ public class UserDbStorage implements UserStorage {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"users\" WHERE \"user_id\" = ?", id);
         if(userRows.next()) {
-            Long user_id = userRows.getLong("user_id");
-            String email = userRows.getString("email");
-            String login = userRows.getString("login");
-            String name = userRows.getString("name");
-            String birthday = userRows.getString("birthday");
-            log.info("Найден пользователь: {} {}", user_id, login);
-            return Optional.of(new User(user_id, email, login, name, birthday));
+            User user = new User(
+                    userRows.getLong("user_id"),
+                    userRows.getString("email"),
+                    userRows.getString("login"),
+                    userRows.getString("name"),
+                    userRows.getString("birthday"));
+            log.debug("User found: {} {}", user.getId(), user.getLogin());
+            return Optional.of(user);
         } else {
-            log.info("Пользователь с идентификатором {} не найден.", id);
+            log.debug("User {} is not found.", id);
             return Optional.empty();
         }
     }
@@ -90,7 +91,7 @@ public class UserDbStorage implements UserStorage {
                     userRows.getString("name"),
                     userRows.getString("birthday"));
         } else {
-            log.info("Данные не найдены.");
+            log.debug("Data is not found.");
             return null;
         }
     }
