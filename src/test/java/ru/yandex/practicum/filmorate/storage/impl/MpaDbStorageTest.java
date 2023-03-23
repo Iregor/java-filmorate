@@ -25,6 +25,7 @@ class MpaDbStorageTest {
 
     @BeforeEach
     void BeforeEach() {
+        jdbcTemplate.execute("ALTER TABLE \"films\" DROP CONSTRAINT IF EXISTS \"fk_films_rating_id\"");
         jdbcTemplate.update("DELETE FROM \"rating_mpa\" ");
         jdbcTemplate.execute("ALTER TABLE \"rating_mpa\" ALTER COLUMN \"rating_id\" RESTART WITH 1 ");
     }
@@ -82,8 +83,10 @@ class MpaDbStorageTest {
                 "('PG-13')," +
                 "('R')," +
                 "('NC-17')");
+        jdbcTemplate.execute("ALTER TABLE \"films\" " +
+                "ADD CONSTRAINT \"fk_films_rating_id\" " +
+                "FOREIGN KEY (\"rating_id\") " +
+                "REFERENCES \"rating_mpa\" (\"rating_id\");");
 
-        jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN \"genre_id\" " +
-                "RESTART WITH (SELECT MAX( \"genre_id\") FROM \"genres\") + 1 ");
     }
 }
