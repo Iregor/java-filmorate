@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
@@ -14,20 +14,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    private final UserStorage userStorage;
-    private final FriendStorage friendStorage;
-    private final LikesStorage likesStorage;
-
-    @Autowired
-    public UserService(@Qualifier("userDb") UserStorage userStorage,
-                       @Qualifier("friendDb") FriendStorage friendStorage,
-                       @Qualifier("likesDb") LikesStorage likesStorage) {
-        this.userStorage = userStorage;
-        this.friendStorage = friendStorage;
-        this.likesStorage = likesStorage;
-    }
+    @Qualifier("userDb") private final UserStorage userStorage;
+    @Qualifier("friendDb") private final FriendStorage friendStorage;
+    @Qualifier("likesDb") private final LikesStorage likesStorage;
 
     public Collection<User> findAll() { // вынести оснастку в другой класс
         Collection<User> result = userStorage.findAll();

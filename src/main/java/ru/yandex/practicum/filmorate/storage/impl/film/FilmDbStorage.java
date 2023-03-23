@@ -24,7 +24,33 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
-        String sql = "SELECT * FROM \"films\" ORDER BY \"film_id\" ";
+        if (after == null) {
+            after = LocalDate.parse("1895-12-28");
+        }
+        if (before == null) {
+            before = LocalDate.now();
+        }
+
+        String sql = "SELECT * FROM \"films\" " +
+                "WHERE \"release_date\" BETWEEN ? AND ? " +
+                "ORDER BY \"film_id\" ";
+
+        if (name != null) {
+            sql = "SELECT * FROM \"films\" " +
+                    "WHERE \"release_date\" BETWEEN ? AND ? " +
+                    "AND \"name\" = ? " +
+                    "ORDER BY \"film_id\" ";
+            return jdbcTemplate.query(sql, (rs, rowNum) ->
+                    new Film(rs.getLong("film_id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getString("release_date"),
+                            rs.getInt("length"),
+                            rs.getInt("rate"),
+                            rs.getInt("rating_id")
+                    ), after, before, name);
+        }
+
         return jdbcTemplate.query(sql, (rs, rowNum) ->
                 new Film(rs.getLong("film_id"),
                         rs.getString("name"),
@@ -33,7 +59,7 @@ public class FilmDbStorage implements FilmStorage {
                         rs.getInt("length"),
                         rs.getInt("rate"),
                         rs.getInt("rating_id")
-                ));
+                ), after, before);
     }
 
     @Override

@@ -1,0 +1,124 @@
+package ru.yandex.practicum.filmorate.storage.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
+import java.time.LocalDate;
+import java.util.Collection;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+class FilmDbStorageTest {
+
+    @Qualifier("filmDb") private final FilmStorage filmStorage;
+    private final JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void BeforeEach() {
+        jdbcTemplate.update("DELETE FROM \"films\" ");
+        jdbcTemplate.execute("ALTER TABLE \"films\" ALTER COLUMN \"film_id\" RESTART WITH 1 ");
+    }
+
+    @Test
+    void findAll_return5Films_adding5Films() {
+        addData();
+        Collection<Film> collection = filmStorage.findAll(null, null, null);
+        assertThat(collection.size()).isEqualTo(5);
+        assertThat(collection).asList().containsAnyOf(
+                new Film(1L,"Евангелион 3.0+1.0", "Мехи, гиганты и тд",
+                        "2021-03-08", 155, 10, 1),
+
+                new Film(2L, "Карты, деньги, два ствола", "Стейтем не бьет морды",
+                        "1998-08-23", 107, 20, 5),
+
+                new Film(3L, "Большой куш'", "Борис Бритва вещает про надежность большого и тяжелого",
+                        "2000-08-23", 104, 30, 2),
+
+                new Film(4L, "Побег из Шоушенка",
+                        "Бухгалтер Энди Дюфрейн обвинён в убийстве собственной жены",
+                        "1994-09-24", 142, 40, 3),
+
+                new Film(5L, "Аватар", "Синие голые чуваки бегают по лесу",
+                        "2009-12-10", 162, 50, 4));
+    }
+
+    @Test
+    void findById_returnFilmId1_adding5Films() {
+        addData();
+        assertThat(filmStorage.findById(1L))
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", 1L)
+                                .hasFieldOrPropertyWithValue("name", "Евангелион 3.0+1.0")
+                                .hasFieldOrPropertyWithValue("description", "Мехи, гиганты и тд")
+                                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.parse("2021-03-08"))
+                                .hasFieldOrPropertyWithValue("duration", 155)
+                                .hasFieldOrPropertyWithValue("rate", 10)
+                                .hasFieldOrPropertyWithValue("mpa", new Mpa(1L))
+                );
+    }
+
+    @Test
+    void create_returnNewFilmId6_AllFilm() {
+        addData();
+        Film newFilm = filmStorage.create(new Film("Джентльмены",
+                "Один ушлый американец ещё со студенческих лет приторговывал наркотиками",
+                "2019-12-03", 113, 2));
+        assertThat(newFilm).hasFieldOrPropertyWithValue("id", 6L)
+                .hasFieldOrPropertyWithValue("name", "Джентльмены")
+                .hasFieldOrPropertyWithValue("description",
+                        "Один ушлый американец ещё со студенческих лет приторговывал наркотиками")
+                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.parse("2019-12-03"))
+                .hasFieldOrPropertyWithValue("duration", 113)
+                .hasFieldOrPropertyWithValue("rate", 0)
+                .hasFieldOrPropertyWithValue("mpa", new Mpa(2L));
+    }
+
+    @Test
+    void update_returnUpdateFilmId4_AllFilm() {
+        addData();
+        filmStorage.update(new Film(4L, "Updated Name",
+                "Updated descr",
+                "2019-12-03", 113, 20, 2));
+        assertThat(filmStorage.findById(4L))
+                .isPresent()
+                .hasValueSatisfying(film ->
+                        assertThat(film).hasFieldOrPropertyWithValue("id", 4L)
+                                .hasFieldOrPropertyWithValue("name", "Updated Name")
+                                .hasFieldOrPropertyWithValue("description",
+                                        "Updated descr")
+                                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.parse("2019-12-03"))
+                                .hasFieldOrPropertyWithValue("duration", 113)
+                                .hasFieldOrPropertyWithValue("rate", 20)
+                                .hasFieldOrPropertyWithValue("mpa", new Mpa(2L))
+                );
+    }
+
+    private void addData() {
+        jdbcTemplate.update("INSERT INTO \"films\" (\"rating_id\", \"name\", \"description\", " +
+                "\"release_date\", \"length\", \"rate\") " +
+                "VALUES (1,'Евангелион 3.0+1.0', 'Мехи, гиганты и тд'," +
+                " '2021-03-08', 155, 10)," +
+                "(5,'Карты, деньги, два ствола', 'Стейтем не бьет морды, '," +
+                " '1998-08-23', 107, 20)," +
+                "(2,'Большой куш', 'Борис Бритва вещает про надежность большого и тяжелого'," +
+                " '2000-08-23', 104, 30)," +
+                "(3,'Побег из Шоушенка', 'Бухгалтер Энди Дюфрейн обвинён в убийстве собственной жены'," +
+                " '1994-09-24', 142, 40)," +
+                "(4 ,'Аватар', 'Синие голые чуваки бегают по лесу'," +
+                " '2009-12-10', 162, 50);");
+    }
+}
+

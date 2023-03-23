@@ -12,4 +12,8 @@ public class Mpa {
     public Mpa(Long mpaId) {
         this.id = mpaId;
     }
+
+    public Mpa(String name) {
+        this.name = name;
+    }
 }

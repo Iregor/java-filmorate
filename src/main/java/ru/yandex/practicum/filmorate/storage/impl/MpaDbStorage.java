@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -15,12 +16,20 @@ import java.util.Optional;
 
 @Slf4j
 @Component("mpaDb")
+@RequiredArgsConstructor
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public MpaDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate=jdbcTemplate;
-    }
+/*    public MpaDbStorage(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
+        jdbcTemplate.update("INSERT INTO \"rating_mpa\" (\"name\") " +
+                "VALUES ('G')," +
+                "('PG')," +
+                "('PG-13')," +
+                "('R')," +
+                "('NC-17')");
+
+    }*/
 
     @Override
     public Collection<Mpa> findAll() {
@@ -80,7 +89,7 @@ public class MpaDbStorage implements MpaStorage {
                         "WHERE \"name\" = ? ", name);
         if(mpaRows.next()) {
             return new Mpa(
-                    mpaRows.getLong("genre_id"),
+                    mpaRows.getLong("rating_id"),
                     mpaRows.getString("name"));
         } else {
             log.debug("Data is not found.");

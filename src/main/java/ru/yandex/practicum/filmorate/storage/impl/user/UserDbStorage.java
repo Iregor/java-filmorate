@@ -59,9 +59,9 @@ public class UserDbStorage implements UserStorage {
             user.setName(user.getLogin());
         }
         jdbcTemplate.update(
-                "INSERT INTO \"users\" (\"email\", \"name\", \"login\", \"birthday\")" +
+                "INSERT INTO \"users\" (\"email\", \"login\", \"name\", \"birthday\" ) " +
                         "VALUES (?,?,?,?)",
-                user.getEmail(), user.getName(), user.getLogin(), user.getBirthday());
+                user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         return getUserFromDb(user);
     }
 

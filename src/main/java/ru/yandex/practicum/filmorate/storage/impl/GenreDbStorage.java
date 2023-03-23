@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -15,12 +16,20 @@ import java.util.Optional;
 
 @Slf4j
 @Component("genreDb")
+@RequiredArgsConstructor
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public GenreDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate=jdbcTemplate;
-    }
+/*    public GenreDbStorage(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
+        jdbcTemplate.update("INSERT INTO \"genres\" (\"name\") " +
+                "VALUES ('Комедия'), " +
+                "('Драма')," +
+                "('Мультфильм')," +
+                "('Триллер')," +
+                "('Документальный'),"+
+                "('Боевик')");
+    }*/
 
     @Override
     public Collection<Genre> findAll() {

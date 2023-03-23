@@ -43,12 +43,17 @@ public class Film {
         this.duration = duration;
     }
 
+    public Film(String name, String description, String releaseDate,
+                int duration, long mpaId) {
+        this(name, description, releaseDate, duration);
+        this.mpa = new Mpa(mpaId);
+    }
+
     public Film(Long id, String name, String description, String releaseDate,
                 int duration, int rate, long mpaId) {
-        this(name, description, releaseDate, duration);
+        this(name, description, releaseDate, duration, mpaId);
         this.id = id;
         this.rate = rate;
-        this.mpa = new Mpa(mpaId);
     }
 
     @Target({ FIELD })

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,27 +17,16 @@ import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
-    private final UserStorage userStorage;
-    private final FilmStorage filmStorage;
-    private final MpaStorage mpaStorage;
-    private final GenreStorage genreStorage;
-    private final LikesStorage likesStorage;
-
-    @Autowired
-    public FilmService(@Qualifier("userDb") UserStorage userStorage,
-                       @Qualifier("filmDb") FilmStorage filmStorage,
-                       @Qualifier("mpaDb") MpaStorage mpaStorage,
-                       @Qualifier("genreDb") GenreStorage genreStorage,
-                       @Qualifier("likesDb") LikesStorage likesStorage) {
-        this.userStorage = userStorage;
-        this.filmStorage = filmStorage;
-        this.mpaStorage = mpaStorage;
-        this.genreStorage = genreStorage;
-        this.likesStorage = likesStorage;
-    }
+    @Qualifier("userDb") private final UserStorage userStorage;
+    @Qualifier("filmDb") private final FilmStorage filmStorage;
+    @Qualifier("mpaDb") private final MpaStorage mpaStorage;
+    @Qualifier("genreDb") private final GenreStorage genreStorage;
+    @Qualifier("likesDb") private final LikesStorage likesStorage;
 
     public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
+
         Collection<Film> result = filmStorage.findAll(name, after, before);
         result.forEach(this::makeData);
         log.info("Found {} movie(s).", result.size());
