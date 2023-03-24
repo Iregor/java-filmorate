@@ -1,4 +1,4 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-![DB-Scheme](https://github.com/AGolykh/DB_filmorate/blob/master/DB_scheme.JPG)
+![DB-Scheme](https://github.com/AGolykh/java-filmorate/blob/add-database/DB_scheme.JPG)
