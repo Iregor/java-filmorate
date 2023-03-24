@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface GenreStorage {
     Collection<Genre> findAll();
 
-    Collection<Genre> findAllByFilmId(Long filmId);
+    Collection<Genre> findGenresByFilmId(Long filmId);
 
     Optional<Genre> findById(Long id);
 
@@ -16,5 +16,5 @@ public interface GenreStorage {
 
     Genre update(Genre genre);
 
-    void delFilmGenre(Long filmId, Long genreId);
+    void deleteFilmGenres(Long filmId, Long genreId);
 }

@@ -27,10 +27,6 @@ public class MpaController {
 
     @GetMapping(value ="{mpaId}")
     public Mpa findById(@PathVariable Long mpaId) {
-        Optional<Mpa> result = mpaService.findById(mpaId);
-        if (result.isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Mpa %d is not found.", mpaId));
-        }
-        return result.get();
+        return mpaService.findById(mpaId);
     }
 }

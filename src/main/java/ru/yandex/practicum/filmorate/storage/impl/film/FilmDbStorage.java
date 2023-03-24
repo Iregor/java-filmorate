@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
@@ -18,19 +20,12 @@ import java.util.Optional;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate=jdbcTemplate;
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
-        if (after == null) {
-            after = LocalDate.parse("1895-12-28");
-        }
-        if (before == null) {
-            before = LocalDate.now();
-        }
-
         String sql = "SELECT * FROM \"films\" " +
                 "WHERE \"release_date\" BETWEEN ? AND ? " +
                 "ORDER BY \"film_id\" ";
@@ -40,26 +35,10 @@ public class FilmDbStorage implements FilmStorage {
                     "WHERE \"release_date\" BETWEEN ? AND ? " +
                     "AND \"name\" = ? " +
                     "ORDER BY \"film_id\" ";
-            return jdbcTemplate.query(sql, (rs, rowNum) ->
-                    new Film(rs.getLong("film_id"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getString("release_date"),
-                            rs.getInt("length"),
-                            rs.getInt("rate"),
-                            rs.getInt("rating_id")
-                    ), after, before, name);
+            return jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), after, before, name);
         }
 
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                new Film(rs.getLong("film_id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("release_date"),
-                        rs.getInt("length"),
-                        rs.getInt("rate"),
-                        rs.getInt("rating_id")
-                ), after, before);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), after, before);
     }
 
     @Override
@@ -67,16 +46,8 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"films\" WHERE \"film_id\" = ?", id);
 
-        if(filmRows.next()) {
-            Film film = new Film(
-                    filmRows.getLong("film_id"),
-                    filmRows.getString("name"),
-                    filmRows.getString("description"),
-                    filmRows.getString("release_date"),
-                    filmRows.getInt("length"),
-                    filmRows.getInt("rate"),
-                    filmRows.getInt("rating_id")
-            );
+        if (filmRows.next()) {
+            Film film = getFilmFromSqlRowSet(filmRows);
             log.debug("Film found: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -99,7 +70,7 @@ public class FilmDbStorage implements FilmStorage {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(
                     "INSERT INTO \"film_genres\" (\"film_id\", \"genre_id\")" +
-                            "VALUES (?, ?)" ,
+                            "VALUES (?, ?)",
                     result.getId(), genre.getId());
         }
 
@@ -108,7 +79,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if(findById(film.getId()).isEmpty()) {
+        if (findById(film.getId()).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Film %d is not found.", film.getId()));
         }
 
@@ -123,7 +94,7 @@ public class FilmDbStorage implements FilmStorage {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(
                     "INSERT INTO \"film_genres\" (\"film_id\", \"genre_id\")" +
-                            "VALUES (?, ?)" ,
+                            "VALUES (?, ?)",
                     film.getId(), genre.getId());
         }
 
@@ -134,18 +105,33 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"films\" WHERE \"name\" = ? AND \"release_date\" = ?",
                 film.getName(), film.getReleaseDate());
-        if(filmRows.next()) {
-            return new Film(
-                    filmRows.getLong("film_id"),
-                    filmRows.getString("name"),
-                    filmRows.getString("description"),
-                    filmRows.getString("release_date"),
-                    filmRows.getInt("length"),
-                    filmRows.getInt("rate"),
-                    filmRows.getInt("rating_id"));
+        if (filmRows.next()) {
+            return getFilmFromSqlRowSet(filmRows);
         } else {
             log.debug("Data is not found.");
             return null;
         }
+    }
+
+    private Film getFilmFromResultSet(ResultSet rs) throws SQLException {
+        return new Film(
+                rs.getLong("film_id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("release_date"),
+                rs.getInt("length"),
+                rs.getInt("rate"),
+                rs.getInt("rating_id"));
+    }
+
+    private Film getFilmFromSqlRowSet(SqlRowSet srs) {
+        return new Film(
+                srs.getLong("film_id"),
+                srs.getString("name"),
+                srs.getString("description"),
+                srs.getString("release_date"),
+                srs.getInt("length"),
+                srs.getInt("rate"),
+                srs.getInt("rating_id"));
     }
 }

@@ -2,21 +2,13 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
+import ru.yandex.practicum.filmorate.validator.after.After;
 
-import javax.validation.Constraint;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
 import javax.validation.constraints.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Data
 @NoArgsConstructor
@@ -27,7 +19,7 @@ public class Film {
     private String name;
     @Length(max = 200, message = "Описание фильма не должно превышать 200 символов")
     private String description;
-    @After(message = "Дата не может быть раньше создания первого фильма.")
+    @After(value = "1895-12-28", message = "Дата не может быть раньше релиза первого фильма.")
     private LocalDate releaseDate;
     @Min(value = 1, message = "Продолжительность не может быть отрицательной.")
     private int duration;
@@ -54,24 +46,5 @@ public class Film {
         this(name, description, releaseDate, duration, mpaId);
         this.id = id;
         this.rate = rate;
-    }
-
-    @Target({ FIELD })
-    @Retention(RUNTIME)
-    @Constraint(validatedBy = AfterValidator.class)
-    @Documented
-    public @interface After {
-        String message() default "{After.invalid}";
-        Class<?>[] groups() default { };
-        Class<? extends Payload>[] payload() default { };
-    }
-
-    public static class AfterValidator implements ConstraintValidator<After, LocalDate> {
-        public static final LocalDate OLDEST_DATE_RELEASE
-                = LocalDate.of(1895, 12, 28);
-        @Override
-        public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-            return !value.isBefore(OLDEST_DATE_RELEASE);
-        }
     }
 }

@@ -28,11 +28,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public User findById(@PathVariable Long userId) {
-        Optional<User> result = userService.findById(userId);
-        if (result.isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("User %d is not found.", userId));
-        }
-        return result.get();
+        return userService.findById(userId);
     }
 
     @PostMapping
@@ -52,18 +48,12 @@ public class UserController {
 
     @PutMapping("{userId}/friends/{friendId}")
     public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        Map<String, Long> result = userService.addFriend(userId, friendId);
-        if(result != null) {
-            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
-        }
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("{userId}/friends/{friendId}")
     public void delFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        Map<String, Long> result = userService.delFriend(userId, friendId);
-        if(result != null) {
-            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
-        }
+        userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{userId}/friends/common/{friendId}")

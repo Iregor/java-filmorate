@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -17,8 +19,8 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate=jdbcTemplate;
+    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -26,25 +28,15 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query(
                 "SELECT * FROM \"users\" " +
                         "ORDER BY \"user_id\" ",
-                (rs, rowNum) ->
-                new User(rs.getLong("user_id"),
-                rs.getString("email"),
-                rs.getString("login"),
-                rs.getString("name"),
-                rs.getString("birthday")));
+                (rs, rowNum) -> getUserFromResultSet(rs));
     }
 
     @Override
     public Optional<User> findById(Long id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"users\" WHERE \"user_id\" = ?", id);
-        if(userRows.next()) {
-            User user = new User(
-                    userRows.getLong("user_id"),
-                    userRows.getString("email"),
-                    userRows.getString("login"),
-                    userRows.getString("name"),
-                    userRows.getString("birthday"));
+        if (userRows.next()) {
+            User user = getUserFromSqlRowSet(userRows);
             log.debug("User found: {} {}", user.getId(), user.getLogin());
             return Optional.of(user);
         } else {
@@ -55,7 +47,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        if(user.getName().isEmpty() || user.getName().isBlank()) {
+        if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         jdbcTemplate.update(
@@ -67,7 +59,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if(findById(user.getId()).isEmpty()) {
+        if (findById(user.getId()).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("User %d is not found.", user.getId()));
         }
         jdbcTemplate.update(
@@ -81,18 +73,31 @@ public class UserDbStorage implements UserStorage {
 
     private User getUserFromDb(User user) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(
-                    "SELECT * FROM \"users\" WHERE \"login\" = ? AND \"email\" = ?",
-                    user.getLogin(), user.getEmail());
-        if(userRows.next()) {
-            return new User(
-                    userRows.getLong("user_id"),
-                    userRows.getString("email"),
-                    userRows.getString("login"),
-                    userRows.getString("name"),
-                    userRows.getString("birthday"));
+                "SELECT * FROM \"users\" WHERE \"login\" = ? AND \"email\" = ?",
+                user.getLogin(), user.getEmail());
+        if (userRows.next()) {
+            return getUserFromSqlRowSet(userRows);
         } else {
             log.debug("Data is not found.");
             return null;
         }
+    }
+
+    private User getUserFromResultSet(ResultSet rs) throws SQLException {
+        return new User(
+                rs.getLong("user_id"),
+                rs.getString("email"),
+                rs.getString("login"),
+                rs.getString("name"),
+                rs.getString("birthday"));
+    }
+
+    private User getUserFromSqlRowSet(SqlRowSet srs) {
+        return new User(
+                srs.getLong("user_id"),
+                srs.getString("email"),
+                srs.getString("login"),
+                srs.getString("name"),
+                srs.getString("birthday"));
     }
 }

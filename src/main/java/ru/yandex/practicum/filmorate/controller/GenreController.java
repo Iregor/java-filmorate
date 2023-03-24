@@ -27,10 +27,6 @@ public class GenreController {
 
     @GetMapping(value ="{genreId}")
     public Genre findById(@PathVariable Long genreId) {
-        Optional<Genre> result = genreService.findById(genreId);
-        if (result.isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genreId));
-        }
-        return result.get();
+        return genreService.findById(genreId);
     }
 }

@@ -4,18 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
-import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_RELEASE;
 
 @Slf4j
 @RestController
@@ -31,19 +25,6 @@ public class FilmController {
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate after,
             @RequestParam(value = "before", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate before) {
-        if (after.isBefore(OLDEST_DATE_RELEASE) && after.isAfter(LocalDate.now())) {
-            log.warn("Incorrect value in field \"after\". ");
-            throw new IncorrectParameterException("after");
-        }
-
-        if (before == null) {
-            before = LocalDate.now();
-        }
-
-        if (before.isAfter(after) && before.isAfter(LocalDate.now())) {
-            log.warn("Incorrect value in field \"before\". ");
-            throw new IncorrectParameterException("before");
-        }
         return filmService.findAll(name, after, before);
     }
 
@@ -54,12 +35,8 @@ public class FilmController {
     }
 
     @GetMapping(value ="{filmId}")
-    public Film findById(@PathVariable Long filmId) { ///// kosyak
-        Optional<Film> result = filmService.findById(filmId);
-        if (result.isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Film %d is not found.", filmId));
-        }
-        return result.get();
+    public Film findById(@PathVariable Long filmId) {
+        return filmService.findById(filmId);
     }
 
     @PostMapping
@@ -74,17 +51,11 @@ public class FilmController {
 
     @PutMapping("{filmId}/like/{userId}")
     public void like(@PathVariable Long filmId, @PathVariable Long userId) {
-        Map<String, Long> result = filmService.like(filmId, userId);
-        if(result != null) {
-            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
-        }
+        filmService.like(filmId, userId);
     }
 
     @DeleteMapping("{filmId}/like/{userId}")
     public void dislike(@PathVariable Long filmId, @PathVariable Long userId) {
-        Map<String, Long> result = filmService.dislike(filmId, userId);
-        if(result != null) {
-            throw new IncorrectObjectIdException(String.format("Data %s is not found.", result));
-        }
+       filmService.dislike(filmId, userId);
     }
 }

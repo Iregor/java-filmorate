@@ -20,23 +20,12 @@ import java.util.Optional;
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
-/*    public MpaDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-        jdbcTemplate.update("INSERT INTO \"rating_mpa\" (\"name\") " +
-                "VALUES ('G')," +
-                "('PG')," +
-                "('PG-13')," +
-                "('R')," +
-                "('NC-17')");
-
-    }*/
-
     @Override
     public Collection<Mpa> findAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM \"rating_mpa\" " +
                         "ORDER BY \"rating_id\" ",
-                (rs, rowNum) -> makeMpa(rs));
+                (rs, rowNum) -> getMpaFromResultSet(rs));
     }
 
     @Override
@@ -44,10 +33,8 @@ public class MpaDbStorage implements MpaStorage {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"rating_mpa\" " +
                         "WHERE \"rating_id\" = ?", id);
-        if(mpaRows.next()) {
-            Mpa mpa = new Mpa(
-                    mpaRows.getLong("rating_id"),
-                    mpaRows.getString("name"));
+        if (mpaRows.next()) {
+            Mpa mpa = getMpaFromSqlRowSet(mpaRows);
             log.debug("Rating is found: {} {}", mpa.getId(), mpa.getName());
             return Optional.of(mpa);
         } else {
@@ -61,12 +48,12 @@ public class MpaDbStorage implements MpaStorage {
         jdbcTemplate.update(
                 "INSERT INTO \"rating_mpa\" (\"name\") VALUES (?)",
                 mpa.getName());
-        return getMpaFromDb(mpa.getName());
+        return findByName(mpa.getName());
     }
 
     @Override
     public Mpa update(Mpa mpa) {
-        if(findById(mpa.getId()).isEmpty()) {
+        if (findById(mpa.getId()).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Rating MPA %d is not found.", mpa.getId()));
         }
         jdbcTemplate.update(
@@ -77,23 +64,25 @@ public class MpaDbStorage implements MpaStorage {
         return mpa;
     }
 
-    private Mpa makeMpa(ResultSet rs) throws SQLException {
-        Long id = rs.getLong("rating_id");
-        String name = rs.getString("name");
-        return new Mpa(id, name);
-    }
-
-    private Mpa getMpaFromDb(String name) {
+    private Mpa findByName(String name) {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"rating_mpa\" " +
                         "WHERE \"name\" = ? ", name);
-        if(mpaRows.next()) {
-            return new Mpa(
-                    mpaRows.getLong("rating_id"),
-                    mpaRows.getString("name"));
+        if (mpaRows.next()) {
+            return getMpaFromSqlRowSet(mpaRows);
         } else {
             log.debug("Data is not found.");
             return null;
         }
+    }
+
+    private Mpa getMpaFromResultSet(ResultSet rs) throws SQLException {
+        return new Mpa(rs.getLong("rating_id"),
+                rs.getString("name"));
+    }
+
+    private Mpa getMpaFromSqlRowSet(SqlRowSet srs) {
+        return new Mpa(srs.getLong("rating_id"),
+                srs.getString("name"));
     }
 }

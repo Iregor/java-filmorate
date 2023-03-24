@@ -28,8 +28,7 @@ CREATE TABLE IF NOT EXISTS "genres" (
 
 CREATE TABLE IF NOT EXISTS "film_genres" (
                                                  "film_id" BIGINT NOT NULL,
-                                                 "genre_id" BIGINT NOT NULL,
-                                                 PRIMARY KEY ("film_id", "genre_id")
+                                                 "genre_id" BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "users" (
@@ -43,8 +42,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 CREATE TABLE IF NOT EXISTS "friendship" (
                                             "user_id" BIGINT NOT NULL,
                                             "friend_id" BIGINT NOT NULL,
-                                            "status" BOOLEAN NOT NULL,
-                                            PRIMARY KEY ("user_id", "friend_id")
+                                            "status" BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "likes" (

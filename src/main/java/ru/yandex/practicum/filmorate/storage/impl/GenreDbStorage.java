@@ -20,33 +20,23 @@ import java.util.Optional;
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
-/*    public GenreDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-        jdbcTemplate.update("INSERT INTO \"genres\" (\"name\") " +
-                "VALUES ('Комедия'), " +
-                "('Драма')," +
-                "('Мультфильм')," +
-                "('Триллер')," +
-                "('Документальный'),"+
-                "('Боевик')");
-    }*/
-
     @Override
     public Collection<Genre> findAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM \"genres\" " +
                         "ORDER BY \"genre_id\" ",
-                (rs, rowNum) -> makeGenre(rs));
+                (rs, rowNum) -> getGenreFromResultSet(rs));
     }
 
     @Override
-    public Collection<Genre> findAllByFilmId(Long filmId) {
+    public Collection<Genre> findGenresByFilmId(Long filmId) {
         Collection<Genre> result = jdbcTemplate.query(
                 "SELECT \"film_genres\".\"genre_id\", \"name\"\n" +
                         "FROM \"film_genres\"\n" +
                         "JOIN \"genres\" AS g ON g.\"genre_id\" = \"film_genres\".\"genre_id\"\n" +
-                        "WHERE \"film_id\" = ?",
-                (rs, rowNum) -> makeGenre(rs), filmId);
+                        "WHERE \"film_id\" = ?" +
+                        "ORDER BY \"genre_id\" ",
+                (rs, rowNum) -> getGenreFromResultSet(rs), filmId);
         log.info("Found {} genre(s).", result.size());
         return result;
     }
@@ -57,9 +47,7 @@ public class GenreDbStorage implements GenreStorage {
                 "SELECT * FROM \"genres\" " +
                         "WHERE \"genre_id\" = ?", id);
         if(genreRows.next()) {
-            Genre genre = new Genre(
-                    genreRows.getLong("genre_id"),
-                    genreRows.getString("name"));
+            Genre genre = getGenreFromSqlRowSet(genreRows);
             log.debug("Genre found: {} {}", genre.getId(), genre.getName());
             return Optional.of(genre);
         } else {
@@ -73,7 +61,7 @@ public class GenreDbStorage implements GenreStorage {
         jdbcTemplate.update(
                 "INSERT INTO \"genres\" (\"name\") VALUES (?)",
                 genre.getName());
-        return getGenreFromDb(genre.getName());
+        return findByName(genre.getName());
     }
 
     @Override
@@ -90,29 +78,31 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public void delFilmGenre(Long filmId, Long genreId) {
+    public void deleteFilmGenres(Long filmId, Long genreId) {
         jdbcTemplate.update(
                 "DELETE FROM \"film_genres\" WHERE \"film_id\" = ? AND \"genre_id\" = ? ",
                 filmId, genreId);
     }
 
-    private Genre makeGenre(ResultSet rs) throws SQLException {
-        Long id = rs.getLong("genre_id");
-        String name = rs.getString("name");
-        return new Genre(id, name);
-    }
-
-    private Genre getGenreFromDb(String name) {
+    private Genre findByName(String name) {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"genres\" " +
                         "WHERE \"name\" = ? ", name);
         if(genreRows.next()) {
-            return new Genre(
-                    genreRows.getLong("genre_id"),
-                    genreRows.getString("name"));
+            return getGenreFromSqlRowSet(genreRows);
         } else {
             log.debug("Data is not found.");
             return null;
         }
+    }
+
+    private Genre getGenreFromResultSet(ResultSet rs) throws SQLException {
+        return new Genre(rs.getLong("genre_id"),
+                rs.getString("name"));
+    }
+
+    private Genre getGenreFromSqlRowSet(SqlRowSet srs) {
+        return new Genre(srs.getLong("genre_id"),
+                srs.getString("name"));
     }
 }
