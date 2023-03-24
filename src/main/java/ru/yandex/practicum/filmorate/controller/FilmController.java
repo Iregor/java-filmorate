@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
 
 @Slf4j
@@ -19,19 +17,14 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping
-    public Collection<Film> findAll(
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "after", required = false, defaultValue = "1895-12-28")
-            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate after,
-            @RequestParam(value = "before", required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate before) {
-        return filmService.findAll(name, after, before);
+    public Collection<Film> findAll() {
+        return filmService.findAll();
     }
 
     @GetMapping("/popular")
     public Collection<Film> getPopularFilms(
             @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        return filmService.getMostPopularFilms(count);
+        return filmService.getPopularFilms(count);
     }
 
     @GetMapping(value ="{filmId}")

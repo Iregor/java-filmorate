@@ -15,6 +15,4 @@ public interface GenreStorage {
     Genre create(Genre genre);
 
     Genre update(Genre genre);
-
-    void deleteFilmGenres(Long filmId, Long genreId);
 }

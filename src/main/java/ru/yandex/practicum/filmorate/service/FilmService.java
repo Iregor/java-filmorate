@@ -5,17 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static ru.yandex.practicum.filmorate.validator.FilmValidator.OLDEST_DATE_RELEASE;
 
 @Slf4j
 @Service
@@ -25,28 +19,13 @@ public class FilmService {
     private final UserStorage userStorage;
     @Qualifier("filmDb")
     private final FilmStorage filmStorage;
-    @Qualifier("mpaDb")
-    private final MpaStorage mpaStorage;
     @Qualifier("genreDb")
     private final GenreStorage genreStorage;
     @Qualifier("likesDb")
     private final LikesStorage likesStorage;
 
-    public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
-        if (after.isBefore(OLDEST_DATE_RELEASE) && after.isAfter(LocalDate.now())) {
-            log.warn("Incorrect value in field \"after\". ");
-            throw new IncorrectParameterException("after");
-        }
-
-        if (before == null) {
-            before = LocalDate.now();
-        }
-
-        if (before.isAfter(after) && before.isAfter(LocalDate.now())) {
-            log.warn("Incorrect value in field \"before\". ");
-            throw new IncorrectParameterException("before");
-        }
-        Collection<Film> result = filmStorage.findAll(name, after, before);
+    public Collection<Film> findAll() {
+        Collection<Film> result = filmStorage.findAll();
         result.forEach(this::makeData);
         log.info("Found {} movie(s).", result.size());
         return result;
@@ -71,25 +50,20 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        if (filmStorage.findById(film.getId()).isEmpty()) {
+            throw new IncorrectObjectIdException(String.format("Film %d is not found.", film.getId()));
+        }
         Collection<Genre> genreFromDb = genreStorage.findGenresByFilmId(film.getId());
         genreFromDb.removeAll(film.getGenres());
-        genreFromDb.forEach(genre -> genreStorage.deleteFilmGenres(film.getId(), genre.getId()));
+        genreFromDb.forEach(genre -> filmStorage.deleteFilmGenres(film.getId(), genre.getId()));
         Film result = filmStorage.update(film);
         makeData(result);
         log.info("Film {} updated.", result.getId());
         return result;
     }
 
-    public Collection<Film> getMostPopularFilms(Integer size) {
-        Collection<Film> result = filmStorage
-                .findAll(null, OLDEST_DATE_RELEASE, LocalDate.now());
-        result.forEach(this::makeData);
-        result = result.stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .limit(size)
-                .collect(Collectors.toList());
-        log.info("Found {} movie(s).", result.size());
-        return result;
+    public Collection<Film> getPopularFilms(Integer size) {
+        return filmStorage.getPopularFilms(size);
     }
 
     public void like(Long filmId, Long userId) {
@@ -119,9 +93,6 @@ public class FilmService {
     }
 
     private void makeData(Film film) {
-        Optional<Mpa> mpa = mpaStorage.findById(film.getMpa().getId());
-        mpa.ifPresent(film::setMpa);
         film.setGenres(new HashSet<>(genreStorage.findGenresByFilmId(film.getId())));
-        film.setLikes(new HashSet<>(likesStorage.getFilmLikes(film.getId())));
     }
 }

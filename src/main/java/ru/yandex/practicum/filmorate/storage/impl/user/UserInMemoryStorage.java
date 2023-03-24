@@ -21,6 +21,16 @@ public class UserInMemoryStorage implements UserStorage {
     }
 
     @Override
+    public Collection<User> getFriends(Long userId) {
+        return null;
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(Long userId, Long friendId) {
+        return null;
+    }
+
+    @Override
     public Optional<User> findById(Long userId) {
         if (!users.containsKey(userId)) {
             return Optional.empty();
@@ -64,5 +74,10 @@ public class UserInMemoryStorage implements UserStorage {
         users.put(user.getId(), user);
         log.debug("User ID {} updated. ", user.getId());
         return user;
+    }
+
+    @Override
+    public Collection<Long> getUserLikes(Long userId) {
+        return users.get(userId).getLikeFilms();
     }
 }

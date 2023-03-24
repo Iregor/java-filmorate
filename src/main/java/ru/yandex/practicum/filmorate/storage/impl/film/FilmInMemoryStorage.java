@@ -6,11 +6,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component("filmInMemory")
@@ -19,16 +17,13 @@ public class FilmInMemoryStorage implements FilmStorage {
     private final HashMap<Long, Film> films = new HashMap<>();
 
     @Override
-    public Collection<Film> findAll(String name, LocalDate after, LocalDate before) {
-        return films.values()
-                .stream()
-                .filter(film -> {
-                    if (name == null) return true;
-                    return film.getName().contains(name);
-                })
-                .filter(film -> film.getReleaseDate().isAfter(after))
-                .filter(film -> film.getReleaseDate().isBefore(before))
-                .collect(Collectors.toList());
+    public Collection<Film> findAll() {
+        return films.values();
+    }
+
+    @Override
+    public Collection<Film> getPopularFilms(int size) {
+        return null;
     }
 
     @Override
@@ -70,5 +65,15 @@ public class FilmInMemoryStorage implements FilmStorage {
         films.put(film.getId(), film);
         log.info("Movie ID {} updated.", film.getId());
         return film;
+    }
+
+    @Override
+    public void deleteFilmGenres(Long filmId, Long genreId) {
+
+    }
+
+    @Override
+    public Collection<Long> getFilmLikes(Long filmId) {
+        return films.get(filmId).getLikes();
     }
 }

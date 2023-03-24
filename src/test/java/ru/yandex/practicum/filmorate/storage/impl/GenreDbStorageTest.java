@@ -75,7 +75,7 @@ class GenreDbStorageTest {
     }
 
     private void addData() {
-        jdbcTemplate.update("INSERT INTO \"genres\" (\"name\") " +
+        jdbcTemplate.update("INSERT INTO \"genres\" (\"genre_name\") " +
         "VALUES ('Комедия'), " +
                 "('Драма')," +
                 "('Мультфильм')," +

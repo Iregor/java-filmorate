@@ -33,16 +33,4 @@ public class MpaService {
         log.info("MPA rating {} is found.", result.get().getId());
         return result.get();
     }
-
-    public Mpa create(Mpa mpa) {
-        Mpa result = mpaStorage.create(mpa);
-        log.info("MPA rating {} {} added.", result.getId(), result.getName());
-        return result;
-    }
-
-    public Mpa update(Mpa mpa) {
-        Mpa result = mpaStorage.update(mpa);
-        log.info("MPA rating {} updated.", result.getId());
-        return result;
-    }
 }

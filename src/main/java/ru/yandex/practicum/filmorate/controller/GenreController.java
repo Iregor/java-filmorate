@@ -2,16 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
 
+import javax.validation.Valid;
 import java.util.Collection;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -28,5 +24,15 @@ public class GenreController {
     @GetMapping(value ="{genreId}")
     public Genre findById(@PathVariable Long genreId) {
         return genreService.findById(genreId);
+    }
+
+    @PostMapping
+    public Genre create(@Valid @RequestBody Genre genre) {
+        return genreService.create(genre);
+    }
+
+    @PutMapping
+    public Genre update(@Valid @RequestBody Genre genre) {
+        return genreService.update(genre);
     }
 }

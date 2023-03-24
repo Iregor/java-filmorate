@@ -36,14 +36,14 @@ public class Film {
     }
 
     public Film(String name, String description, String releaseDate,
-                int duration, long mpaId) {
+                int duration, Mpa mpa) {
         this(name, description, releaseDate, duration);
-        this.mpa = new Mpa(mpaId);
+        this.mpa = mpa;
     }
 
     public Film(Long id, String name, String description, String releaseDate,
-                int duration, int rate, long mpaId) {
-        this(name, description, releaseDate, duration, mpaId);
+                int duration, int rate, Mpa mpa) {
+        this(name, description, releaseDate, duration, mpa);
         this.id = id;
         this.rate = rate;
     }

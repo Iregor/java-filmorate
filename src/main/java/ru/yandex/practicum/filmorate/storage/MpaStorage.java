@@ -9,8 +9,4 @@ public interface MpaStorage {
     Collection<Mpa> findAll();
 
     Optional<Mpa> findById(Long id);
-
-    Mpa create(Mpa mpa);
-
-    Mpa update(Mpa mpa);
 }

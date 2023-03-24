@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
 
 @Slf4j
 @Component("likesDb")
@@ -32,21 +31,5 @@ public class LikesDbStorage implements LikesStorage {
                 "WHERE \"film_id\" = ? AND \"user_id\" = ? ",
                 filmId, userId);
         log.debug("User {} disliked film {}", userId, filmId);
-    }
-
-    @Override
-    public Collection<Long> getUserLikes(Long userId) {
-        return jdbcTemplate.query(
-                "SELECT * FROM \"likes\" " +
-                "WHERE \"user_id\" = ?",
-                (rs, rowNum) -> rs.getLong("film_id"), userId);
-    }
-
-    @Override
-    public Collection<Long> getFilmLikes(Long filmId) {
-        return jdbcTemplate.query(
-                "SELECT * FROM \"likes\" " +
-                "WHERE \"film_id\" = ?",
-                (rs, rowNum) -> rs.getLong("user_id"), filmId);
     }
 }

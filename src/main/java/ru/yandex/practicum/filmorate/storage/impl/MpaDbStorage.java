@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
@@ -43,46 +42,13 @@ public class MpaDbStorage implements MpaStorage {
         }
     }
 
-    @Override
-    public Mpa create(Mpa mpa) {
-        jdbcTemplate.update(
-                "INSERT INTO \"rating_mpa\" (\"name\") VALUES (?)",
-                mpa.getName());
-        return findByName(mpa.getName());
-    }
-
-    @Override
-    public Mpa update(Mpa mpa) {
-        if (findById(mpa.getId()).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Rating MPA %d is not found.", mpa.getId()));
-        }
-        jdbcTemplate.update(
-                "UPDATE \"rating_mpa\" " +
-                        "SET \"name\" = ? " +
-                        "WHERE \"rating_id\" = ? ",
-                mpa.getName(), mpa.getId());
-        return mpa;
-    }
-
-    private Mpa findByName(String name) {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"rating_mpa\" " +
-                        "WHERE \"name\" = ? ", name);
-        if (mpaRows.next()) {
-            return getMpaFromSqlRowSet(mpaRows);
-        } else {
-            log.debug("Data is not found.");
-            return null;
-        }
-    }
-
     private Mpa getMpaFromResultSet(ResultSet rs) throws SQLException {
         return new Mpa(rs.getLong("rating_id"),
-                rs.getString("name"));
+                rs.getString("rating_name"));
     }
 
     private Mpa getMpaFromSqlRowSet(SqlRowSet srs) {
         return new Mpa(srs.getLong("rating_id"),
-                srs.getString("name"));
+                srs.getString("rating_name"));
     }
 }

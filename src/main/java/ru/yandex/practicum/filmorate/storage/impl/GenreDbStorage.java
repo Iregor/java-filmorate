@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
@@ -31,7 +30,7 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Collection<Genre> findGenresByFilmId(Long filmId) {
         Collection<Genre> result = jdbcTemplate.query(
-                "SELECT \"film_genres\".\"genre_id\", \"name\"\n" +
+                "SELECT \"film_genres\".\"genre_id\", \"genre_name\"\n" +
                         "FROM \"film_genres\"\n" +
                         "JOIN \"genres\" AS g ON g.\"genre_id\" = \"film_genres\".\"genre_id\"\n" +
                         "WHERE \"film_id\" = ?" +
@@ -59,35 +58,25 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Genre create(Genre genre) {
         jdbcTemplate.update(
-                "INSERT INTO \"genres\" (\"name\") VALUES (?)",
+                "INSERT INTO \"genres\" (\"genre_name\") VALUES (?)",
                 genre.getName());
         return findByName(genre.getName());
     }
 
     @Override
     public Genre update(Genre genre) {
-        if(findById(genre.getId()).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genre.getId()));
-        }
         jdbcTemplate.update(
                 "UPDATE \"genres\" " +
-                        "SET \"name\" = ? " +
+                        "SET \"genre_name\" = ? " +
                         "WHERE \"genre_id\" = ? ",
                 genre.getName(), genre.getId());
         return genre;
     }
 
-    @Override
-    public void deleteFilmGenres(Long filmId, Long genreId) {
-        jdbcTemplate.update(
-                "DELETE FROM \"film_genres\" WHERE \"film_id\" = ? AND \"genre_id\" = ? ",
-                filmId, genreId);
-    }
-
     private Genre findByName(String name) {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"genres\" " +
-                        "WHERE \"name\" = ? ", name);
+                        "WHERE \"genre_name\" = ? ", name);
         if(genreRows.next()) {
             return getGenreFromSqlRowSet(genreRows);
         } else {
@@ -98,11 +87,11 @@ public class GenreDbStorage implements GenreStorage {
 
     private Genre getGenreFromResultSet(ResultSet rs) throws SQLException {
         return new Genre(rs.getLong("genre_id"),
-                rs.getString("name"));
+                rs.getString("genre_name"));
     }
 
     private Genre getGenreFromSqlRowSet(SqlRowSet srs) {
         return new Genre(srs.getLong("genre_id"),
-                srs.getString("name"));
+                srs.getString("genre_name"));
     }
 }

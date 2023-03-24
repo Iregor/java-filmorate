@@ -41,6 +41,9 @@ public class GenreService {
     }
 
     public Genre update(Genre genre) {
+        if(genreStorage.findById(genre.getId()).isEmpty()) {
+            throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genre.getId()));
+        }
         Genre result = genreStorage.update(genre);
         log.info("Genre {} updated.", result.getId());
         return result;

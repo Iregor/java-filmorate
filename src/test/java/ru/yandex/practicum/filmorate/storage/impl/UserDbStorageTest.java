@@ -86,7 +86,7 @@ class UserDbStorageTest {
     }
 
     private void addData() {
-        jdbcTemplate.update("INSERT INTO \"users\" (\"email\", \"login\", \"name\", \"birthday\" ) " +
+        jdbcTemplate.update("INSERT INTO \"users\" (\"email\", \"login\", \"user_name\", \"birthday\" ) " +
                 "VALUES ('email@yandex.ru', 'trulala', 'Trexo', '2011-03-08')," +
                 "('ema@mail.ru', 'login', 'Name', '2001-06-05')," +
                 "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +

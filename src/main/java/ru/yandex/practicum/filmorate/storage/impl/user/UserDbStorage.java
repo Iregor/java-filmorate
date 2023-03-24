@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -32,6 +31,25 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public Collection<User> getFriends(Long userId) {
+        return jdbcTemplate.query(
+                "SELECT * FROM \"users\" u\n" +
+                        "JOIN \"friendship\" f ON u.\"user_id\" = f.\"friend_id\"\n" +
+                        "WHERE f.\"user_id\" = ?",
+                (rs, rowNum) -> getUserFromResultSet(rs), userId);
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(Long userId, Long friendId) {
+        final String sql = "SELECT * FROM \"users\" AS u, \"friendship\" AS f, \"friendship\" AS o " +
+                "where u.\"user_id\" = f.\"friend_id\" " +
+                "AND u.\"user_id\" = o.\"friend_id\" " +
+                "AND f.\"user_id\" = ? " +
+                "AND o.\"user_id\" = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> getUserFromResultSet(rs), userId, friendId);
+    }
+
+    @Override
     public Optional<User> findById(Long id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"users\" WHERE \"user_id\" = ?", id);
@@ -47,27 +65,31 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        if (user.getName().isEmpty() || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
         jdbcTemplate.update(
-                "INSERT INTO \"users\" (\"email\", \"login\", \"name\", \"birthday\" ) " +
+                "INSERT INTO \"users\" (\"email\", \"login\", \"user_name\", \"birthday\" ) " +
                         "VALUES (?,?,?,?)",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         return getUserFromDb(user);
     }
 
     @Override
+
     public User update(User user) {
-        if (findById(user.getId()).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("User %d is not found.", user.getId()));
-        }
         jdbcTemplate.update(
                 "UPDATE \"users\" " +
-                        "SET \"email\" = ?, \"name\" = ?, \"login\" = ?, \"birthday\" = ? " +
+                        "SET \"email\" = ?, \"user_name\" = ?, \"login\" = ?, \"birthday\" = ? " +
                         "WHERE \"user_id\" = ? ",
                 user.getEmail(), user.getName(), user.getLogin(), user.getBirthday(), user.getId());
         return user;
+    }
+
+
+    @Override
+    public Collection<Long> getUserLikes(Long userId) {
+        return jdbcTemplate.query(
+                "SELECT * FROM \"likes\" " +
+                        "WHERE \"user_id\" = ?",
+                (rs, rowNum) -> rs.getLong("film_id"), userId);
     }
 
 
@@ -88,7 +110,7 @@ public class UserDbStorage implements UserStorage {
                 rs.getLong("user_id"),
                 rs.getString("email"),
                 rs.getString("login"),
-                rs.getString("name"),
+                rs.getString("user_name"),
                 rs.getString("birthday"));
     }
 
@@ -97,7 +119,7 @@ public class UserDbStorage implements UserStorage {
                 srs.getLong("user_id"),
                 srs.getString("email"),
                 srs.getString("login"),
-                srs.getString("name"),
+                srs.getString("user_name"),
                 srs.getString("birthday"));
     }
 }
