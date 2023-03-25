@@ -20,7 +20,7 @@ public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Collection<Mpa> findAll() {
+    public Collection<Mpa> readAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM \"rating_mpa\" " +
                         "ORDER BY \"rating_id\" ",
@@ -28,7 +28,7 @@ public class MpaDbStorage implements MpaStorage {
     }
 
     @Override
-    public Optional<Mpa> findById(Long id) {
+    public Optional<Mpa> readById(Long id) {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"rating_mpa\" " +
                         "WHERE \"rating_id\" = ?", id);

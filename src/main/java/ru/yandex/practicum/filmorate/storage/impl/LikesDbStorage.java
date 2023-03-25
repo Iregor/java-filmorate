@@ -17,7 +17,7 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public void like(Long filmId, Long userId) {
+    public void writeRow(Long filmId, Long userId) {
         jdbcTemplate.update(
                 "INSERT INTO \"likes\" (\"film_id\", \"user_id\", \"date\") VALUES (?, ?, ?)",
                 filmId, userId, LocalDate.now());
@@ -25,7 +25,7 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public void dislike(Long filmId, Long userId) {
+    public void deleteRow(Long filmId, Long userId) {
         jdbcTemplate.update(
                 "DELETE FROM \"likes\" " +
                 "WHERE \"film_id\" = ? AND \"user_id\" = ? ",

@@ -19,13 +19,13 @@ public class FriendInMemoryStorage implements FriendStorage {
     }
 
     @Override
-    public void addFriend(Long userId, Long friendId) {
+    public void writeRow(Long userId, Long friendId) {
         userStorage.findById(userId).get().getFriends().add(friendId);
         userStorage.findById(friendId).get().getFriends().add(userId);
     }
 
     @Override
-    public void delFriend(Long userId, Long friendId) {
+    public void deleteRow(Long userId, Long friendId) {
         userStorage.findById(userId).get().getFriends().remove(friendId);
         userStorage.findById(friendId).get().getFriends().remove(userId);
     }

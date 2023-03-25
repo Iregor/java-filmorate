@@ -64,7 +64,7 @@ public class UserService {
             log.warn("Friend {} is not found.", friendId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
-        friendStorage.addFriend(userId, friendId);
+        friendStorage.writeRow(userId, friendId);
         log.info("User {} added user {} to friends.", userId, friendId);
     }
 
@@ -77,7 +77,7 @@ public class UserService {
             log.warn("Friend {} is not found.", friendId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
-        friendStorage.delFriend(userId, friendId);
+        friendStorage.deleteRow(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
     }
 

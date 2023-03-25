@@ -20,7 +20,7 @@ public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Collection<Genre> findAll() {
+    public Collection<Genre> readAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM \"genres\" " +
                         "ORDER BY \"genre_id\" ",
@@ -28,7 +28,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Collection<Genre> findGenresByFilmId(Long filmId) {
+    public Collection<Genre> readRowByFilmId(Long filmId) {
         Collection<Genre> result = jdbcTemplate.query(
                 "SELECT \"film_genres\".\"genre_id\", \"genre_name\"\n" +
                         "FROM \"film_genres\"\n" +
@@ -41,7 +41,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Optional<Genre> findById(Long id) {
+    public Optional<Genre> readById(Long id) {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"genres\" " +
                         "WHERE \"genre_id\" = ?", id);
@@ -56,7 +56,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Genre create(Genre genre) {
+    public Genre writeRow(Genre genre) {
         jdbcTemplate.update(
                 "INSERT INTO \"genres\" (\"genre_name\") VALUES (?)",
                 genre.getName());
@@ -64,7 +64,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Genre update(Genre genre) {
+    public Genre updateRow(Genre genre) {
         jdbcTemplate.update(
                 "UPDATE \"genres\" " +
                         "SET \"genre_name\" = ? " +

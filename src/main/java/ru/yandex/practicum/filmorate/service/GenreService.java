@@ -19,13 +19,13 @@ public class GenreService {
     private final GenreStorage genreStorage;
 
     public Collection<Genre> findAll() {
-        Collection<Genre> result = genreStorage.findAll();
+        Collection<Genre> result = genreStorage.readAll();
         log.info("Found {} genre(s).", result.size());
         return result;
     }
 
     public Genre findById(Long genreId) {
-        Optional<Genre> result = genreStorage.findById(genreId);
+        Optional<Genre> result = genreStorage.readById(genreId);
         if (result.isEmpty()) {
             log.warn("Genre {} is not found.", genreId);
             throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genreId));
@@ -35,16 +35,16 @@ public class GenreService {
     }
 
     public Genre create(Genre genre) {
-        Genre result = genreStorage.create(genre);
+        Genre result = genreStorage.writeRow(genre);
         log.info("Genre {} {} added.", result.getId(), result.getName());
         return result;
     }
 
     public Genre update(Genre genre) {
-        if(genreStorage.findById(genre.getId()).isEmpty()) {
+        if(genreStorage.readById(genre.getId()).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genre.getId()));
         }
-        Genre result = genreStorage.update(genre);
+        Genre result = genreStorage.updateRow(genre);
         log.info("Genre {} updated.", result.getId());
         return result;
     }

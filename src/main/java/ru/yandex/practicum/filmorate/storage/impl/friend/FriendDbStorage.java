@@ -18,8 +18,8 @@ public class FriendDbStorage implements FriendStorage {
     }
 
     @Override
-    public void addFriend(Long userId, Long friendId) {
-        Optional<Boolean> status = getFriendshipStatus(userId, friendId);
+    public void writeRow(Long userId, Long friendId) {
+        Optional<Boolean> status = readFriendshipStatus(userId, friendId);
 
         if (status.isPresent() && !status.get()) {
             jdbcTemplate.update(
@@ -36,13 +36,13 @@ public class FriendDbStorage implements FriendStorage {
     }
 
     @Override
-    public void delFriend(Long userId, Long friendId) {
+    public void deleteRow(Long userId, Long friendId) {
         jdbcTemplate.update(
                 "DELETE FROM \"friendship\" WHERE \"user_id\" = ? AND \"friend_id\" = ? ",
                 userId, friendId);
     }
 
-    private Optional<Boolean> getFriendshipStatus(Long userId, Long friendId) {
+    private Optional<Boolean> readFriendshipStatus(Long userId, Long friendId) {
         SqlRowSet statusRow = jdbcTemplate.queryForRowSet(
                 "SELECT \"status\" " +
                         "FROM \"friendship\" " +

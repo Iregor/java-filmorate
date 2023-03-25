@@ -11,8 +11,9 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("filmDb")
@@ -28,7 +29,9 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT * FROM \"films\" AS f " +
                 "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\" " +
                 "ORDER BY \"film_id\" ";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs));
+        Collection<Film> result = jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs));
+        getGenresByFilms(result);
+        return result;
     }
 
     @Override
@@ -39,18 +42,22 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY \"film_id\") AS cl ON cl.\"film_id\" = f.\"film_id\" " +
                 "ORDER BY cl.count DESC " +
                 "LIMIT ? ";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), size);
+        //return jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), size);
+        Collection<Film> result = jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), size);
+        getGenresByFilms(result);
+        return result;
     }
 
     @Override
     public Optional<Film> findById(Long id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"films\" AS f " +
-                        "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\"" +
+                        "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\" " +
                         "WHERE \"film_id\" = ?", id);
 
         if (filmRows.next()) {
             Film film = getFilmFromSqlRowSet(filmRows);
+            film.setGenres(getGenresByFilm(film));
             log.debug("Film found: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -68,17 +75,18 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().getId(), film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getRate());
 
-        Film result = getFilmFromDb(film);
-
+        Long newFilmId = getFilmFromDb(film).getId();
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(
                     "INSERT INTO \"film_genres\" (\"film_id\", \"genre_id\")" +
                             "VALUES (?, ?)",
-                    result.getId(), genre.getId());
+                    newFilmId, genre.getId());
         }
-
+        Film result = getFilmFromDb(film);
+        result.setGenres(getGenresByFilm(result));
         return result;
     }
+
 
     @Override
     public Film update(Film film) {
@@ -96,7 +104,8 @@ public class FilmDbStorage implements FilmStorage {
                             "VALUES (?, ?)",
                     film.getId(), genre.getId());
         }
-
+        film = getFilmFromDb(film);
+        film.setGenres(getGenresByFilm(film));
         return film;
     }
 
@@ -154,4 +163,36 @@ public class FilmDbStorage implements FilmStorage {
                 new Mpa(srs.getLong("rating_id"),
                         srs.getString("rating_name")));
     }
+
+
+    private Set<Genre> getGenresByFilm(Film film) {
+        String sql = "SELECT * FROM \"film_genres\" fg " +
+                "JOIN \"genres\" g on fg.\"genre_id\" = g.\"genre_id\" " +
+                "WHERE \"film_id\" = ? " +
+                "ORDER BY \"genre_id\" ";
+        return new HashSet<>(jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Genre(rs.getLong("genre_id"),
+                        rs.getString("genre_name")), film.getId()));
+    }
+
+    private void getGenresByFilms(Collection<Film> films) {
+        Map<Long, Film> mapOfFilm = films.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+
+
+        String keySet = mapOfFilm.keySet().toString()
+                .replace("[","(")
+                .replace("]", ")");
+
+        String sql = "SELECT * FROM \"film_genres\" fg " +
+                "JOIN \"genres\" g on fg.\"genre_id\" = g.\"genre_id\" " +
+                "WHERE \"film_id\" in " + keySet +
+                "ORDER BY \"film_id\", \"genre_id\" ";
+
+        jdbcTemplate.query(sql, (rs, rowNum) -> mapOfFilm
+                .get(rs.getLong("film_id"))
+                .getGenres()
+                .add(new Genre(rs.getLong("genre_id"),
+                        rs.getString("genre_name"))));
+    }
+
 }

@@ -6,13 +6,13 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface GenreStorage {
-    Collection<Genre> findAll();
+    Collection<Genre> readAll();
 
-    Collection<Genre> findGenresByFilmId(Long filmId);
+    Collection<Genre> readRowByFilmId(Long filmId);
 
-    Optional<Genre> findById(Long id);
+    Optional<Genre> readById(Long id);
 
-    Genre create(Genre genre);
+    Genre writeRow(Genre genre);
 
-    Genre update(Genre genre);
+    Genre updateRow(Genre genre);
 }

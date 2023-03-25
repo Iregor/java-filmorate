@@ -26,7 +26,6 @@ public class FilmService {
 
     public Collection<Film> findAll() {
         Collection<Film> result = filmStorage.findAll();
-        result.forEach(this::makeData);
         log.info("Found {} movie(s).", result.size());
         return result;
     }
@@ -37,14 +36,12 @@ public class FilmService {
             log.warn("Film {} is not found.", filmId);
             throw new IncorrectObjectIdException(String.format("Film %d is not found.", filmId));
         }
-        makeData(result.get());
         log.info("Film {} is found.", result.get().getId());
         return result.get();
     }
 
     public Film create(Film film) {
         Film result = filmStorage.create(film);
-        makeData(result);
         log.info("Film {} {} added.", result.getId(), result.getName());
         return result;
     }
@@ -53,11 +50,10 @@ public class FilmService {
         if (filmStorage.findById(film.getId()).isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Film %d is not found.", film.getId()));
         }
-        Collection<Genre> genreFromDb = genreStorage.findGenresByFilmId(film.getId());
+        Collection<Genre> genreFromDb = genreStorage.readRowByFilmId(film.getId());
         genreFromDb.removeAll(film.getGenres());
         genreFromDb.forEach(genre -> filmStorage.deleteFilmGenres(film.getId(), genre.getId()));
         Film result = filmStorage.update(film);
-        makeData(result);
         log.info("Film {} updated.", result.getId());
         return result;
     }
@@ -75,7 +71,7 @@ public class FilmService {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", userId));
         }
-        likesStorage.like(filmId, userId);
+        likesStorage.writeRow(filmId, userId);
         log.info("User {} liked film {}.", userId, filmId);
     }
 
@@ -88,11 +84,7 @@ public class FilmService {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
         }
-        likesStorage.dislike(filmId, userId);
+        likesStorage.deleteRow(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
-    }
-
-    private void makeData(Film film) {
-        film.setGenres(new HashSet<>(genreStorage.findGenresByFilmId(film.getId())));
     }
 }

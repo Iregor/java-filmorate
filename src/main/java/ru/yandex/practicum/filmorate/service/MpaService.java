@@ -19,13 +19,13 @@ public class MpaService {
     private final MpaStorage mpaStorage;
 
     public Collection<Mpa> findAll() {
-        Collection<Mpa> result = mpaStorage.findAll();
+        Collection<Mpa> result = mpaStorage.readAll();
         log.info("Found {} MPA rating(s).", result.size());
         return result;
     }
 
     public Mpa findById(Long mpaId) {
-        Optional<Mpa> result = mpaStorage.findById(mpaId);
+        Optional<Mpa> result = mpaStorage.readById(mpaId);
         if (result.isEmpty()) {
             log.warn("MPA rating {} is not found.", mpaId);
             throw new IncorrectObjectIdException(String.format("Mpa %d is not found.", mpaId));
