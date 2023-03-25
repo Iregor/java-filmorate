@@ -31,7 +31,7 @@ class GenreDbStorageTest {
     @Test
     void findAll_return6Genres_adding6Genres() {
         addData();
-        Collection<Genre> collection = genreStorage.findAll();
+        Collection<Genre> collection = genreStorage.readAll();
         assertThat(collection.size()).isEqualTo(6);
         assertThat(collection).asList().containsAnyOf(
                 new Genre(1L, "Комедия"),
@@ -45,7 +45,7 @@ class GenreDbStorageTest {
     @Test
     void findById_returnGenreId1_adding6Genres() {
         addData();
-        assertThat(genreStorage.findById(1L))
+        assertThat(genreStorage.readById(1L))
                 .isPresent()
                 .hasValueSatisfying(genre ->
                         assertThat(genre).hasFieldOrPropertyWithValue("id", 1L)
@@ -56,7 +56,7 @@ class GenreDbStorageTest {
     @Test
     void create_returnNewGenreId7_AllGenre() {
         addData();
-        Genre newGenre = genreStorage.create(new Genre("Музыкальная комедия эротического содержания"));
+        Genre newGenre = genreStorage.writeRow(new Genre("Музыкальная комедия эротического содержания"));
         assertThat(newGenre).hasFieldOrPropertyWithValue("id", 7L)
                 .hasFieldOrPropertyWithValue("name", "Музыкальная комедия эротического содержания");
     }
@@ -64,8 +64,8 @@ class GenreDbStorageTest {
     @Test
     void update_returnUpdateGenreId5_AllGenre() {
         addData();
-        genreStorage.update((new Genre(5L, "Музыкальная комедия")));
-        assertThat(genreStorage.findById(5L))
+        genreStorage.updateRow(new Genre(5L, "Музыкальная комедия"));
+        assertThat(genreStorage.readById(5L))
                 .isPresent()
                 .hasValueSatisfying(genre ->
                         assertThat(genre).hasFieldOrPropertyWithValue("id", 5L)

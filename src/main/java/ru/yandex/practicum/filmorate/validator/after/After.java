@@ -21,11 +21,4 @@ public @interface After {
     Class<? extends Payload>[] payload() default { };
 
     String value();
-
-    @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
-    @Retention(RUNTIME)
-    @Documented
-    @interface List {
-        After[] value();
-    }
 }

@@ -22,7 +22,7 @@ class MpaDbStorageTest {
 
     @Test
     void findAll_return5Mpa_adding5Mpa() {
-        Collection<Mpa> collection = mpaStorage.findAll();
+        Collection<Mpa> collection = mpaStorage.readAll();
         assertThat(collection.size()).isEqualTo(5);
         assertThat(collection).asList().containsAnyOf(
                 new Mpa(1L, "G"),
@@ -34,7 +34,7 @@ class MpaDbStorageTest {
 
     @Test
     void findById_returnMpaId1_adding5Mpa() {
-        assertThat(mpaStorage.findById(1L))
+        assertThat(mpaStorage.readById(1L))
                 .isPresent()
                 .hasValueSatisfying(mpa ->
                         assertThat(mpa).hasFieldOrPropertyWithValue("id", 1L)

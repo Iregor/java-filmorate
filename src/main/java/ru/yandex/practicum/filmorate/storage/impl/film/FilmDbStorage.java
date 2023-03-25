@@ -42,7 +42,6 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY \"film_id\") AS cl ON cl.\"film_id\" = f.\"film_id\" " +
                 "ORDER BY cl.count DESC " +
                 "LIMIT ? ";
-        //return jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), size);
         Collection<Film> result = jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), size);
         getGenresByFilms(result);
         return result;

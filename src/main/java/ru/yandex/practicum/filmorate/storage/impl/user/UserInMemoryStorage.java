@@ -75,9 +75,4 @@ public class UserInMemoryStorage implements UserStorage {
         log.debug("User ID {} updated. ", user.getId());
         return user;
     }
-
-    @Override
-    public Collection<Long> getUserLikes(Long userId) {
-        return users.get(userId).getLikeFilms();
-    }
 }

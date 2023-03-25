@@ -83,16 +83,6 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-
-    @Override
-    public Collection<Long> getUserLikes(Long userId) {
-        return jdbcTemplate.query(
-                "SELECT * FROM \"likes\" " +
-                        "WHERE \"user_id\" = ?",
-                (rs, rowNum) -> rs.getLong("film_id"), userId);
-    }
-
-
     private User getUserFromDb(User user) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"users\" WHERE \"login\" = ? AND \"email\" = ?",
