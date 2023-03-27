@@ -19,7 +19,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class GenreDbStorageTest {
-    @Qualifier("genreDb") private final GenreStorage genreStorage;
+    @Qualifier("genreDb")
+    private final GenreStorage genreStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
@@ -76,11 +77,11 @@ class GenreDbStorageTest {
 
     private void addData() {
         jdbcTemplate.update("INSERT INTO \"genres\" (\"genre_name\") " +
-        "VALUES ('Комедия'), " +
-                "('Драма')," +
-                "('Мультфильм')," +
-                "('Триллер')," +
-                "('Документальный'),"+
+                "VALUES ('Комедия'), " +
+                "('Драма'), " +
+                "('Мультфильм'), " +
+                "('Триллер'), " +
+                "('Документальный'), " +
                 "('Боевик')");
     }
 }
