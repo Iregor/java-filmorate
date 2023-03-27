@@ -9,21 +9,21 @@ public class UserValidator {
     public static void validate(User user) {
         StringBuilder exceptionMessage = new StringBuilder();
 
-        if(user.getEmail() == null
+        if (user.getEmail() == null
                 || user.getEmail().isBlank()
                 || !user.getEmail().contains("@")) {
             exceptionMessage.append("Почта должна быть заполнена и содержать символ \"@\". ");
         }
-        if(user.getLogin() == null
+        if (user.getLogin() == null
                 || user.getLogin().isBlank()
                 || user.getLogin().contains(" ")) {
             exceptionMessage.append("Логин не может быть пустым или содержать пробелы. "); // перенести в аннотацию
         }
-        if(user.getBirthday().isAfter(LocalDate.now())) {
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             exceptionMessage.append("Дата рождения не может быть в будущем. ");
         }
 
-        if(!exceptionMessage.toString().isBlank()) {
+        if (!exceptionMessage.toString().isBlank()) {
             throw new ValidateException(exceptionMessage.toString());
         }
     }
