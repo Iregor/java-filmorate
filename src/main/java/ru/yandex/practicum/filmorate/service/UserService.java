@@ -88,4 +88,4 @@ public class UserService {
     public Collection<User> getCommonFriends(Long userId, Long friendId) {
         return userStorage.getCommonFriends(userId, friendId);
     }
- }
+}
