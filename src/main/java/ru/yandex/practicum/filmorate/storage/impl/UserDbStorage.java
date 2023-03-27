@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl.user;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;

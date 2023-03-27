@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl.film;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -176,22 +176,16 @@ public class FilmDbStorage implements FilmStorage {
 
     private void getGenresByFilms(Collection<Film> films) {
         Map<Long, Film> mapOfFilm = films.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
-
-
-        String keySet = mapOfFilm.keySet().toString()
-                .replace("[","(")
-                .replace("]", ")");
-
-        String sql = "SELECT * FROM \"film_genres\" fg " +
+        String inSql = String.join(",", Collections.nCopies(mapOfFilm.size(), "?"));
+        String sql = String.format("SELECT * FROM \"film_genres\" fg " +
                 "JOIN \"genres\" g on fg.\"genre_id\" = g.\"genre_id\" " +
-                "WHERE \"film_id\" in " + keySet +
-                "ORDER BY \"film_id\", \"genre_id\" ";
+                "WHERE \"film_id\" IN (%s) " +
+                "ORDER BY \"film_id\", \"genre_id\" ", inSql);
 
         jdbcTemplate.query(sql, (rs, rowNum) -> mapOfFilm
                 .get(rs.getLong("film_id"))
                 .getGenres()
-                .add(new Genre(rs.getLong("genre_id"),
-                        rs.getString("genre_name"))));
+                .add(new Genre(rs.getLong("genre_id"), rs.getString("genre_name"))),
+                mapOfFilm.keySet().toArray());
     }
-
 }
