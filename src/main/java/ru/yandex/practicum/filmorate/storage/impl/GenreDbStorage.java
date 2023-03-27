@@ -45,7 +45,7 @@ public class GenreDbStorage implements GenreStorage {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"genres\" " +
                         "WHERE \"genre_id\" = ?", id);
-        if(genreRows.next()) {
+        if (genreRows.next()) {
             Genre genre = getGenreFromSqlRowSet(genreRows);
             log.debug("Genre found: {} {}", genre.getId(), genre.getName());
             return Optional.of(genre);
@@ -77,7 +77,7 @@ public class GenreDbStorage implements GenreStorage {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"genres\" " +
                         "WHERE \"genre_name\" = ? ", name);
-        if(genreRows.next()) {
+        if (genreRows.next()) {
             return getGenreFromSqlRowSet(genreRows);
         } else {
             log.debug("Data is not found.");

@@ -183,9 +183,9 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY \"film_id\", \"genre_id\" ", inSql);
 
         jdbcTemplate.query(sql, (rs, rowNum) -> mapOfFilm
-                .get(rs.getLong("film_id"))
-                .getGenres()
-                .add(new Genre(rs.getLong("genre_id"), rs.getString("genre_name"))),
+                        .get(rs.getLong("film_id"))
+                        .getGenres()
+                        .add(new Genre(rs.getLong("genre_id"), rs.getString("genre_name"))),
                 mapOfFilm.keySet().toArray());
     }
 }

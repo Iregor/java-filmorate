@@ -28,7 +28,7 @@ public class LikesDbStorage implements LikesStorage {
     public void deleteRow(Long filmId, Long userId) {
         jdbcTemplate.update(
                 "DELETE FROM \"likes\" " +
-                "WHERE \"film_id\" = ? AND \"user_id\" = ? ",
+                        "WHERE \"film_id\" = ? AND \"user_id\" = ? ",
                 filmId, userId);
         log.debug("User {} disliked film {}", userId, filmId);
     }

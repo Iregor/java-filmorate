@@ -46,8 +46,8 @@ public class FriendDbStorage implements FriendStorage {
         SqlRowSet statusRow = jdbcTemplate.queryForRowSet(
                 "SELECT \"status\" " +
                         "FROM \"friendship\" " +
-                        "WHERE \"user_id\" = ? and \"friend_id\" = ?" , friendId, userId);
-        if(statusRow.next()) {
+                        "WHERE \"user_id\" = ? and \"friend_id\" = ?", friendId, userId);
+        if (statusRow.next()) {
             return Optional.of(statusRow.getBoolean("status"));
         } else {
             return Optional.empty();
