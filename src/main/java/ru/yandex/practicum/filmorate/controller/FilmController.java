@@ -27,7 +27,7 @@ public class FilmController {
         return filmService.getPopularFilms(count);
     }
 
-    @GetMapping(value ="{filmId}")
+    @GetMapping(value = "{filmId}")
     public Film findById(@PathVariable Long filmId) {
         return filmService.findById(filmId);
     }
@@ -49,6 +49,6 @@ public class FilmController {
 
     @DeleteMapping("{filmId}/like/{userId}")
     public void dislike(@PathVariable Long filmId, @PathVariable Long userId) {
-       filmService.dislike(filmId, userId);
+        filmService.dislike(filmId, userId);
     }
 }
