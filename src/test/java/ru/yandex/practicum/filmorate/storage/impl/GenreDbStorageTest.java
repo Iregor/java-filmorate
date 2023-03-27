@@ -23,7 +23,7 @@ class GenreDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         jdbcTemplate.update("DELETE FROM \"genres\" ");
         jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN \"genre_id\" RESTART WITH 1 ");
     }

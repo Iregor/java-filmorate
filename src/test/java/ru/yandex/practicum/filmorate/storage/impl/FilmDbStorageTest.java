@@ -27,7 +27,7 @@ class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         jdbcTemplate.update("DELETE FROM \"films\" ");
         jdbcTemplate.execute("ALTER TABLE \"films\" ALTER COLUMN \"film_id\" RESTART WITH 1 ");
     }

@@ -24,7 +24,7 @@ class UserDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         jdbcTemplate.update("DELETE FROM \"users\" ");
         jdbcTemplate.execute("ALTER TABLE \"users\" ALTER COLUMN \"user_id\" RESTART WITH 1 ");
     }
