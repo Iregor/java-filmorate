@@ -27,7 +27,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> findAll() {
         String sql = "SELECT * FROM \"films\" AS f " +
-                "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\" " +
+                "JOIN RATING AS mpa ON f.\"rating_id\" = mpa.RATING_ID " +
                 "ORDER BY \"film_id\" ";
         Collection<Film> result = jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs));
         getGenresByFilms(result);
@@ -37,7 +37,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilms(int size) {
         String sql = "SELECT * FROM \"films\" as f " +
-                "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\"" +
+                "JOIN RATING AS mpa ON f.\"rating_id\" = mpa.RATING_ID " +
                 "LEFT OUTER JOIN (SELECT \"film_id\", COUNT(\"user_id\") AS count FROM \"likes\" " +
                 "GROUP BY \"film_id\") AS cl ON cl.\"film_id\" = f.\"film_id\" " +
                 "ORDER BY cl.count DESC " +
@@ -51,7 +51,7 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> findById(Long id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"films\" AS f " +
-                        "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\" " +
+                        "JOIN RATING AS mpa ON f.\"rating_id\" = mpa.RATING_ID " +
                         "WHERE \"film_id\" = ?", id);
 
         if (filmRows.next()) {
@@ -128,7 +128,7 @@ public class FilmDbStorage implements FilmStorage {
     private Film getFilmFromDb(Film film) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM \"films\" as f " +
-                        "JOIN \"rating_mpa\" AS mpa ON f.\"rating_id\" = mpa.\"rating_id\" " +
+                        "JOIN RATING AS mpa ON f.\"rating_id\" = mpa.RATING_ID " +
                         "WHERE \"film_name\" = ? AND \"release_date\" = ?",
                 film.getName(), film.getReleaseDate());
         if (filmRows.next()) {
@@ -147,8 +147,8 @@ public class FilmDbStorage implements FilmStorage {
                 rs.getString("release_date"),
                 rs.getInt("length"),
                 rs.getInt("rate"),
-                new Mpa(rs.getLong("rating_id"),
-                        rs.getString("rating_name")));
+                new Mpa(rs.getLong("RATING_ID"),
+                        rs.getString("RATING_NAME")));
     }
 
     private Film getFilmFromSqlRowSet(SqlRowSet srs) {
@@ -159,8 +159,8 @@ public class FilmDbStorage implements FilmStorage {
                 srs.getString("release_date"),
                 srs.getInt("length"),
                 srs.getInt("rate"),
-                new Mpa(srs.getLong("rating_id"),
-                        srs.getString("rating_name")));
+                new Mpa(srs.getLong("RATING_ID"),
+                        srs.getString("RATING_NAME")));
     }
 
 
