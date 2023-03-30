@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.validator.after.After;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"likes"})
 public class Film {
     private Long id;
     @NotBlank(message = "Название фильма не может быть пустым.")
@@ -19,7 +21,7 @@ public class Film {
     private String name;
     @Length(max = 200, message = "Описание фильма не должно превышать 200 символов")
     private String description;
-    @After(value = "1895-12-28", message = "Дата не может быть раньше релиза первого фильма.")
+    @After(value = "1895-12-28")
     private LocalDate releaseDate;
     @Min(value = 1, message = "Продолжительность не может быть отрицательной.")
     private int duration;

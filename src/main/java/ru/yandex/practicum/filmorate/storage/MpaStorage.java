@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface MpaStorage {
-    Collection<Mpa> readAll();
+    Collection<Mpa> findAll();
 
-    Optional<Mpa> readById(Long id);
+    Optional<Mpa> findById(Long id);
 }

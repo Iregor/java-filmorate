@@ -19,33 +19,47 @@ public class GenreService {
     private final GenreStorage genreStorage;
 
     public Collection<Genre> findAll() {
-        Collection<Genre> result = genreStorage.readAll();
-        log.info("Found {} genre(s).", result.size());
+        Collection<Genre> result = genreStorage.findAll();
+        log.info("Found {} genre(s).",
+                result.size());
         return result;
     }
 
     public Genre findById(Long genreId) {
-        Optional<Genre> result = genreStorage.readById(genreId);
+        Optional<Genre> result = genreStorage.findById(genreId);
         if (result.isEmpty()) {
             log.warn("Genre {} is not found.", genreId);
-            throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genreId));
+            throw new IncorrectObjectIdException(String.format("Genre %d is not found.",
+                    genreId));
         }
-        log.info("Genre {} is found.", result.get().getId());
+        log.info("Genre {} is found.",
+                result.get().getId());
         return result.get();
     }
 
     public Genre create(Genre genre) {
-        Genre result = genreStorage.writeRow(genre);
-        log.info("Genre {} {} added.", result.getId(), result.getName());
-        return result;
+        Optional<Genre> result = genreStorage.create(genre);
+        if (result.isEmpty()) {
+            log.warn("Genre {} is not created.",
+                    genre.getName());
+            throw new IncorrectObjectIdException(String.format("Genre %s is not created.",
+                    genre.getName()));
+        }
+        log.info("Genre {} {} created.",
+                result.get().getId(), result.get().getName());
+        return result.get();
     }
 
     public Genre update(Genre genre) {
-        if (genreStorage.readById(genre.getId()).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Genre %d is not found.", genre.getId()));
+        Optional<Genre> result = genreStorage.update(genre);
+        if (result.isEmpty()) {
+            log.warn("Genre {} {} is not updated.",
+                    genre.getId(), genre.getName());
+            throw new IncorrectObjectIdException(String.format("Genre %d %s is not updated.",
+                    genre.getId(), genre.getName()));
         }
-        Genre result = genreStorage.updateRow(genre);
-        log.info("Genre {} updated.", result.getId());
-        return result;
+        log.info("Genre {} {} updated.",
+                result.get().getId(), result.get().getName());
+        return result.get();
     }
 }

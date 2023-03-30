@@ -1,115 +1,105 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Optional;
 
-@Slf4j
-@Component("userDb")
+@Repository("userDb")
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
+    static final RowMapper<User> userMapper =
+            (rs, rowNum) -> User.builder()
+                    .id(rs.getLong("USER_ID"))
+                    .email(rs.getString("EMAIL"))
+                    .login(rs.getString("LOGIN"))
+                    .name(rs.getString("USER_NAME"))
+                    .birthday(rs.getDate("BIRTHDAY").toLocalDate())
+                    .build();
 
     @Override
     public Collection<User> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM \"users\" " +
-                        "ORDER BY \"user_id\" ",
-                (rs, rowNum) -> getUserFromResultSet(rs));
-    }
-
-    @Override
-    public Collection<User> getFriends(Long userId) {
-        return jdbcTemplate.query(
-                "SELECT * FROM \"users\" u\n" +
-                        "JOIN \"friendship\" f ON u.\"user_id\" = f.\"friend_id\"\n" +
-                        "WHERE f.\"user_id\" = ?",
-                (rs, rowNum) -> getUserFromResultSet(rs), userId);
-    }
-
-    @Override
-    public Collection<User> getCommonFriends(Long userId, Long friendId) {
-        final String sql = "SELECT * FROM \"users\" AS u, \"friendship\" AS f, \"friendship\" AS o " +
-                "where u.\"user_id\" = f.\"friend_id\" " +
-                "AND u.\"user_id\" = o.\"friend_id\" " +
-                "AND f.\"user_id\" = ? " +
-                "AND o.\"user_id\" = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> getUserFromResultSet(rs), userId, friendId);
+                "SELECT * FROM USERS ORDER BY USER_ID; ",
+                userMapper);
     }
 
     @Override
     public Optional<User> findById(Long id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"users\" WHERE \"user_id\" = ?", id);
-        if (userRows.next()) {
-            User user = getUserFromSqlRowSet(userRows);
-            log.debug("User found: {} {}", user.getId(), user.getLogin());
-            return Optional.of(user);
-        } else {
-            log.debug("User {} is not found.", id);
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
+                    "SELECT * FROM USERS WHERE USER_ID = :USER_ID; ",
+                    new MapSqlParameterSource()
+                            .addValue("USER_ID", id),
+                    userMapper));
+        } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
     @Override
-    public User create(User user) {
-        jdbcTemplate.update(
-                "INSERT INTO \"users\" (\"email\", \"login\", \"user_name\", \"birthday\" ) " +
-                        "VALUES (?,?,?,?)",
-                user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-        return getUserFromDb(user);
+    public Collection<User> findFriends(Long id) {
+        return jdbcTemplate.query(
+                "SELECT * FROM USERS U " +
+                        "JOIN FRIENDSHIPS FS ON U.USER_ID = FS.FRIEND_ID " +
+                        "WHERE FS.USER_ID = :USER_ID " +
+                        "ORDER BY U.USER_ID; ",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", id),
+                userMapper);
     }
 
     @Override
-
-    public User update(User user) {
-        jdbcTemplate.update(
-                "UPDATE \"users\" " +
-                        "SET \"email\" = ?, \"user_name\" = ?, \"login\" = ?, \"birthday\" = ? " +
-                        "WHERE \"user_id\" = ? ",
-                user.getEmail(), user.getName(), user.getLogin(), user.getBirthday(), user.getId());
-        return user;
+    public Collection<User> findCommonFriends(Long userId, Long friendId) {
+        return jdbcTemplate.query(
+                "SELECT * FROM USERS U, FRIENDSHIPS F, FRIENDSHIPS O " +
+                        "WHERE U.USER_ID = F.FRIEND_ID AND U.USER_ID = O.FRIEND_ID " +
+                        "AND F.USER_ID = :USER_ID AND O.USER_ID = :FRIEND_ID; ",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId)
+                        .addValue("FRIEND_ID", friendId),
+                userMapper);
     }
 
-    private User getUserFromDb(User user) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"users\" WHERE \"login\" = ? AND \"email\" = ?",
-                user.getLogin(), user.getEmail());
-        if (userRows.next()) {
-            return getUserFromSqlRowSet(userRows);
-        } else {
-            log.debug("Data is not found.");
-            return null;
-        }
+    @Override
+    public Optional<User> create(User user) {
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+                .withTableName("USERS")
+                .usingGeneratedKeyColumns("USER_ID");
+        long id = insert
+                .executeAndReturnKey(getUserParams(user))
+                .longValue();
+        return findById(id);
     }
 
-    private User getUserFromResultSet(ResultSet rs) throws SQLException {
-        return new User(
-                rs.getLong("user_id"),
-                rs.getString("email"),
-                rs.getString("login"),
-                rs.getString("user_name"),
-                rs.getString("birthday"));
+    @Override
+    public Optional<User> update(User user) {
+        String sql = "UPDATE USERS " +
+                "SET EMAIL = :EMAIL, LOGIN = :LOGIN, " +
+                "USER_NAME = :USER_NAME, BIRTHDAY = :BIRTHDAY " +
+                "WHERE USER_ID = :USER_ID; ";
+        jdbcTemplate.update(sql, getUserParams(user));
+        return findById(user.getId());
     }
 
-    private User getUserFromSqlRowSet(SqlRowSet srs) {
-        return new User(
-                srs.getLong("user_id"),
-                srs.getString("email"),
-                srs.getString("login"),
-                srs.getString("user_name"),
-                srs.getString("birthday"));
+    public static MapSqlParameterSource getUserParams(User user) {
+        return new MapSqlParameterSource()
+                .addValue("USER_ID", user.getId())
+                .addValue("EMAIL", user.getEmail())
+                .addValue("LOGIN", user.getLogin())
+                .addValue("USER_NAME", user.getName())
+                .addValue("BIRTHDAY", user.getBirthday());
     }
 }

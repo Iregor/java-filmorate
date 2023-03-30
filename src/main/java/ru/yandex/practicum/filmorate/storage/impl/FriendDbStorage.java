@@ -1,56 +1,33 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 
-import java.util.Optional;
-
 @Slf4j
-@Component("friendDb")
+@Repository("friendDb")
+@RequiredArgsConstructor
 public class FriendDbStorage implements FriendStorage {
-    private final JdbcTemplate jdbcTemplate;
-
-    public FriendDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
-    public void writeRow(Long userId, Long friendId) {
-        Optional<Boolean> status = readFriendshipStatus(userId, friendId);
-
-        if (status.isPresent() && !status.get()) {
-            jdbcTemplate.update(
-                    "UPDATE \"friendship\" " +
-                            "SET \"status\" = true " +
-                            "WHERE \"user_id\" = ?" +
-                            "AND \"friend_id\" = ?",
-                    friendId, userId);
-        } else {
-            jdbcTemplate.update(
-                    "INSERT INTO \"friendship\" (\"user_id\", \"friend_id\", \"status\") VALUES (?, ?, false)",
-                    userId, friendId);
-        }
-    }
-
-    @Override
-    public void deleteRow(Long userId, Long friendId) {
+    public void add(Long userId, Long friendId) {
         jdbcTemplate.update(
-                "DELETE FROM \"friendship\" WHERE \"user_id\" = ? AND \"friend_id\" = ? ",
-                userId, friendId);
+                "INSERT INTO FRIENDSHIPS VALUES (:USER_ID, :FRIEND_ID, false);",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId)
+                        .addValue("FRIEND_ID", friendId));
     }
 
-    private Optional<Boolean> readFriendshipStatus(Long userId, Long friendId) {
-        SqlRowSet statusRow = jdbcTemplate.queryForRowSet(
-                "SELECT \"status\" " +
-                        "FROM \"friendship\" " +
-                        "WHERE \"user_id\" = ? and \"friend_id\" = ?", friendId, userId);
-        if (statusRow.next()) {
-            return Optional.of(statusRow.getBoolean("status"));
-        } else {
-            return Optional.empty();
-        }
+    @Override
+    public void remove(Long userId, Long friendId) {
+        jdbcTemplate.update(
+                "DELETE FROM FRIENDSHIPS WHERE USER_ID = :USER_ID AND FRIEND_ID = :FRIEND_ID;",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId)
+                        .addValue("FRIEND_ID", friendId));
     }
 }

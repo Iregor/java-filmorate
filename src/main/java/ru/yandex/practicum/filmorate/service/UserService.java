@@ -38,21 +38,32 @@ public class UserService {
     }
 
     public User create(User user) {
-        if (user.getName().isEmpty() || user.getName().isBlank()) {
+        if(user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        User result = userStorage.create(user);
-        log.info("User {} {} added.", result.getId(), result.getLogin());
-        return result;
+        Optional<User> result = userStorage.create(user);
+        if (result.isEmpty()) {
+            log.warn("User {} is not created.",
+                    user.getLogin());
+            throw new IncorrectObjectIdException(String.format("User %s is not created.",
+                    user.getLogin()));
+        }
+        log.info("User {} {} created.",
+                result.get().getId(), result.get().getLogin());
+        return result.get();
     }
 
     public User update(User user) {
-        if (userStorage.findById(user.getId()).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("User %d is not found.", user.getId()));
+        Optional<User> result = userStorage.update(user);
+        if (result.isEmpty()) {
+            log.warn("User {} {} is not updated.",
+                    user.getId(), user.getLogin());
+            throw new IncorrectObjectIdException(String.format("User %d %s is not updated.",
+                    user.getId(), user.getLogin()));
         }
-        User result = userStorage.update(user);
-        log.info("User {} updated.", result.getId());
-        return result;
+        log.info("User {} {} updated.",
+                result.get().getId(), result.get().getLogin());
+        return result.get();
     }
 
     public void addFriend(Long userId, Long friendId) {
@@ -64,7 +75,7 @@ public class UserService {
             log.warn("Friend {} is not found.", friendId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
-        friendStorage.writeRow(userId, friendId);
+        friendStorage.add(userId, friendId);
         log.info("User {} added user {} to friends.", userId, friendId);
     }
 
@@ -77,15 +88,15 @@ public class UserService {
             log.warn("Friend {} is not found.", friendId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
-        friendStorage.deleteRow(userId, friendId);
+        friendStorage.remove(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
     }
 
     public Collection<User> getFriends(Long userId) {
-        return userStorage.getFriends(userId);
+        return userStorage.findFriends(userId);
     }
 
     public Collection<User> getCommonFriends(Long userId, Long friendId) {
-        return userStorage.getCommonFriends(userId, friendId);
+        return userStorage.findCommonFriends(userId, friendId);
     }
 }

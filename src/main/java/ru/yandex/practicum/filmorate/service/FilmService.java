@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
@@ -88,3 +89,4 @@ public class FilmService {
         log.info("User {} disliked film {}.", userId, filmId);
     }
 }
+*/

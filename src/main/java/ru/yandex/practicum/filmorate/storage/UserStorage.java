@@ -8,13 +8,13 @@ import java.util.Optional;
 public interface UserStorage {
     Collection<User> findAll();
 
-    Collection<User> getFriends(Long userId);
+    Collection<User> findFriends(Long userId);
 
-    Collection<User> getCommonFriends(Long userId, Long friendId);
+    Collection<User> findCommonFriends(Long userId, Long friendId);
 
     Optional<User> findById(Long id);
 
-    User create(User user);
+    Optional<User> create(User user);
 
-    User update(User user);
+    Optional<User> update(User user);
 }

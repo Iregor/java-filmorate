@@ -1,97 +1,72 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Optional;
 
-@Slf4j
-@Component("genreDb")
+@Repository("genreDb")
 @RequiredArgsConstructor
 public class GenreDbStorage implements GenreStorage {
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
+    static final RowMapper<Genre> genreMapper = (rs, rowNum) -> new Genre(
+            rs.getLong("GENRE_ID"),
+            rs.getString("GENRE_NAME"));
 
     @Override
-    public Collection<Genre> readAll() {
+    public Collection<Genre> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM \"genres\" " +
-                        "ORDER BY \"genre_id\" ",
-                (rs, rowNum) -> getGenreFromResultSet(rs));
+                "SELECT * FROM GENRES ORDER BY GENRE_ID;",
+                genreMapper);
     }
 
     @Override
-    public Collection<Genre> readRowByFilmId(Long filmId) {
-        Collection<Genre> result = jdbcTemplate.query(
-                "SELECT \"film_genres\".\"genre_id\", \"genre_name\"\n" +
-                        "FROM \"film_genres\"\n" +
-                        "JOIN \"genres\" AS g ON g.\"genre_id\" = \"film_genres\".\"genre_id\"\n" +
-                        "WHERE \"film_id\" = ?" +
-                        "ORDER BY \"genre_id\" ",
-                (rs, rowNum) -> getGenreFromResultSet(rs), filmId);
-        log.info("Found {} genre(s).", result.size());
-        return result;
-    }
-
-    @Override
-    public Optional<Genre> readById(Long id) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"genres\" " +
-                        "WHERE \"genre_id\" = ?", id);
-        if (genreRows.next()) {
-            Genre genre = getGenreFromSqlRowSet(genreRows);
-            log.debug("Genre found: {} {}", genre.getId(), genre.getName());
-            return Optional.of(genre);
-        } else {
-            log.debug("Genre {} is not found.", id);
+    public Optional<Genre> findById(Long id) {
+        try {
+            return Optional.ofNullable(jdbcTemplate.
+                    queryForObject("SELECT * FROM GENRES WHERE GENRE_ID = :GENRE_ID;",
+                            new MapSqlParameterSource()
+                                    .addValue("GENRE_ID", id),
+                            genreMapper));
+        } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
     @Override
-    public Genre writeRow(Genre genre) {
-        jdbcTemplate.update(
-                "INSERT INTO \"genres\" (\"genre_name\") VALUES (?)",
-                genre.getName());
-        return findByName(genre.getName());
+    public Optional<Genre> create(Genre genre) {
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+                .withTableName("GENRES")
+                .usingGeneratedKeyColumns("GENRE_ID");
+        long id = insert
+                .executeAndReturnKey(getGenreParams(genre))
+                .longValue();
+        return findById(id);
     }
 
     @Override
-    public Genre updateRow(Genre genre) {
-        jdbcTemplate.update(
-                "UPDATE \"genres\" " +
-                        "SET \"genre_name\" = ? " +
-                        "WHERE \"genre_id\" = ? ",
-                genre.getName(), genre.getId());
-        return genre;
+    public Optional<Genre> update(Genre genre) {
+        String sql = "UPDATE GENRES " +
+                "SET GENRE_NAME = :GENRE_NAME " +
+                "WHERE GENRE_ID = :GENRE_ID; ";
+        jdbcTemplate.update(sql, getGenreParams(genre));
+        return findById(genre.getId());
     }
 
-    private Genre findByName(String name) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM \"genres\" " +
-                        "WHERE \"genre_name\" = ? ", name);
-        if (genreRows.next()) {
-            return getGenreFromSqlRowSet(genreRows);
-        } else {
-            log.debug("Data is not found.");
-            return null;
-        }
-    }
-
-    private Genre getGenreFromResultSet(ResultSet rs) throws SQLException {
-        return new Genre(rs.getLong("genre_id"),
-                rs.getString("genre_name"));
-    }
-
-    private Genre getGenreFromSqlRowSet(SqlRowSet srs) {
-        return new Genre(srs.getLong("genre_id"),
-                srs.getString("genre_name"));
+    public SqlParameterSource getGenreParams(Genre genre) {
+        return new MapSqlParameterSource()
+                .addValue("GENRE_ID", genre.getId())
+                .addValue("GENRE_NAME", genre.getName());
     }
 }

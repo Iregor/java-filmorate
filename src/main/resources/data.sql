@@ -5,16 +5,14 @@ VALUES ('G'),
        ('R'),
        ('NC-17');
 
-INSERT INTO "genres"
-VALUES (1, 'Комедия'),
-       (2, 'Драма'),
-       (3, 'Мультфильм'),
-       (4, 'Триллер'),
-       (5, 'Документальный'),
-       (6, 'Боевик');
+INSERT INTO PUBLIC.GENRES (GENRE_NAME)
+VALUES ('Комедия'),
+       ('Драма'),
+       ('Мультфильм'),
+       ('Триллер'),
+       ('Документальный'),
+       ('Боевик');
 
-ALTER TABLE "genres"
-    ALTER COLUMN "genre_id"
-        RESTART WITH (SELECT MAX("genre_id") FROM "genres") + 1;
+
 
 

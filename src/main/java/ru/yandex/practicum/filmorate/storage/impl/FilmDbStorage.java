@@ -1,9 +1,12 @@
+/*
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -11,12 +14,13 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component("filmDb")
+@Repository("filmDb")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -26,8 +30,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        String sql = "SELECT * FROM \"films\" AS f " +
-                "JOIN RATING AS mpa ON f.\"rating_id\" = mpa.RATING_ID " +
+        String sql = "SELECT * FROM FILMS F " +
+                "JOIN RATING MPA ON f.\"rating_id\" = mpa.RATING_ID " +
                 "ORDER BY \"film_id\" ";
         Collection<Film> result = jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs));
         getGenresByFilms(result);
@@ -35,16 +39,21 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getPopularFilms(int size) {
+    public Collection<Film> findPopularFilms(int size) {
         String sql = "SELECT * FROM \"films\" as f " +
                 "JOIN RATING AS mpa ON f.\"rating_id\" = mpa.RATING_ID " +
-                "LEFT OUTER JOIN (SELECT \"film_id\", COUNT(\"user_id\") AS count FROM \"likes\" " +
+                "LEFT OUTER JOIN (SELECT \"film_id\", COUNT(\"user_id\") AS count FROM LIKES " +
                 "GROUP BY \"film_id\") AS cl ON cl.\"film_id\" = f.\"film_id\" " +
                 "ORDER BY cl.count DESC " +
                 "LIMIT ? ";
         Collection<Film> result = jdbcTemplate.query(sql, (rs, rowNum) -> getFilmFromResultSet(rs), size);
         getGenresByFilms(result);
         return result;
+    }
+
+    @Override
+    public Collection<Film> findFilmsByParams(String name, LocalDate after, LocalDate before) {
+        return null;
     }
 
     @Override
@@ -188,4 +197,32 @@ public class FilmDbStorage implements FilmStorage {
                         .add(new Genre(rs.getLong("genre_id"), rs.getString("genre_name"))),
                 mapOfFilm.keySet().toArray());
     }
+
+
+    private static class FilmExtractor implements ResultSetExtractor<Map<Long, Film>> {
+
+        @Override
+        public Map<Long, Film> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            Map<Long, Film> films = new HashMap<>();
+            while (rs.next()) {
+                Film film = new Film();
+                film.setId(rs.getLong("ID"));
+                film.setName(rs.getString("NAME"));
+                film.setDescription(rs.getString("DESCRIPTION"));
+                film.setReleaseDate(rs.getDate("RELEASE_DATE").toLocalDate());
+                film.setDuration(rs.getInt("DURATION"));
+                film.setMpa(new Mpa(
+                        rs.getLong("RATING_ID"),
+                        rs.getString("RATING_NAME")));
+                film.setRate(rs.getInt("RATE"));
+                films.putIfAbsent(film.getId(), film);
+                films.get(film.getId()).getGenres().add(new Genre(
+                        rs.getLong("GENRE_ID"),
+                        rs.getString("GENRE_NAME")));
+            }
+            return films;
+        }
+    }
 }
+
+*/
