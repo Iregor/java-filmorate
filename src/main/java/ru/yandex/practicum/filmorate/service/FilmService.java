@@ -1,13 +1,10 @@
-/*
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.*;
@@ -16,13 +13,9 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    @Qualifier("userDb")
+
     private final UserStorage userStorage;
-    @Qualifier("filmDb")
     private final FilmStorage filmStorage;
-    @Qualifier("genreDb")
-    private final GenreStorage genreStorage;
-    @Qualifier("likesDb")
     private final LikesStorage likesStorage;
 
     public Collection<Film> findAll() {
@@ -42,25 +35,33 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        Film result = filmStorage.create(film);
-        log.info("Film {} {} added.", result.getId(), result.getName());
-        return result;
+        Optional<Film> result = filmStorage.create(film);
+        if (result.isEmpty()) {
+            log.warn("Film {} is not created.",
+                    film.getName());
+            throw new IncorrectObjectIdException(String.format("Film %s is not created.",
+                    film.getName()));
+        }
+        log.info("Film {} {} created.",
+                result.get().getId(), result.get().getName());
+        return result.get();
     }
 
     public Film update(Film film) {
         if (filmStorage.findById(film.getId()).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Film %d is not found.", film.getId()));
+            log.warn("Film {} {} is not updated.",
+                    film.getId(), film.getName());
+            throw new IncorrectObjectIdException(String.format("Film %d %s is not updated.",
+                    film.getId(), film.getName()));
         }
-        Collection<Genre> genreFromDb = genreStorage.readRowByFilmId(film.getId());
-        genreFromDb.removeAll(film.getGenres());
-        genreFromDb.forEach(genre -> filmStorage.deleteFilmGenres(film.getId(), genre.getId()));
-        Film result = filmStorage.update(film);
-        log.info("Film {} updated.", result.getId());
-        return result;
+        Optional<Film> result = filmStorage.update(film);
+        log.info("Film {} {} updated.",
+                result.get().getId(), result.get().getName());
+        return result.get();
     }
 
     public Collection<Film> getPopularFilms(Integer size) {
-        return filmStorage.getPopularFilms(size);
+        return filmStorage.findPopularFilms(size);
     }
 
     public void like(Long filmId, Long userId) {
@@ -72,7 +73,7 @@ public class FilmService {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", userId));
         }
-        likesStorage.writeRow(filmId, userId);
+        likesStorage.add(filmId, userId);
         log.info("User {} liked film {}.", userId, filmId);
     }
 
@@ -85,8 +86,8 @@ public class FilmService {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
         }
-        likesStorage.deleteRow(filmId, userId);
+        likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
     }
 }
-*/
+

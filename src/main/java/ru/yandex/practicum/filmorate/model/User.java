@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,6 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"friends", "likeFilms"})
 public class User {
     @Positive(message = "Идентификатор не может быть отрицательным.")
     private Long id;
@@ -29,5 +27,4 @@ public class User {
     private LocalDate birthday;
     private Set<Long> friends = new HashSet<>();
     private Set<Long> likeFilms = new HashSet<>();
-
 }

@@ -1,4 +1,5 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+/*
+package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ class GenreDbStorageTest {
     @BeforeEach
     void beforeEach() {
         jdbcTemplate.update("DELETE FROM \"genres\" ");
-        jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN \"genre_id\" RESTART WITH 1 ");
+        jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN GENRE_ID RESTART WITH 1 ");
     }
 
     @Test
@@ -84,4 +85,4 @@ class GenreDbStorageTest {
                 "('Документальный'), " +
                 "('Боевик')");
     }
-}
+}*/

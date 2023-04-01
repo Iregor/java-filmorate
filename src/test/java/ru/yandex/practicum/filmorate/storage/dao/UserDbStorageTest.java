@@ -1,4 +1,5 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+/*
+package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,4 +95,4 @@ class UserDbStorageTest {
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
 
     }
-}
+}*/

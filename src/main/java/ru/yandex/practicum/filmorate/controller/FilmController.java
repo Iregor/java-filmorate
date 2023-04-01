@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
@@ -53,4 +52,3 @@ public class FilmController {
         filmService.dislike(filmId, userId);
     }
 }
-*/

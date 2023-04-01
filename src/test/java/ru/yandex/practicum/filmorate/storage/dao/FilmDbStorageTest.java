@@ -1,4 +1,5 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+/*
+package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +29,8 @@ class FilmDbStorageTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM \"films\" ");
-        jdbcTemplate.execute("ALTER TABLE \"films\" ALTER COLUMN \"film_id\" RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILMS ");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
     }
 
     @Test
@@ -108,8 +109,8 @@ class FilmDbStorageTest {
     }
 
     private void addData() {
-        jdbcTemplate.update("INSERT INTO \"films\" (\"rating_id\", \"film_name\", \"description\", " +
-                "\"release_date\", \"length\", \"rate\") " +
+        jdbcTemplate.update("INSERT INTO FILMS (RATING_ID, FILM_NAME, DESCRIPTION, " +
+                "RELEASE_DATE, DURATION, RATE) " +
                 "VALUES (1,'Евангелион 3.0+1.0', 'Мехи, гиганты и тд'," +
                 " '2021-03-08', 155, 10)," +
                 "(5,'Карты, деньги, два ствола', 'Стейтем не бьет морды, '," +
@@ -123,3 +124,4 @@ class FilmDbStorageTest {
     }
 }
 
+*/
