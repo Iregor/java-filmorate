@@ -30,8 +30,8 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public Optional<Mpa> findById(Long id) {
         try {
-            return Optional.ofNullable(jdbcTemplate.
-                    queryForObject("SELECT * FROM RATING WHERE RATING_ID = :RATING_ID;",
+            return Optional.ofNullable(jdbcTemplate
+                    .queryForObject("SELECT * FROM RATING WHERE RATING_ID = :RATING_ID;",
                             new MapSqlParameterSource()
                                     .addValue("RATING_ID", id),
                             mpaMapper));
