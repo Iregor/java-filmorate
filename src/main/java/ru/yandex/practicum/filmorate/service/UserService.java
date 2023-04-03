@@ -38,7 +38,7 @@ public class UserService {
     }
 
     public User create(User user) {
-        if(user.getName().isEmpty() || user.getName().isBlank()) {
+        if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         Optional<User> result = userStorage.create(user);
