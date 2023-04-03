@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface FilmStorage {
+
     Collection<Film> findAll();
 
     Collection<Film> findPopularFilms(int size);

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface GenreStorage {
+
     Collection<Genre> findAll();
 
     Collection<Genre> findByFilmId(Long filmId);

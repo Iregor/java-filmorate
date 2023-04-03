@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface UserStorage {
+
     Collection<User> findAll();
 
     Collection<User> findFriends(Long userId);
