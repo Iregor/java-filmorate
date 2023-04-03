@@ -25,7 +25,7 @@ public class GenreDbStorage implements GenreStorage {
             rs.getString("GENRE_NAME"));
 
     static final ResultSetExtractor<Map<Long, Set<Genre>>> genresExtractor = rs -> {
-        Map<Long,Set<Genre>> filmGenres = new HashMap<>();
+        Map<Long, Set<Genre>> filmGenres = new HashMap<>();
         while (rs.next()) {
             filmGenres.putIfAbsent(rs.getLong("FILM_ID"), new HashSet<>());
             filmGenres.get(rs.getLong("FILM_ID")).add(new Genre(
@@ -45,8 +45,8 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Optional<Genre> findById(Long id) {
         try {
-            return Optional.ofNullable(jdbcTemplate.
-                    queryForObject("SELECT * FROM GENRES WHERE GENRE_ID = :GENRE_ID;",
+            return Optional.ofNullable(jdbcTemplate
+                    .queryForObject("SELECT * FROM GENRES WHERE GENRE_ID = :GENRE_ID;",
                             new MapSqlParameterSource()
                                     .addValue("GENRE_ID", id),
                             genreMapper));
