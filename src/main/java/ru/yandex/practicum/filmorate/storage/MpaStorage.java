@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface MpaStorage {
     Collection<Mpa> findAll();
 
-    Optional<Mpa> findById(Long id);
+    Optional<Mpa> findById(Long mpaId);
 }

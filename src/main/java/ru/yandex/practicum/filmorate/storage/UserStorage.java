@@ -12,7 +12,7 @@ public interface UserStorage {
 
     Collection<User> findCommonFriends(Long userId, Long friendId);
 
-    Optional<User> findById(Long id);
+    Optional<User> findById(Long userId);
 
     Optional<User> create(User user);
 

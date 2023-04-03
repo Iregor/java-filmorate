@@ -2,28 +2,30 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    @Qualifier("userDb")
     private final UserStorage userStorage;
-    @Qualifier("friendDb")
     private final FriendStorage friendStorage;
+    private final LikesStorage likesStorage;
 
     public Collection<User> findAll() {
         Collection<User> result = userStorage.findAll();
         log.info("Found {} user(s).", result.size());
+        addDataUsers(result);
         return result;
     }
 
@@ -34,6 +36,7 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("User %d is not found.", userId));
         }
         log.info("User {} is found.", result.get().getId());
+        addDataUsers(List.of(result.get()));
         return result.get();
     }
 
@@ -48,6 +51,7 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("User %s is not created.",
                     user.getLogin()));
         }
+        addDataUsers(List.of(result.get()));
         log.info("User {} {} created.",
                 result.get().getId(), result.get().getLogin());
         return result.get();
@@ -61,6 +65,7 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("User %d %s is not updated.",
                     user.getId(), user.getLogin()));
         }
+        addDataUsers(List.of(result.get()));
         log.info("User {} {} updated.",
                 result.get().getId(), result.get().getLogin());
         return result.get();
@@ -93,10 +98,35 @@ public class UserService {
     }
 
     public Collection<User> getFriends(Long userId) {
-        return userStorage.findFriends(userId);
+        Collection<User> result = userStorage.findFriends(userId);
+        log.info("Found {} friend(s).", result.size());
+        addDataUsers(result);
+        return result;
     }
 
     public Collection<User> getCommonFriends(Long userId, Long friendId) {
-        return userStorage.findCommonFriends(userId, friendId);
+        Collection<User> result = userStorage.findCommonFriends(userId, friendId);
+        log.info("Found {} friend(s).", result.size());
+        addDataUsers(result);
+        return result;
+    }
+
+
+    private void addDataUsers(Collection<User> users) {
+        Map<Long, User> usersMap = users
+                .stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+        Map<Long, Set<Long>> friendsMap = friendStorage.findByUsers(usersMap.keySet());
+        Map<Long, Set<Long>> likesMap = likesStorage.findByUsers(usersMap.keySet());
+        users.forEach(user -> {
+            user.setFriends(new HashSet<>());
+            user.setLikeFilms(new HashSet<>());
+            if (Objects.requireNonNull(friendsMap).containsKey(user.getId())) {
+                user.setFriends(friendsMap.get(user.getId()));
+            }
+            if (Objects.requireNonNull(likesMap).containsKey(user.getId())) {
+                user.setLikeFilms(likesMap.get(user.getId()));
+            }
+        });
     }
 }

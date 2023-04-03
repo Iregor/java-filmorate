@@ -5,7 +5,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
@@ -13,8 +12,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.sql.DataSource;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Repository("userDb")
 @RequiredArgsConstructor
@@ -35,23 +32,19 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-        Collection<User> result = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "SELECT * FROM USERS ORDER BY USER_ID;",
                 userMapper);
-        findUserData(result);
-        return result;
     }
 
     @Override
     public Optional<User> findById(Long id) {
         try {
-            Optional<User> result = Optional.ofNullable(jdbcTemplate.queryForObject(
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
                     "SELECT * FROM USERS WHERE USER_ID = :USER_ID;",
                     new MapSqlParameterSource()
                             .addValue("USER_ID", id),
                     userMapper));
-            result.ifPresent(u -> findUserData(List.of(u)));
-            return result;
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -59,7 +52,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> findFriends(Long id) {
-        Collection<User> result = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "SELECT * FROM USERS U " +
                         "JOIN FRIENDSHIPS FS ON U.USER_ID = FS.FRIEND_ID " +
                         "WHERE FS.USER_ID = :USER_ID " +
@@ -67,13 +60,11 @@ public class UserDbStorage implements UserStorage {
                 new MapSqlParameterSource()
                         .addValue("USER_ID", id),
                 userMapper);
-        findUserData(result);
-        return result;
     }
 
     @Override
     public Collection<User> findCommonFriends(Long userId, Long friendId) {
-        Collection<User> result = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "SELECT * FROM USERS U, FRIENDSHIPS F, FRIENDSHIPS O " +
                         "WHERE U.USER_ID = F.FRIEND_ID AND U.USER_ID = O.FRIEND_ID " +
                         "AND F.USER_ID = :USER_ID AND O.USER_ID = :FRIEND_ID;",
@@ -81,8 +72,6 @@ public class UserDbStorage implements UserStorage {
                         .addValue("USER_ID", userId)
                         .addValue("FRIEND_ID", friendId),
                 userMapper);
-        findUserData(result);
-        return result;
     }
 
     @Override
@@ -93,9 +82,7 @@ public class UserDbStorage implements UserStorage {
         long id = insert
                 .executeAndReturnKey(getUserParams(user))
                 .longValue();
-        Optional<User> result = findById(id);
-        result.ifPresent(u -> findUserData(List.of(u)));
-        return result;
+        return findById(id);
     }
 
     @Override
@@ -106,38 +93,7 @@ public class UserDbStorage implements UserStorage {
                         "USER_NAME = :USER_NAME, BIRTHDAY = :BIRTHDAY " +
                         "WHERE USER_ID = :USER_ID;",
                 getUserParams(user));
-        Optional<User> result = findById(user.getId());
-        result.ifPresent(u -> findUserData(List.of(u)));
-        return result;
-    }
-
-    private void findUserData(Collection<User> users) {
-        Map<Long, User> usersMap = users
-                .stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-
-        SqlParameterSource ids = new MapSqlParameterSource("IDS", usersMap.keySet());
-
-        jdbcTemplate.query(
-                "SELECT U.USER_ID F_ID, FS.USER_ID U_ID FROM USERS U " +
-                        "JOIN FRIENDSHIPS FS ON U.USER_ID = FS.FRIEND_ID " +
-                        "WHERE FS.USER_ID IN (:IDS) " +
-                        "ORDER BY U.USER_ID;",
-                ids,
-                (rs, rowNum) -> usersMap
-                        .get(rs.getLong("U_ID"))
-                        .getFriends()
-                        .add(rs.getLong("F_ID")));
-
-        jdbcTemplate.query(
-                "SELECT * FROM LIKES " +
-                        "WHERE USER_ID IN (:IDS) " +
-                        "ORDER BY FILM_ID;",
-                ids,
-                (rs, rowNum) -> usersMap
-                        .get(rs.getLong("USER_ID"))
-                        .getLikeFilms()
-                        .add(rs.getLong("FILM_ID")));
+        return findById(user.getId());
     }
 
     private MapSqlParameterSource getUserParams(User user) {

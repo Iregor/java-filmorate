@@ -43,6 +43,31 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
+    public Collection<Genre> findByFilmId(Long filmId) {
+        return new HashSet<>(jdbcTemplate.query(
+                "SELECT G.GENRE_ID, G.GENRE_NAME " +
+                        "FROM GENRES G " +
+                        "JOIN FILM_GENRES FG ON G.GENRE_ID = FG.GENRE_ID " +
+                        "WHERE FG.FILM_ID = :FILM_ID " +
+                        "ORDER BY G.GENRE_ID;",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId),
+                genreMapper));
+    }
+
+    @Override
+    public Map<Long, Set<Genre>> findByFilms(Set<Long> filmIds) {
+        SqlParameterSource ids = new MapSqlParameterSource("IDS", filmIds);
+        return jdbcTemplate.query(
+                "SELECT * FROM FILM_GENRES FG " +
+                        "JOIN GENRES G on G.GENRE_ID = FG.GENRE_ID " +
+                        "WHERE FILM_ID IN (:IDS) " +
+                        "ORDER BY G.GENRE_ID",
+                ids,
+                genresExtractor);
+    }
+
+    @Override
     public Optional<Genre> findById(Long id) {
         try {
             return Optional.ofNullable(jdbcTemplate
@@ -73,6 +98,24 @@ public class GenreDbStorage implements GenreStorage {
                 "WHERE GENRE_ID = :GENRE_ID;";
         jdbcTemplate.update(sql, getGenreParams(genre));
         return findById(genre.getId());
+    }
+
+    @Override
+    public void add(Long filmId, Long genreId) {
+        jdbcTemplate.update(
+                "INSERT INTO FILM_GENRES VALUES (:FILM_ID,:GENRE_ID);",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("GENRE_ID", genreId));
+    }
+
+    @Override
+    public void remove(Long filmId, Long genreId) {
+        jdbcTemplate.update(
+                "DELETE FROM FILM_GENRES WHERE FILM_ID = :FILM_ID AND GENRE_ID = :GENRE_ID;",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("GENRE_ID", genreId));
     }
 
     private SqlParameterSource getGenreParams(Genre genre) {
