@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.validator.after;
+package ru.yandex.practicum.filmorate.validators.after;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = AfterValidator.class)
 @Documented
 public @interface After {
-    String message() default "{After.invalid}";
+    String message() default "Дата релиза не может быть раньше {value}";
 
     Class<?>[] groups() default {};
 

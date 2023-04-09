@@ -1,7 +1,15 @@
 package ru.yandex.practicum.filmorate.storage;
 
-public interface LikesStorage {
-    void writeRow(Long filmId, Long userId);
+import java.util.Map;
+import java.util.Set;
 
-    void deleteRow(Long filmId, Long userId);
+public interface LikesStorage {
+
+    Map<Long, Set<Long>> findByFilms(Set<Long> filmIds);
+
+    Map<Long, Set<Long>> findByUsers(Set<Long> userIds);
+
+    void add(Long filmId, Long userId);
+
+    void remove(Long filmId, Long userId);
 }

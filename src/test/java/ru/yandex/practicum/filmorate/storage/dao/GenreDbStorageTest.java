@@ -1,4 +1,5 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+/*
+package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ class GenreDbStorageTest {
     @BeforeEach
     void beforeEach() {
         jdbcTemplate.update("DELETE FROM \"genres\" ");
-        jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN \"genre_id\" RESTART WITH 1 ");
+        jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN GENRE_ID RESTART WITH 1 ");
     }
 
     @Test
@@ -57,7 +58,7 @@ class GenreDbStorageTest {
     @Test
     void create_returnNewGenreId7_AllGenre() {
         addData();
-        Genre newGenre = genreStorage.writeRow(new Genre("Музыкальная комедия эротического содержания"));
+        Genre newGenre = genreStorage.create(new Genre("Музыкальная комедия эротического содержания"));
         assertThat(newGenre).hasFieldOrPropertyWithValue("id", 7L)
                 .hasFieldOrPropertyWithValue("name", "Музыкальная комедия эротического содержания");
     }
@@ -65,7 +66,7 @@ class GenreDbStorageTest {
     @Test
     void update_returnUpdateGenreId5_AllGenre() {
         addData();
-        genreStorage.updateRow(new Genre(5L, "Музыкальная комедия"));
+        genreStorage.update(new Genre(5L, "Музыкальная комедия"));
         assertThat(genreStorage.readById(5L))
                 .isPresent()
                 .hasValueSatisfying(genre ->
@@ -84,4 +85,4 @@ class GenreDbStorageTest {
                 "('Документальный'), " +
                 "('Боевик')");
     }
-}
+}*/

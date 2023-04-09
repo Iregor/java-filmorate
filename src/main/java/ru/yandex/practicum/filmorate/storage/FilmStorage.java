@@ -6,17 +6,14 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface FilmStorage {
+
     Collection<Film> findAll();
 
-    Collection<Film> getPopularFilms(int size);
+    Collection<Film> findPopularFilms(int size);
 
-    Optional<Film> findById(Long id);
+    Optional<Film> findById(Long filmId);
 
-    Film create(Film film);
+    Optional<Film> create(Film film);
 
-    Film update(Film film);
-
-    void deleteFilmGenres(Long filmId, Long genreId);
-
-    Collection<Long> getFilmLikes(Long filmId);
+    Optional<Film> update(Film film);
 }

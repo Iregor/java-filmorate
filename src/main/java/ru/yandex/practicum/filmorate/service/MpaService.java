@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -15,22 +14,25 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class MpaService {
-    @Qualifier("mpaDb")
+
     private final MpaStorage mpaStorage;
 
     public Collection<Mpa> findAll() {
-        Collection<Mpa> result = mpaStorage.readAll();
-        log.info("Found {} MPA rating(s).", result.size());
+        Collection<Mpa> result = mpaStorage.findAll();
+        log.info("Found {} MPA rating(s).",
+                result.size());
         return result;
     }
 
     public Mpa findById(Long mpaId) {
-        Optional<Mpa> result = mpaStorage.readById(mpaId);
+        Optional<Mpa> result = mpaStorage.findById(mpaId);
         if (result.isEmpty()) {
             log.warn("MPA rating {} is not found.", mpaId);
-            throw new IncorrectObjectIdException(String.format("Mpa %d is not found.", mpaId));
+            throw new IncorrectObjectIdException(String.format("Mpa %d is not found.",
+                    mpaId));
         }
-        log.info("MPA rating {} is found.", result.get().getId());
+        log.info("MPA rating {} is found.",
+                result.get().getId());
         return result.get();
     }
 }

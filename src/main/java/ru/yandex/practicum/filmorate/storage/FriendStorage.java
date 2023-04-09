@@ -1,7 +1,13 @@
 package ru.yandex.practicum.filmorate.storage;
 
-public interface FriendStorage {
-    void writeRow(Long userId, Long friendId);
+import java.util.Map;
+import java.util.Set;
 
-    void deleteRow(Long userId, Long friendId);
+public interface FriendStorage {
+
+    Map<Long, Set<Long>> findByUsers(Set<Long> userIds);
+
+    void add(Long userId, Long friendId);
+
+    void remove(Long userId, Long friendId);
 }
