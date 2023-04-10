@@ -27,4 +27,16 @@ public class User {
     private LocalDate birthday;
     private Set<Long> friends = new HashSet<>();
     private Set<Long> likeFilms = new HashSet<>();
+
+    public User(String email, String login, String name, String  birthday) {
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = LocalDate.parse(birthday);
+    }
+
+    public User(Long id, String email, String login, String name, String birthday) {
+        this(email, login, name, birthday);
+        this.id = id;
+    }
 }

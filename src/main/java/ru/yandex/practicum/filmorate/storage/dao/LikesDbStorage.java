@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,11 +61,10 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public void add(Long filmId, Long userId) {
         jdbcTemplate.update(
-                "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID, :DATE);",
+                "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
-                        .addValue("USER_ID", userId)
-                        .addValue("DATE", LocalDate.now()));
+                        .addValue("USER_ID", userId));
     }
 
     @Override

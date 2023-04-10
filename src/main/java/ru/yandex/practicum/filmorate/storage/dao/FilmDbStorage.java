@@ -59,6 +59,22 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> findCommonFilms(Long userId, Long friendId) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :USER_ID) " +
+                        "AND F.FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :FRIEND_ID) " +
+                        "ORDER BY R.RATE DESC",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId)
+                        .addValue("FRIEND_ID", friendId),
+                filmMapper);
+    }
+
+    @Override
     public Optional<Film> findById(Long id) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(

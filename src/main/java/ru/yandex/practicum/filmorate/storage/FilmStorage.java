@@ -11,6 +11,8 @@ public interface FilmStorage {
 
     Collection<Film> findPopularFilms(int size);
 
+    Collection<Film> findCommonFilms(Long userId, Long friendId);
+
     Optional<Film> findById(Long filmId);
 
     Optional<Film> create(Film film);
