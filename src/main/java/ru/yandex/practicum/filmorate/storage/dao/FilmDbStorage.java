@@ -59,6 +59,9 @@ public class FilmDbStorage implements FilmStorage {
                 filmMapper);
     }
 
+
+    SELECT * FROM FILMS  where  LOWER( film_name) like '%f%'
+    SELECT * FROM FILMS f  left join likes l on f.film_id = l.film_id  where  LOWER( f.film_name) like '%f%' order
     @Override
     public Collection<Film> findPopularFilmsByGenreId(int size, Long genreId) {
         return jdbcTemplate.query(
