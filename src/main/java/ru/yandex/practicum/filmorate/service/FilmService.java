@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.*;
@@ -54,6 +55,24 @@ public class FilmService {
         addDataFilms(result);
         return result;
     }
+
+    public Collection<Film> searchFilms(String subString, List<String> by) {
+        for (String s : by) {
+            if (!(s.equals("director") || s.equals("title"))) {
+                log.warn("Param %d is not correct.", s);
+                throw new ValidateException(String.format("Params %d is not correct.", s));
+            }
+        }
+        Collection<Film> result = filmStorage.searchFilms(subString, by);
+        if (result.isEmpty()) {
+            log.warn("Films {} is not found.");
+            throw new IncorrectObjectIdException("Films are not found.");
+        }
+        log.info("Found {} film(s).", result.size());
+        addDataFilms(result);
+        return result;
+    }
+
 
     public Film findById(Long filmId) {
         Optional<Film> result = filmStorage.findById(filmId);
