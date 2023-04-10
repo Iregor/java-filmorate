@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
@@ -26,8 +25,8 @@ class UserDbStorageTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM \"users\" ");
-        jdbcTemplate.execute("ALTER TABLE \"users\" ALTER COLUMN \"user_id\" RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS ");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
     }
 
     @Test
@@ -61,7 +60,7 @@ class UserDbStorageTest {
     void create_returnNewUserId6_AllUser() {
         addData();
         User newUser = userStorage.create(new User("dsadsadsal@yandsadex.ru",
-                "dsadsa", "dsadsa", "2001-01-12"));
+                "dsadsa", "dsadsa", "2001-01-12")).get();
         assertThat(newUser).hasFieldOrPropertyWithValue("id", 6L)
                 .hasFieldOrPropertyWithValue("email", "dsadsadsal@yandsadex.ru")
                 .hasFieldOrPropertyWithValue("login", "dsadsa")
@@ -87,7 +86,7 @@ class UserDbStorageTest {
     }
 
     private void addData() {
-        jdbcTemplate.update("INSERT INTO \"users\" (\"email\", \"login\", \"user_name\", \"birthday\" ) " +
+        jdbcTemplate.update("INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY ) " +
                 "VALUES ('email@yandex.ru', 'trulala', 'Trexo', '2011-03-08')," +
                 "('ema@mail.ru', 'login', 'Name', '2001-06-05')," +
                 "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
@@ -95,4 +94,4 @@ class UserDbStorageTest {
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
 
     }
-}*/
+}

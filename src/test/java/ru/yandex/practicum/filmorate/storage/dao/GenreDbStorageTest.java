@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
@@ -26,14 +25,14 @@ class GenreDbStorageTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM \"genres\" ");
-        jdbcTemplate.execute("ALTER TABLE \"genres\" ALTER COLUMN GENRE_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM GENRES ");
+        jdbcTemplate.execute("ALTER TABLE GENRES ALTER COLUMN GENRE_ID RESTART WITH 1 ");
     }
 
     @Test
     void findAll_return6Genres_adding6Genres() {
         addData();
-        Collection<Genre> collection = genreStorage.readAll();
+        Collection<Genre> collection = genreStorage.findAll();
         assertThat(collection.size()).isEqualTo(6);
         assertThat(collection).asList().containsAnyOf(
                 new Genre(1L, "Комедия"),
@@ -47,7 +46,7 @@ class GenreDbStorageTest {
     @Test
     void findById_returnGenreId1_adding6Genres() {
         addData();
-        assertThat(genreStorage.readById(1L))
+        assertThat(genreStorage.findById(1L))
                 .isPresent()
                 .hasValueSatisfying(genre ->
                         assertThat(genre).hasFieldOrPropertyWithValue("id", 1L)
@@ -55,29 +54,9 @@ class GenreDbStorageTest {
                 );
     }
 
-    @Test
-    void create_returnNewGenreId7_AllGenre() {
-        addData();
-        Genre newGenre = genreStorage.create(new Genre("Музыкальная комедия эротического содержания"));
-        assertThat(newGenre).hasFieldOrPropertyWithValue("id", 7L)
-                .hasFieldOrPropertyWithValue("name", "Музыкальная комедия эротического содержания");
-    }
-
-    @Test
-    void update_returnUpdateGenreId5_AllGenre() {
-        addData();
-        genreStorage.update(new Genre(5L, "Музыкальная комедия"));
-        assertThat(genreStorage.readById(5L))
-                .isPresent()
-                .hasValueSatisfying(genre ->
-                        assertThat(genre).hasFieldOrPropertyWithValue("id", 5L)
-                                .hasFieldOrPropertyWithValue("name", "Музыкальная комедия")
-                );
-
-    }
 
     private void addData() {
-        jdbcTemplate.update("INSERT INTO \"genres\" (\"genre_name\") " +
+        jdbcTemplate.update("INSERT INTO GENRES (GENRE_NAME) " +
                 "VALUES ('Комедия'), " +
                 "('Драма'), " +
                 "('Мультфильм'), " +
@@ -85,4 +64,4 @@ class GenreDbStorageTest {
                 "('Документальный'), " +
                 "('Боевик')");
     }
-}*/
+}
