@@ -62,11 +62,10 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public void add(Long filmId, Long userId) {
         jdbcTemplate.update(
-                "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID, :DATE);",
+                "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
-                        .addValue("USER_ID", userId)
-                        .addValue("DATE", LocalDate.now()));
+                        .addValue("USER_ID", userId));
     }
 
     @Override
