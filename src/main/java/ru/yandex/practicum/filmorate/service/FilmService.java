@@ -29,6 +29,20 @@ public class FilmService {
         return result;
     }
 
+    public Collection<Film> getPopularFilms(Integer size) {
+        Collection<Film> result = filmStorage.findPopularFilms(size);
+        addDataFilms(result);
+        log.info("Found {} movie(s).", result.size());
+        return result;
+    }
+
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        Collection<Film> result = filmStorage.findCommonFilms(userId, friendId);
+        log.info("Found {} film(s).", result.size());
+        addDataFilms(result);
+        return result;
+    }
+
     public Film findById(Long filmId) {
         Optional<Film> result = filmStorage.findById(filmId);
         if (result.isEmpty()) {
@@ -77,13 +91,6 @@ public class FilmService {
         log.info("Film {} {} updated.",
                 result.get().getId(), result.get().getName());
         return result.get();
-    }
-
-    public Collection<Film> getPopularFilms(Integer size) {
-        Collection<Film> result = filmStorage.findPopularFilms(size);
-        addDataFilms(result);
-        log.info("Found {} movie(s).", result.size());
-        return result;
     }
 
     public void like(Long filmId, Long userId) {

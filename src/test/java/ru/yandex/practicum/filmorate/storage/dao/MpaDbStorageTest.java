@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ class MpaDbStorageTest {
 
     @Test
     void findAll_return5Mpa_adding5Mpa() {
-        Collection<Mpa> collection = mpaStorage.readAll();
+        Collection<Mpa> collection = mpaStorage.findAll();
         assertThat(collection.size()).isEqualTo(5);
         assertThat(collection).asList().containsAnyOf(
                 new Mpa(1L, "G"),
@@ -35,11 +34,11 @@ class MpaDbStorageTest {
 
     @Test
     void findById_returnMpaId1_adding5Mpa() {
-        assertThat(mpaStorage.readById(1L))
+        assertThat(mpaStorage.findById(1L))
                 .isPresent()
                 .hasValueSatisfying(mpa ->
                         assertThat(mpa).hasFieldOrPropertyWithValue("id", 1L)
                                 .hasFieldOrPropertyWithValue("name", "G")
                 );
     }
-}*/
+}
