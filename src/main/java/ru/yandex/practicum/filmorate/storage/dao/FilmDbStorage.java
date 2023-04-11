@@ -117,13 +117,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findFilmsDirectorByYear(Long directorId) {
-        return null; // to do
-    }
+        return jdbcTemplate.query("SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN ( " +
+                        "SELECT FILM_ID FROM FILM_DIRECTORS FD WHERE DIRECTOR_ID = :DIRECTOR_ID) " +
+                        "ORDER BY F.RELEASE_DATE;",
+                new MapSqlParameterSource()
+                        .addValue("DIRECTOR_ID", directorId),
+                filmMapper);    }
 
     @Override
     public Collection<Film> findFilmsDirectorByLikes(Long directorId) {
-        return null; // to do
-
+        return jdbcTemplate.query("SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "JOIN FILM_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE FD.DIRECTOR_ID = :DIRECTOR_ID " +
+                        "ORDER BY R.RATE DESC;",
+                new MapSqlParameterSource()
+                        .addValue("DIRECTOR_ID", directorId),
+                filmMapper);
     }
 
     private MapSqlParameterSource getFilmParams(Film film) {
