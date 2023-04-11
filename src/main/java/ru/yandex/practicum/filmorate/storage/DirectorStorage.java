@@ -13,4 +13,6 @@ public interface DirectorStorage {
     Optional<Director> createDirector(Director director);
 
     Optional<Director> updateDirector(Director director);
+
+    void deleteDirector(Long id);
 }
