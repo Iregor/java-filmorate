@@ -40,7 +40,7 @@ public class DirectorController {
     }
 
     @PutMapping
-    public Director updateDirector(@RequestBody Director director, HttpServletRequest request) {
+    public Director updateDirector(@Valid @RequestBody Director director, HttpServletRequest request) {
         log.info(REQUEST_PUT_LOG, request.getRequestURI());
         return service.updateDirector(director);
     }
