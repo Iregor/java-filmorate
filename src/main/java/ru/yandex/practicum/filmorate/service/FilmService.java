@@ -24,6 +24,7 @@ public class FilmService {
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
+    private final DirectorService directorService;
 
     public Collection<Film> findAll() {
         Collection<Film> result = filmStorage.findAll();
@@ -147,12 +148,15 @@ public class FilmService {
     }
 
     public Collection<Film> getFilmDirectorSorted(Long directorId, String sortBy) {
+        directorService.findById(directorId);
         if (sortBy.equals("year")) {
             Collection<Film> result = filmStorage.findFilmsDirectorByYear(directorId);
-            return null; // to do
+            addDataFilms(result);
+            return result;
         } else if (sortBy.equals("likes")) {
             Collection<Film> result = filmStorage.findFilmsDirectorByLikes(directorId);
-            return null; // to do
+            addDataFilms(result);
+            return result;
         } else throw new IncorrectParameterException(
                 String.format("Передан некорректный параметр сортировки %s .", sortBy));
     }
