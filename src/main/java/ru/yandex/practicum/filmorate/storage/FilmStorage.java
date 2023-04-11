@@ -11,6 +11,12 @@ public interface FilmStorage {
 
     Collection<Film> findPopularFilms(int size);
 
+    Collection<Film> findPopularFilmsByGenreId(int size, Long genreId);
+
+    Collection<Film> findPopularFilmsByYear(int size, String year);
+
+    Collection<Film> findPopularFilmsByGenreIdAndYear(int size, Long genreId, String year);
+
     Collection<Film> findCommonFilms(Long userId, Long friendId);
 
     Optional<Film> findById(Long filmId);

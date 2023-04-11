@@ -32,13 +32,13 @@ public class FilmService {
     public Collection<Film> getPopularFilms(Integer size, Long genreId, String year) {
         Collection<Film> result;
         if (genreId != null && year != null) {
-            result = filmStorage.findPopularFilms(size);
+            result = filmStorage.findPopularFilmsByGenreIdAndYear(size, genreId, year);
         } else if (genreId != null) {
             result = filmStorage.findPopularFilmsByGenreId(size, genreId);
         } else if (year != null) {
             result = filmStorage.findPopularFilmsByYear(size, year);
         } else {
-            result = filmStorage.findPopularFilmsByGenreIdAndYear(size, genreId, year);
+            result = filmStorage.findPopularFilms(size);
         }
         addDataFilms(result);
         log.info("Found {} movie(s).", result.size());
