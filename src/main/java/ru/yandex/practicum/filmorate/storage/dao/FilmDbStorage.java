@@ -31,6 +31,7 @@ public class FilmDbStorage implements FilmStorage {
                             rs.getString("RATING_NAME")))
                     .genres(new HashSet<>())
                     .likes(new HashSet<>())
+                    .directors(new HashSet<>())
                     .build());
 
     @Override

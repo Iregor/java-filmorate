@@ -29,6 +29,7 @@ public class Film {
     private Mpa mpa;
     private Set<Genre> genres = new HashSet<>();
     private Set<Long> likes = new HashSet<>();
+    private Set<Director> directors = new HashSet<>();
 
     public Film(String name, String description, String releaseDate, int duration, Mpa mpa) {
         this.name = name;
