@@ -28,11 +28,11 @@ public class DirectorDbStorage implements DirectorStorage {
     private static final String FIND_DIRECTOR_BY_FILM_ID = "SELECT d.director_id, d.director_name " +
             "FROM directors AS d " +
             "JOIN film_directors AS fd ON d.director_id = fd.director_id " +
-            "WHERE fd.director_id = :DIRECTOR_ID " +
+            "WHERE fd.film_id = :FILM_ID " +
             "ORDER BY d.director_id;";
-    private static final String FIND_DIRECTORS_BY_FILMS = "DELETE FROM film_directors AS fd " +
+    private static final String FIND_DIRECTORS_BY_FILMS = "SELECT * FROM film_directors AS fd " +
             "JOIN directors AS d ON d.director_id = fd.director_id " +
-            "WHERE director_id IN (:IDS) " +
+            "WHERE film_id IN (:IDS) " +
             "ORDER BY d.director_id;";
 
     static final RowMapper<Director> directorRowMapper = ((rs, rowNum) -> Director.builder()
@@ -103,6 +103,24 @@ public class DirectorDbStorage implements DirectorStorage {
     public Map<Long, Set<Director>> findByFilms(Set<Long> filmIds) {
         SqlParameterSource ids = new MapSqlParameterSource("IDS", filmIds);
         return jdbcTemplate.query(FIND_DIRECTORS_BY_FILMS, ids, directorsExtractor);
+    }
+
+    @Override
+    public void add(Long filmId, Long directorId) {
+        jdbcTemplate.update(
+                "INSERT INTO FILM_DIRECTORS VALUES (:FILM_ID,:DIRECTOR_ID);",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("DIRECTOR_ID", directorId));
+    }
+
+    @Override
+    public void remove(Long filmId, Long directorId) {
+        jdbcTemplate.update(
+                "DELETE FROM FILM_DIRECTORS WHERE FILM_ID = :FILM_ID AND DIRECTOR_ID = :DIRECTOR_ID;",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("DIRECTOR_ID", directorId));
     }
 
     private MapSqlParameterSource getDirectorParams(Director director) {

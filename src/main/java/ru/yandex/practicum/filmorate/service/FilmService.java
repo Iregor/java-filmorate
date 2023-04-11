@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.*;
@@ -21,6 +22,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public Collection<Film> findAll() {
         Collection<Film> result = filmStorage.findAll();
@@ -72,6 +74,7 @@ public class FilmService {
                     film.getName()));
         }
         film.getGenres().forEach(genre -> genreStorage.add(result.get().getId(), genre.getId()));
+        film.getDirectors().forEach(director -> directorStorage.add(result.get().getId(), director.getId()));
         addDataFilms(List.of(result.get()));
         log.info("Film {} {} created.",
                 result.get().getId(), result.get().getName());
@@ -142,20 +145,38 @@ public class FilmService {
         addedGenre.forEach(genre -> genreStorage.add(film.getId(), genre.getId()));
     }
 
+    private void updateDirectorByFilm(Film film) {
+        Set<Director> removedDirector = directorStorage.findByFilmId(film.getId())
+                .stream()
+                .filter(director -> !film.getDirectors().contains(director))
+                .collect(Collectors.toSet());
+        Set<Director> addedDirector = film.getDirectors()
+                .stream()
+                .filter(director -> !directorStorage.findByFilmId(film.getId()).contains(director))
+                .collect(Collectors.toSet());
+        removedDirector.forEach(director -> directorStorage.remove(film.getId(), director.getId()));
+        addedDirector.forEach(director -> directorStorage.add(film.getId(), director.getId()));
+    }
+
     private void addDataFilms(Collection<Film> films) {
         Map<Long, Film> filmsMap = films
                 .stream()
                 .collect(Collectors.toMap(Film::getId, Function.identity()));
         Map<Long, Set<Genre>> genresMap = genreStorage.findByFilms(filmsMap.keySet());
         Map<Long, Set<Long>> likesMap = likesStorage.findByFilms(filmsMap.keySet());
+        Map<Long, Set<Director>> directorsMap = directorStorage.findByFilms(filmsMap.keySet());
         films.forEach(film -> {
             film.setGenres(new HashSet<>());
             film.setLikes(new HashSet<>());
+            film.setDirectors(new HashSet<>());
             if (Objects.requireNonNull(genresMap).containsKey(film.getId())) {
                 film.setGenres(genresMap.get(film.getId()));
             }
             if (Objects.requireNonNull(likesMap).containsKey(film.getId())) {
                 film.setLikes(likesMap.get(film.getId()));
+            }
+            if (Objects.requireNonNull(directorsMap).containsKey(film.getId())) {
+                film.setDirectors(directorsMap.get(film.getId()));
             }
         });
     }
