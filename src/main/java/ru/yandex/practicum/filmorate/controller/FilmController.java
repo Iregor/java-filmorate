@@ -60,5 +60,9 @@ public class FilmController {
         return filmService.getCommonFilms(userId, friendId);
     }
 
-
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsSortedByDirector(@PathVariable Long directorId, @RequestParam String sortBy) {
+        log.info("Получен запрос всех фильмов режиссёра с id = {}, отсортированных по {}", directorId, sortBy);
+        return filmService.getFilmDirectorSorted(directorId, sortBy);
+    }
 }
