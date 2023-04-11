@@ -21,11 +21,11 @@ public class FilmController {
         return filmService.findAll();
     }
 
-    @GetMapping(value = "/popular", params = {"count", "genreId", "year"})
+    @GetMapping(value = "/popular")
     public Collection<Film> getPopularFilms(
-            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
-            @RequestParam(value = "genreId", required = false) Long genreId,
-            @RequestParam(value = "year", required = false) String year) {
+            @RequestParam(defaultValue = "10", required = false) Integer count,
+            @RequestParam(required = false) Long genreId,
+            @RequestParam(required = false) String year) {
         return filmService.getPopularFilms(count, genreId, year);
     }
 
@@ -54,9 +54,9 @@ public class FilmController {
         filmService.dislike(filmId, userId);
     }
 
-    @GetMapping(value = "/common", params = {"userId", "friendId"})
-    public Collection<Film> getCommonFilms(@RequestParam("userId") Long userId,
-                                           @RequestParam("friendId") Long friendId) {
+    @GetMapping(value = "/common")
+    public Collection<Film> getCommonFilms(@RequestParam Long userId,
+                                           @RequestParam Long friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
 
