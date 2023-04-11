@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.Collection;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class DirectorController {
     }
 
     @PostMapping
-    public Director createDirector(@RequestBody Director director, HttpServletRequest request) {
+    public Director createDirector(@Valid @RequestBody Director director, HttpServletRequest request) {
         log.info(REQUEST_POST_LOG, request.getRequestURI());
         return service.createDirector(director);
     }

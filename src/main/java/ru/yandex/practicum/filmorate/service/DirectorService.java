@@ -3,13 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
-import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.util.Collection;
 import java.util.Optional;
-
 
 @Service
 @RequiredArgsConstructor
@@ -29,9 +27,6 @@ public class DirectorService {
     }
 
     public Director createDirector(Director director) {
-        if (director.getName().isBlank()) {
-            throw new ValidateException("Имя директора не может быть пустым.");
-        }
         Optional<Director> optionalDirector = storage.createDirector(director);
         if (optionalDirector.isEmpty()) {
             throw new IncorrectObjectIdException(String.format("Директор %s не создан.", director.getName()));
