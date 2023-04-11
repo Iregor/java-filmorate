@@ -173,6 +173,17 @@ public class FilmDbStorage implements FilmStorage {
                         .addValue("FILM_ID", filmId));
     }
 
+    @Override
+    public Collection<Film> findFilmsDirectorByYear(Long directorId) {
+        return null; // to do
+    }
+
+    @Override
+    public Collection<Film> findFilmsDirectorByLikes(Long directorId) {
+        return null; // to do
+
+    }
+
     private MapSqlParameterSource getFilmParams(Film film) {
         return new MapSqlParameterSource()
                 .addValue("FILM_ID", film.getId())
