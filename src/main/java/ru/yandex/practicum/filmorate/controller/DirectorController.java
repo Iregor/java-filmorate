@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
-import static ru.yandex.practicum.filmorate.constant.Constant.*;
-
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
@@ -17,8 +14,11 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @RequestMapping("/directors")
 public class DirectorController {
-
     private final DirectorService service;
+    public static final String REQUEST_GET_LOG = "Получен запрос к эндпойнту: 'GET {}";
+    public static final String REQUEST_POST_LOG = "Получен запрос к эндпойнту: 'POST {}";
+    public static final String REQUEST_PUT_LOG = "Получен запрос к эндпойнту: 'PUT {}";
+    public static final String REQUEST_DELETE_LOG = "Получен запрос к эндпойнту: 'DELETE {}";
 
     @GetMapping
     public Collection<Director> findAll(HttpServletRequest request) {
