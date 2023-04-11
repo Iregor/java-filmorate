@@ -75,7 +75,6 @@ public class FilmService {
                     film.getName()));
         }
         film.getGenres().forEach(genre -> genreStorage.add(result.get().getId(), genre.getId()));
-        film.getDirectors().forEach(director -> directorStorage.addInFilm(result.get().getId(), director.getId()));
         addDataFilms(List.of(result.get()));
         log.info("Film {} {} created.",
                 result.get().getId(), result.get().getName());
@@ -179,6 +178,19 @@ public class FilmService {
                 .collect(Collectors.toSet());
         removedDirector.forEach(director -> directorStorage.removeFromFilm(film.getId(), director.getId()));
         addedDirector.forEach(director -> directorStorage.addInFilm(film.getId(), director.getId()));
+    }
+
+    private void updateDirectorByFilm(Film film) {
+        Set<Director> removedDirector = directorStorage.findByFilmId(film.getId())
+                .stream()
+                .filter(director -> !film.getDirectors().contains(director))
+                .collect(Collectors.toSet());
+        Set<Director> addedDirector = film.getDirectors()
+                .stream()
+                .filter(director -> !directorStorage.findByFilmId(film.getId()).contains(director))
+                .collect(Collectors.toSet());
+        removedDirector.forEach(director -> directorStorage.remove(film.getId(), director.getId()));
+        addedDirector.forEach(director -> directorStorage.add(film.getId(), director.getId()));
     }
 
     private void addDataFilms(Collection<Film> films) {
