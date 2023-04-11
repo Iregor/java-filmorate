@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -121,6 +122,17 @@ public class FilmService {
         }
         likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
+    }
+
+    public Collection<Film> getFilmDirectorSorted(Long directorId, String sortBy) {
+        if (sortBy.equals("year")) {
+            Collection<Film> result = filmStorage.findFilmsDirectorByYear(directorId);
+            return null; // to do
+        } else if (sortBy.equals("likes")) {
+            Collection<Film> result = filmStorage.findFilmsDirectorByLikes(directorId);
+            return null; // to do
+        } else throw new IncorrectParameterException(
+                String.format("Передан некорректный параметр сортировки %s .", sortBy));
     }
 
     private void updateDirectorByFilm(Film film) {

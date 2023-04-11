@@ -18,4 +18,8 @@ public interface FilmStorage {
     Optional<Film> create(Film film);
 
     Optional<Film> update(Film film);
+
+    Collection<Film> findFilmsDirectorByYear(Long directorId);
+
+    Collection<Film> findFilmsDirectorByLikes(Long directorId);
 }
