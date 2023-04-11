@@ -21,4 +21,8 @@ public interface DirectorStorage {
     Collection<Director> findByFilmId(Long filmId);
 
     Map<Long, Set<Director>> findByFilms(Set<Long> filmIds);
+
+    void add(Long filmId, Long directorId);
+
+    void remove(Long filmId, Long directorId);
 }
