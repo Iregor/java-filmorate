@@ -2,17 +2,18 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import javax.sql.DataSource;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @AllArgsConstructor
@@ -24,10 +25,30 @@ public class DirectorDbStorage implements DirectorStorage {
     private static final String UPDATE_DIRECTOR_BY_ID = "UPDATE directors " +
             "SET director_name = :DIRECTOR_NAME WHERE director_id = :DIRECTOR_ID;";
     private static final String DELETE_DIRECTOR = "DELETE FROM directors WHERE director_id = :DIRECTOR_ID;";
+    private static final String FIND_DIRECTOR_BY_FILM_ID = "SELECT d.director_id, d.director_name " +
+            "FROM directors AS d " +
+            "JOIN film_directors AS fd ON d.director_id = fd.director_id " +
+            "WHERE fd.director_id = :DIRECTOR_ID " +
+            "ORDER BY d.director_id;";
+    private static final String FIND_DIRECTORS_BY_FILMS = "DELETE FROM film_directors AS fd " +
+            "JOIN directors AS d ON d.director_id = fd.director_id " +
+            "WHERE director_id IN (:IDS) " +
+            "ORDER BY d.director_id;";
 
     static final RowMapper<Director> directorRowMapper = ((rs, rowNum) -> Director.builder()
             .id(rs.getLong("DIRECTOR_ID"))
             .name(rs.getString("DIRECTOR_NAME")).build());
+
+    static final ResultSetExtractor<Map<Long, Set<Director>>> directorsExtractor = rs -> {
+        Map<Long, Set<Director>> filmDirectors = new HashMap<>();
+        while (rs.next()) {
+            filmDirectors.putIfAbsent(rs.getLong("FILM_ID"), new HashSet<>());
+            filmDirectors.get(rs.getLong("FILM_ID")).add(Director.builder()
+                    .id(rs.getLong("DIRECTOR_ID"))
+                    .name(rs.getString("DIRECTOR_NAME")).build());
+        }
+        return filmDirectors;
+    };
 
     @Override
     public Collection<Director> findAll() {
@@ -68,6 +89,20 @@ public class DirectorDbStorage implements DirectorStorage {
         jdbcTemplate.update(DELETE_DIRECTOR,
                 new MapSqlParameterSource()
                         .addValue("DIRECTOR_ID", id));
+    }
+
+    @Override
+    public Collection<Director> findByFilmId(Long filmId) {
+        return new HashSet<>(jdbcTemplate.query(
+                FIND_DIRECTOR_BY_FILM_ID, new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId),
+                directorRowMapper));
+    }
+
+    @Override
+    public Map<Long, Set<Director>> findByFilms(Set<Long> filmIds) {
+        SqlParameterSource ids = new MapSqlParameterSource("IDS", filmIds);
+        return jdbcTemplate.query(FIND_DIRECTORS_BY_FILMS, ids, directorsExtractor);
     }
 
     private MapSqlParameterSource getDirectorParams(Director director) {
