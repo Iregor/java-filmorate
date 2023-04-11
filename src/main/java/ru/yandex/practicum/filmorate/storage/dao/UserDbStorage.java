@@ -96,6 +96,11 @@ public class UserDbStorage implements UserStorage {
         return findById(user.getId());
     }
 
+    @Override
+    public List<Integer> findAdviseFilmsIds(Integer id) {
+        return null;
+    }
+
     private MapSqlParameterSource getUserParams(User user) {
         return new MapSqlParameterSource()
                 .addValue("USER_ID", user.getId())

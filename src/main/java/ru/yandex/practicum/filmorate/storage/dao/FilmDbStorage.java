@@ -114,6 +114,11 @@ public class FilmDbStorage implements FilmStorage {
         return findById(film.getId());
     }
 
+    @Override
+    public List<Film> filmsByIds(List<Integer> idFilmRecommended) {
+        return null;
+    }
+
     private MapSqlParameterSource getFilmParams(Film film) {
         return new MapSqlParameterSource()
                 .addValue("FILM_ID", film.getId())
