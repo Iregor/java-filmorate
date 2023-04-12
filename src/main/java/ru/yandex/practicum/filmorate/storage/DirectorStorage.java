@@ -12,17 +12,17 @@ public interface DirectorStorage {
 
     Optional<Director> findById(Long id);
 
-    Optional<Director> createDirector(Director director);
+    Optional<Director> addDirector(Director director);
 
     Optional<Director> updateDirector(Director director);
 
-    void deleteDirector(Long id);
+    void removeDirector(Long id);
 
     Collection<Director> findByFilmId(Long filmId);
 
     Map<Long, Set<Director>> findByFilms(Set<Long> filmIds);
 
-    void add(Long filmId, Long directorId);
+    void addInFilm(Long filmId, Long directorId);
 
-    void remove(Long filmId, Long directorId);
+    void removeFromFilm(Long filmId, Long directorId);
 }
