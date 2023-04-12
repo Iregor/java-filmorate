@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Collection;
 
@@ -16,38 +15,29 @@ import java.util.Collection;
 @RequestMapping("/directors")
 public class DirectorController {
     private final DirectorService service;
-    public static final String REQUEST_GET_LOG = "Получен запрос к эндпойнту: 'GET {}";
-    public static final String REQUEST_POST_LOG = "Получен запрос к эндпойнту: 'POST {}";
-    public static final String REQUEST_PUT_LOG = "Получен запрос к эндпойнту: 'PUT {}";
-    public static final String REQUEST_DELETE_LOG = "Получен запрос к эндпойнту: 'DELETE {}";
 
     @GetMapping
-    public Collection<Director> findAll(HttpServletRequest request) {
-        log.info(REQUEST_GET_LOG, request.getRequestURI());
-        return service.findAll();
+    public Collection<Director> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public Director findById(@PathVariable("id") Long id, HttpServletRequest request) {
-        log.info(REQUEST_GET_LOG, request.getRequestURI());
-        return service.findById(id);
+    public Director getById(@PathVariable("id") Long directorId) {
+        return service.getById(directorId);
     }
 
     @PostMapping
-    public Director createDirector(@Valid @RequestBody Director director, HttpServletRequest request) {
-        log.info(REQUEST_POST_LOG, request.getRequestURI());
+    public Director createDirector(@Valid @RequestBody Director director) {
         return service.createDirector(director);
     }
 
     @PutMapping
-    public Director updateDirector(@Valid @RequestBody Director director, HttpServletRequest request) {
-        log.info(REQUEST_PUT_LOG, request.getRequestURI());
+    public Director updateDirector(@Valid @RequestBody Director director) {
         return service.updateDirector(director);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDirector(@PathVariable("id") Long id, HttpServletRequest request) {
-        log.info(REQUEST_DELETE_LOG, request.getRequestURI());
-        service.deleteDirector(id);
+    public void deleteDirector(@PathVariable("id") Long directorId) {
+        service.deleteDirector(directorId);
     }
 }
