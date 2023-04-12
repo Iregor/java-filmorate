@@ -75,7 +75,7 @@ public class FilmService {
                     film.getName()));
         }
         film.getGenres().forEach(genre -> genreStorage.add(result.get().getId(), genre.getId()));
-        film.getDirectors().forEach(director -> directorStorage.add(result.get().getId(), director.getId()));
+        film.getDirectors().forEach(director -> directorStorage.addInFilm(result.get().getId(), director.getId()));
         addDataFilms(List.of(result.get()));
         log.info("Film {} {} created.",
                 result.get().getId(), result.get().getName());
