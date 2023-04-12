@@ -24,7 +24,6 @@ public class FilmService {
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
-    private final DirectorService directorService;
 
     public Collection<Film> findAll() {
         Collection<Film> result = filmStorage.findAll();
@@ -76,7 +75,7 @@ public class FilmService {
                     film.getName()));
         }
         film.getGenres().forEach(genre -> genreStorage.add(result.get().getId(), genre.getId()));
-        film.getDirectors().forEach(director -> directorStorage.add(result.get().getId(), director.getId()));
+        film.getDirectors().forEach(director -> directorStorage.addInFilm(result.get().getId(), director.getId()));
         addDataFilms(List.of(result.get()));
         log.info("Film {} {} created.",
                 result.get().getId(), result.get().getName());
@@ -148,17 +147,25 @@ public class FilmService {
     }
 
     public Collection<Film> getFilmDirectorSorted(Long directorId, String sortBy) {
-        directorService.findById(directorId);
-        if (sortBy.equals("year")) {
-            Collection<Film> result = filmStorage.findFilmsDirectorByYear(directorId);
-            addDataFilms(result);
-            return result;
-        } else if (sortBy.equals("likes")) {
-            Collection<Film> result = filmStorage.findFilmsDirectorByLikes(directorId);
-            addDataFilms(result);
-            return result;
-        } else throw new IncorrectParameterException(
-                String.format("Передан некорректный параметр сортировки %s .", sortBy));
+        log.info("Get Films by Director with id = {}, sorted by {}", directorId, sortBy);
+        if (directorStorage.findById(directorId).isEmpty()) {
+            throw new IncorrectObjectIdException(String.format("Director %s is not found.", directorId));
+        }
+        switch (sortBy) {
+            case "year": {
+                Collection<Film> result = filmStorage.findFilmsDirectorByYear(directorId);
+                addDataFilms(result);
+                return result;
+            }
+            case "likes": {
+                Collection<Film> result = filmStorage.findFilmsDirectorByLikes(directorId);
+                addDataFilms(result);
+                return result;
+            }
+            default:
+                throw new IncorrectParameterException(
+                        String.format("Invalid sort parameter %s .", sortBy));
+        }
     }
 
     private void updateDirectorByFilm(Film film) {
@@ -170,8 +177,8 @@ public class FilmService {
                 .stream()
                 .filter(director -> !directorStorage.findByFilmId(film.getId()).contains(director))
                 .collect(Collectors.toSet());
-        removedDirector.forEach(director -> directorStorage.remove(film.getId(), director.getId()));
-        addedDirector.forEach(director -> directorStorage.add(film.getId(), director.getId()));
+        removedDirector.forEach(director -> directorStorage.removeFromFilm(film.getId(), director.getId()));
+        addedDirector.forEach(director -> directorStorage.addInFilm(film.getId(), director.getId()));
     }
 
     private void addDataFilms(Collection<Film> films) {
