@@ -114,6 +114,14 @@ public class FilmDbStorage implements FilmStorage {
         return findById(film.getId());
     }
 
+    @Override
+    public void remove(Long filmId) {
+        jdbcTemplate.update(
+                "DELETE FROM films WHERE film_id = :FILM_ID",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId));
+    }
+
     private MapSqlParameterSource getFilmParams(Film film) {
         return new MapSqlParameterSource()
                 .addValue("FILM_ID", film.getId())

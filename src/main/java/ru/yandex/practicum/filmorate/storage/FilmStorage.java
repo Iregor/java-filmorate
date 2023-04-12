@@ -18,4 +18,6 @@ public interface FilmStorage {
     Optional<Film> create(Film film);
 
     Optional<Film> update(Film film);
+
+    void remove(Long filmId);
 }

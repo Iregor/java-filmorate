@@ -42,6 +42,11 @@ public class FilmController {
         return filmService.update(film);
     }
 
+    @DeleteMapping(value = "{filmId}")
+    public void delete(@PathVariable Long filmId) {
+        filmService.delete(filmId);
+    }
+
     @PutMapping("{filmId}/like/{userId}")
     public void like(@PathVariable Long filmId, @PathVariable Long userId) {
         filmService.like(filmId, userId);

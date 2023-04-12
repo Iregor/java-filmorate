@@ -77,20 +77,21 @@ public class FilmService {
             throw new IncorrectObjectIdException(String.format("Film %d %s is not updated.",
                     film.getId(), film.getName()));
         }
-        Set<Genre> removedGenre = genreStorage.findByFilmId(film.getId())
-                .stream()
-                .filter(genre -> !film.getGenres().contains(genre))
-                .collect(Collectors.toSet());
-        Set<Genre> addedGenre = film.getGenres()
-                .stream()
-                .filter(genre -> !genreStorage.findByFilmId(film.getId()).contains(genre))
-                .collect(Collectors.toSet());
-        removedGenre.forEach(genre -> genreStorage.remove(film.getId(), genre.getId()));
-        addedGenre.forEach(genre -> genreStorage.add(film.getId(), genre.getId()));
+        updateGenreByFilm(film);
         addDataFilms(List.of(result.get()));
         log.info("Film {} {} updated.",
                 result.get().getId(), result.get().getName());
         return result.get();
+    }
+
+    public void delete(Long filmId) {
+        Optional<Film> result = filmStorage.findById(filmId);
+        if (result.isEmpty()) {
+            log.warn("Film {} is not found.", filmId);
+            throw new IncorrectObjectIdException(String.format("Film %d is not found.", filmId));
+        }
+        filmStorage.remove(filmId);
+        log.info("Film {} removed.", result.get().getName());
     }
 
     public void like(Long filmId, Long userId) {
@@ -117,6 +118,19 @@ public class FilmService {
         }
         likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
+    }
+
+    private void updateGenreByFilm(Film film) {
+        Set<Genre> removedGenre = genreStorage.findByFilmId(film.getId())
+                .stream()
+                .filter(genre -> !film.getGenres().contains(genre))
+                .collect(Collectors.toSet());
+        Set<Genre> addedGenre = film.getGenres()
+                .stream()
+                .filter(genre -> !genreStorage.findByFilmId(film.getId()).contains(genre))
+                .collect(Collectors.toSet());
+        removedGenre.forEach(genre -> genreStorage.remove(film.getId(), genre.getId()));
+        addedGenre.forEach(genre -> genreStorage.add(film.getId(), genre.getId()));
     }
 
     private void addDataFilms(Collection<Film> films) {
