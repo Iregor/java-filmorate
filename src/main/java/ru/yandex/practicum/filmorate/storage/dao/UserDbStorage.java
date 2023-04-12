@@ -11,7 +11,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository("userDb")
 @RequiredArgsConstructor
@@ -98,7 +100,82 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<Integer> findAdviseFilmsIds(Integer id) {
-        return null;
+        final List<Integer> maxCommonUsersId = convertMaxCommonLikes(id);
+        final Map<Integer, List<Integer>> filmDiffByUser = getDiffFilms(id);
+        final Map<Integer, Integer> scoreByFilms = getFilmsScore(id);
+        return filmDiffByUser.entrySet().stream()
+                .filter(a -> maxCommonUsersId.contains(a.getKey()))
+                .flatMap(a -> a.getValue().stream())
+                .distinct()
+                .sorted(Comparator.comparing(scoreByFilms::get).reversed())
+                .collect(Collectors.toList());
+    }
+
+    private Map<Integer, Integer> getFilmsScore(Integer id) {
+        Map<Integer, Integer> filmsScore = new HashMap<>();
+        jdbcTemplate.query("SELECT FILM_ID, COUNT(FILM_ID) SCORE " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID IN (SELECT DISTINCT USER_ID " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID <> :ID " +
+                        "AND FILM_ID IN (SELECT FILM_ID " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID = :ID)) " +
+                        "GROUP BY FILM_ID " +
+                        "ORDER BY SCORE DESC;",
+                new MapSqlParameterSource("ID", id),
+                (ResultSet rs) -> {
+                    int filmId = rs.getInt("FILM_ID");
+                    int score = rs.getInt("SCORE");
+                    filmsScore.put(filmId, score);
+                });
+        return filmsScore;
+    }
+
+    private Map<Integer, List<Integer>> getDiffFilms(Integer id) {
+        final Map<Integer, List<Integer>> filmLikeByUserId = new HashMap<>();
+        jdbcTemplate.query(
+                "SELECT USER_ID, FILM_ID " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID IN (SELECT DISTINCT USER_ID " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID <> :ID " +
+                        "AND FILM_ID IN (SELECT FILM_ID " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID = :ID)) " +
+                        "AND FILM_ID NOT IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :ID);",
+                new MapSqlParameterSource().addValue("ID", id),
+                (ResultSet rs) -> {
+                    int userId = rs.getInt("USER_ID");
+                    int filmId = rs.getInt("FILM_ID");
+                    filmLikeByUserId.computeIfAbsent(userId, l -> new ArrayList<>()).add(filmId);
+                });
+        return filmLikeByUserId;
+    }
+
+    private List<Integer> convertMaxCommonLikes(Integer id) {
+        final List<Integer> scores = new ArrayList<>();
+        final Map<Integer, Integer> scoreByUsersId = new HashMap<>();
+        jdbcTemplate.query(
+                "SELECT USER_ID, COUNT(FILM_ID) SCORE " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID <> :ID " +
+                        "AND FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :ID) " +
+                        "GROUP BY USER_ID " +
+                        "ORDER BY SCORE DESC " +
+                        "LIMIT 1",
+                new MapSqlParameterSource().addValue("ID", id),
+                (ResultSet rs) -> {
+                    int score = rs.getInt("SCORE");
+                    scores.add(score);
+                    scoreByUsersId.put(rs.getInt("USER_ID"), score);
+                });
+        Optional<Integer> scoreMax = scores.stream().max(Comparator.naturalOrder());
+        return scoreMax.map(integer -> scoreByUsersId.entrySet()
+                .stream()
+                .filter(e -> e.getValue().equals(integer))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
 
     private MapSqlParameterSource getUserParams(User user) {
