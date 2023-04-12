@@ -184,7 +184,8 @@ public class FilmDbStorage implements FilmStorage {
                         "ORDER BY F.RELEASE_DATE;",
                 new MapSqlParameterSource()
                         .addValue("DIRECTOR_ID", directorId),
-                filmMapper);    }
+                filmMapper);
+    }
 
     @Override
     public Collection<Film> findFilmsDirectorByLikes(Long directorId) {
