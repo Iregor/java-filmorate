@@ -167,6 +167,14 @@ public class UserDbStorage implements UserStorage {
                 .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
 
+    @Override
+    public void remove(Long userId) {
+        jdbcTemplate.update(
+                "DELETE FROM users WHERE user_id = :USER_ID",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId));
+    }
+
     private MapSqlParameterSource getUserParams(User user) {
         return new MapSqlParameterSource()
                 .addValue("USER_ID", user.getId())

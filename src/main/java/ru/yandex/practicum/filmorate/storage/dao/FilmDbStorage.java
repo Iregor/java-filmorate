@@ -32,6 +32,7 @@ public class FilmDbStorage implements FilmStorage {
                             rs.getString("RATING_NAME")))
                     .genres(new HashSet<>())
                     .likes(new HashSet<>())
+                    .directors(new HashSet<>())
                     .build());
 
     @Override
@@ -56,6 +57,56 @@ public class FilmDbStorage implements FilmStorage {
                         "LIMIT :SIZE;",
                 new MapSqlParameterSource()
                         .addValue("SIZE", size),
+                filmMapper);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByGenreId(int size, Long genreId) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT FILM_ID FROM FILM_GENRES WHERE GENRE_ID = :GENRE_ID) " +
+                        "ORDER BY R.RATE DESC " +
+                        "LIMIT :SIZE;",
+                new MapSqlParameterSource()
+                        .addValue("SIZE", size)
+                        .addValue("GENRE_ID", genreId),
+                filmMapper);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByYear(int size, String year) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE EXTRACT(YEAR FROM F.RELEASE_DATE) = :YEAR " +
+                        "ORDER BY R.RATE DESC " +
+                        "LIMIT :SIZE;",
+                new MapSqlParameterSource()
+                        .addValue("SIZE", size)
+                        .addValue("YEAR", year),
+                filmMapper);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByGenreIdAndYear(int size, Long genreId, String year) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT FILM_ID FROM FILM_GENRES WHERE GENRE_ID = :GENRE_ID) " +
+                        "AND EXTRACT(YEAR FROM F.RELEASE_DATE) = :YEAR " +
+                        "ORDER BY R.RATE DESC " +
+                        "LIMIT :SIZE;",
+                new MapSqlParameterSource()
+                        .addValue("SIZE", size)
+                        .addValue("GENRE_ID", genreId)
+                        .addValue("YEAR", year),
                 filmMapper);
     }
 
@@ -127,6 +178,42 @@ public class FilmDbStorage implements FilmStorage {
                         "WHERE F.FILM_ID IN (:IDS) " +
                         "ORDER BY R.RATE DESC",
                 ids,
+                filmMapper);
+    }
+
+    @Override
+    public void remove(Long filmId) {
+        jdbcTemplate.update(
+                "DELETE FROM films WHERE film_id = :FILM_ID",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId));
+    }
+
+    @Override
+    public Collection<Film> findFilmsDirectorByYear(Long directorId) {
+        return jdbcTemplate.query("SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN ( " +
+                        "SELECT FILM_ID FROM FILM_DIRECTORS FD WHERE DIRECTOR_ID = :DIRECTOR_ID) " +
+                        "ORDER BY F.RELEASE_DATE;",
+                new MapSqlParameterSource()
+                        .addValue("DIRECTOR_ID", directorId),
+                filmMapper);
+    }
+
+    @Override
+    public Collection<Film> findFilmsDirectorByLikes(Long directorId) {
+        return jdbcTemplate.query("SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "JOIN FILM_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE FD.DIRECTOR_ID = :DIRECTOR_ID " +
+                        "ORDER BY R.RATE DESC;",
+                new MapSqlParameterSource()
+                        .addValue("DIRECTOR_ID", directorId),
                 filmMapper);
     }
 

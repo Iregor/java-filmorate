@@ -16,7 +16,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class CommonFilmsTest {
+class DeleteFilmTest {
 
     private final FilmService filmService;
     private final JdbcTemplate jdbcTemplate;
@@ -27,55 +27,20 @@ class CommonFilmsTest {
 
         jdbcTemplate.update("DELETE FROM FILMS ");
         jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
-
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
     }
 
     @Test
-    void getCommonFilms_return2Films_2usersLikes3Films() {
+    void delete3Films_return2Films_added5Films() {
         addData();
-
-        filmService.like(1L, 1L);
-        filmService.like(2L, 1L);
-        filmService.like(3L, 1L);
-
-        filmService.like(2L, 3L);
-        filmService.like(3L, 3L);
-        filmService.like(4L, 3L);
-
-        Film secondFilm = filmService.findById(2L);
+        assertThat(filmService.findAll().size()).isEqualTo(5);
+        Film firstFilm = filmService.findById(1L);
         Film thirdFilm = filmService.findById(3L);
-
-        Collection<Film> collection = filmService.getCommonFilms(1L, 3L);
+        filmService.delete(2L);
+        filmService.delete(4L);
+        filmService.delete(5L);
+        Collection<Film> collection = filmService.findAll();
         assertThat(collection.size()).isEqualTo(2);
-        assertThat(collection).asList().containsAnyOf(secondFilm, thirdFilm);
-    }
-
-    @Test
-    void getCommonFilms_return1Film_2usersLikes3FilmsAndUserDislikeFilm() {
-        addData();
-
-        filmService.like(1L, 1L);
-        filmService.like(2L, 1L);
-        filmService.like(3L, 1L);
-
-        filmService.like(2L, 3L);
-        filmService.like(3L, 3L);
-        filmService.like(4L, 3L);
-
-        Film secondFilm = filmService.findById(2L);
-        Film thirdFilm = filmService.findById(3L);
-
-        Collection<Film> collection1 = filmService.getCommonFilms(1L, 3L);
-        assertThat(collection1.size()).isEqualTo(2);
-        assertThat(collection1).asList().containsAnyOf(secondFilm, thirdFilm);
-
-        filmService.dislike(3L, 1L);
-
-        Collection<Film> collection2 = filmService.getCommonFilms(1L, 3L);
-        assertThat(collection2.size()).isEqualTo(1);
-        assertThat(collection2).asList().containsAnyOf(secondFilm);
+        assertThat(collection).asList().containsAnyOf(firstFilm, thirdFilm);
     }
 
     private void addData() {
@@ -91,12 +56,5 @@ class CommonFilmsTest {
                 " '1994-09-24', 142)," +
                 "(4 ,'Аватар', 'Синие голые чуваки бегают по лесу'," +
                 " '2009-12-10', 162);");
-
-        jdbcTemplate.update("INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY ) " +
-                "VALUES ('email@yandex.ru', 'trulala', 'Trexo', '2011-03-08')," +
-                "('ema@mail.ru', 'login', 'Name', '2001-06-05')," +
-                "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
-                "('ail@rambler.ru', 'user34321', 'User', '2021-03-18')," +
-                "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
     }
 }

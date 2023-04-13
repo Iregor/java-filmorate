@@ -24,6 +24,7 @@ class UserDbStorageTest {
 
     @BeforeEach
     void beforeEach() {
+
         jdbcTemplate.update("DELETE FROM LIKES ");
         jdbcTemplate.update("DELETE FROM USERS ");
         jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
@@ -94,3 +95,4 @@ class UserDbStorageTest {
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
     }
 }
+

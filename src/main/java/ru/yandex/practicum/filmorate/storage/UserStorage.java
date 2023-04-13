@@ -26,4 +26,6 @@ public interface UserStorage {
     Map<Integer, List<Integer>> getDiffFilms(Integer id);
 
     Map<Integer, Integer> getFilmsScore(Integer id);
+
+    void remove(Long userId);
 }

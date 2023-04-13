@@ -43,6 +43,11 @@ public class UserController {
         return userService.update(user);
     }
 
+    @DeleteMapping(value = "{userId}")
+    public void delete(@PathVariable Long userId) {
+        userService.delete(userId);
+    }
+
     @GetMapping("/{userId}/friends")
     public Collection<User> getFriends(@PathVariable Long userId) {
         return userService.getFriends(userId);
