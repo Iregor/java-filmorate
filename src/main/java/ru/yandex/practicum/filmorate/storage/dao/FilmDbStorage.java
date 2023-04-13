@@ -60,6 +60,56 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> findPopularFilmsByGenreId(int size, Long genreId) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT FILM_ID FROM FILM_GENRES WHERE GENRE_ID = :GENRE_ID) " +
+                        "ORDER BY R.RATE DESC " +
+                        "LIMIT :SIZE;",
+                new MapSqlParameterSource()
+                        .addValue("SIZE", size)
+                        .addValue("GENRE_ID", genreId),
+                filmMapper);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByYear(int size, String year) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE EXTRACT(YEAR FROM F.RELEASE_DATE) = :YEAR " +
+                        "ORDER BY R.RATE DESC " +
+                        "LIMIT :SIZE;",
+                new MapSqlParameterSource()
+                        .addValue("SIZE", size)
+                        .addValue("YEAR", year),
+                filmMapper);
+    }
+
+    @Override
+    public Collection<Film> findPopularFilmsByGenreIdAndYear(int size, Long genreId, String year) {
+        return jdbcTemplate.query(
+                "SELECT * FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES " +
+                        "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT FILM_ID FROM FILM_GENRES WHERE GENRE_ID = :GENRE_ID) " +
+                        "AND EXTRACT(YEAR FROM F.RELEASE_DATE) = :YEAR " +
+                        "ORDER BY R.RATE DESC " +
+                        "LIMIT :SIZE;",
+                new MapSqlParameterSource()
+                        .addValue("SIZE", size)
+                        .addValue("GENRE_ID", genreId)
+                        .addValue("YEAR", year),
+                filmMapper);
+    }
+
+    @Override
     public Collection<Film> findCommonFilms(Long userId, Long friendId) {
         return jdbcTemplate.query(
                 "SELECT * FROM FILMS F " +
