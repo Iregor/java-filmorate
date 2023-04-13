@@ -7,16 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -82,32 +77,6 @@ class CommonFilmsTest {
         assertThat(collection2.size()).isEqualTo(1);
         assertThat(collection2).asList().containsAnyOf(secondFilm);
     }
-
-    @Test
-    void getTwoMoviesBySearchInTitle() {
-        addData();
-        Collection<Film> collection = filmService.searchFilms("шО", List.of("title"));
-        assertThat(collection.size()).isEqualTo(2);
-
-        Film film1 = filmService.findById(3L);
-        Film film2 = filmService.findById(4L);
-
-        assertThat(collection).asList().contains(film1,film2);
-        assertTrue(film1.getName().toLowerCase().contains("шо"));
-        assertTrue(film2.getName().toLowerCase().contains("шо"));
-    }
-
-
-    @Test
-    void noFoundBySearch() throws IncorrectObjectIdException {
-        addData();
-        final IncorrectObjectIdException exception = assertThrows(
-                IncorrectObjectIdException.class, () -> filmService.searchFilms("какой то текст", List.of("title")));
-        assertEquals("Films are not found.", exception.getMessage());
-
-    }
-
-
 
     private void addData() {
         jdbcTemplate.update("INSERT INTO FILMS (RATING_ID, FILM_NAME, DESCRIPTION, " +

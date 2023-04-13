@@ -12,7 +12,10 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 @Repository("filmDb")
 @RequiredArgsConstructor
@@ -59,11 +62,10 @@ public class FilmDbStorage implements FilmStorage {
                 filmMapper);
     }
 
-
     @Override
     public Collection<Film> searchFilms(String subString, List<String> by) {
         Collection<Film> films = null;
-        if(by.contains("director") && by.contains("title")){
+        if (by.contains("director") && by.contains("title")) {
             films = jdbcTemplate.query(
                     "SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
@@ -76,9 +78,9 @@ public class FilmDbStorage implements FilmStorage {
                             "OR LOWER(D.DIRECTOR_NAME) LIKE lower(:SUBSTRING)\n" +
                             "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
-                            .addValue("SUBSTRING", "%"+subString+"%"),
+                            .addValue("SUBSTRING", "%" + subString + "%"),
                     filmMapper);
-        } else if(by.contains("title")){
+        } else if (by.contains("title")) {
             films = jdbcTemplate.query(
                     " SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
@@ -87,9 +89,9 @@ public class FilmDbStorage implements FilmStorage {
                             "WHERE  LOWER( F.FILM_NAME) LIKE lower(:SUBSTRING) \n" +
                             "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
-                            .addValue("SUBSTRING", "%"+subString+"%"),
+                            .addValue("SUBSTRING", "%" + subString + "%"),
                     filmMapper);
-        }else if(by.contains("director")){
+        } else if (by.contains("director")) {
             films = jdbcTemplate.query(
                     "SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
@@ -101,32 +103,11 @@ public class FilmDbStorage implements FilmStorage {
                             "WHERE LOWER(D.DIRECTOR_NAME) LIKE lower(:SUBSTRING)\n" +
                             "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
-                            .addValue("SUBSTRING", "%"+subString+"%"),
+                            .addValue("SUBSTRING", "%" + subString + "%"),
                     filmMapper);
         }
         return films;
     }
-
-//- title
-//    SELECT * FROM FILMS F
-//    JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID
-//    LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES
-//    GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID
-//    WHERE  LOWER( F.FILM_NAME) LIKE lower( '%n%')
-//    ORDER BY R.RATE DESC
-
-//-директор +   TITLE
-//    SELECT * FROM FILMS F
-//    JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID
-//    LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES
-//    GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID
-//    LEFT JOIN
-//    (FILM_DIRECTORS FD INNER JOIN DIRECTORS D ON FD. DIRECTOR_ID  = D. DIRECTOR_ID)
-//    on F.FILM_ID = FD.FILM_ID
-//    WHERE  LOWER( F.FILM_NAME) LIKE lower( '%n%')
-//OR LOWER( D.DIRECTOR_NAME) LIKE lower( '%n%')
-//    ORDER BY R.RATE DESC
-
 
     @Override
     public Collection<Film> findPopularFilmsByGenreId(int size, Long genreId) {
