@@ -59,13 +59,20 @@ public class FilmService {
     public Collection<Film> searchFilms(String subString, List<String> by) {
         for (String s : by) {
             if (!(s.equals("director") || s.equals("title"))) {
-                log.warn("Param %d is not correct.", s);
-                throw new ValidateException(String.format("Params %d is not correct.", s));
+                log.warn("Param %s is not correct.", s);
+                throw new ValidateException(String.format("Params %s is not correct.", s));
             }
         }
-        Collection<Film> result = filmStorage.searchFilms(subString, by);
-        log.info("Found {} film(s).", result.size());
+        Collection<Film> result = null;
+        if (by.contains("director") && by.contains("title")) {
+            result = filmStorage.searchFilmsByTitleAndDirector(subString, by);
+        } else if (by.contains("title")) {
+            result = filmStorage.searchFilmsByTitle(subString);
+        } else if (by.contains("director")) {
+            result = filmStorage.searchFilmsByDirector(subString);
+        }
         addDataFilms(result);
+        log.info("Found {} film(s).", result.size());
         return result;
     }
 
