@@ -119,6 +119,13 @@ public class  FilmService {
         log.info("User {} disliked film {}.", userId, filmId);
     }
 
+    public List<Film> convertIdsToFilms(List<Integer> idFilmRecommended) {
+        List<Film> resultAdvise = filmStorage.filmsByIds(idFilmRecommended);
+        addDataFilms(resultAdvise);
+        log.info("A list of recommended films, has been created.");
+        return resultAdvise;
+    }
+
     private void addDataFilms(Collection<Film> films) {
         Map<Long, Film> filmsMap = films
                 .stream()
@@ -136,5 +143,6 @@ public class  FilmService {
             }
         });
     }
+
 }
 

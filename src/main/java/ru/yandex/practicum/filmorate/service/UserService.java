@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -23,7 +21,6 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final LikesStorage likesStorage;
-    private final FilmStorage filmStorage;
 
     public Collection<User> findAll() {
         Collection<User> result = userStorage.findAll();
@@ -114,6 +111,18 @@ public class UserService {
         return result;
     }
 
+    public List<Integer> findAdviseFilmsIds(Integer id) {
+        final List<Integer> maxCommonUsersId = userStorage.convertMaxCommonLikes(id);
+        final Map<Integer, List<Integer>> filmDiffByUser = userStorage.getDiffFilms(id);
+        final Map<Integer, Integer> scoreByFilms = userStorage.getFilmsScore(id);
+        log.info("the prediction matrix, strongly-{} ,has been created", filmDiffByUser.size());
+        return filmDiffByUser.entrySet().stream()
+                .filter(a -> maxCommonUsersId.contains(a.getKey()))
+                .flatMap(a -> a.getValue().stream())
+                .distinct()
+                .sorted(Comparator.comparing(scoreByFilms::get).reversed())
+                .collect(Collectors.toList());
+    }
 
     private void addDataUsers(Collection<User> users) {
         Map<Long, User> usersMap = users
@@ -131,11 +140,6 @@ public class UserService {
                 user.setLikeFilms(likesMap.get(user.getId()));
             }
         });
-    }
-
-    public List<Film> getRecommendation(Integer id) {
-        List<Integer> idFilmRecommended = userStorage.findAdviseFilmsIds(id);
-        return filmStorage.filmsByIds(idFilmRecommended);
     }
 
 }

@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserStorage {
@@ -20,5 +21,9 @@ public interface UserStorage {
 
     Optional<User> update(User user);
 
-    List<Integer> findAdviseFilmsIds(Integer id);
+    List<Integer> convertMaxCommonLikes(Integer id);
+
+    Map<Integer, List<Integer>> getDiffFilms(Integer id);
+
+    Map<Integer, Integer> getFilmsScore(Integer id);
 }

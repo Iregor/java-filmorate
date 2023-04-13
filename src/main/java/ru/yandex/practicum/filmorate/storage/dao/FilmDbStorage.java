@@ -117,7 +117,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> filmsByIds(List<Integer> idFilmRecommended) {
-
         SqlParameterSource ids = new MapSqlParameterSource("IDS", idFilmRecommended);
         return jdbcTemplate.query(
                 "SELECT * " +
@@ -126,7 +125,7 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE " +
                         "FROM LIKES GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
                         "WHERE F.FILM_ID IN (:IDS) " +
-                        "ORDER BY F.FILM_ID;",
+                        "ORDER BY R.RATE DESC",
                 ids,
                 filmMapper);
     }

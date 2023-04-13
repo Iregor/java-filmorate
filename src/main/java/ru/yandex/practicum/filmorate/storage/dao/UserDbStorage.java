@@ -99,19 +99,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<Integer> findAdviseFilmsIds(Integer id) {
-        final List<Integer> maxCommonUsersId = convertMaxCommonLikes(id);
-        final Map<Integer, List<Integer>> filmDiffByUser = getDiffFilms(id);
-        final Map<Integer, Integer> scoreByFilms = getFilmsScore(id);
-        return filmDiffByUser.entrySet().stream()
-                .filter(a -> maxCommonUsersId.contains(a.getKey()))
-                .flatMap(a -> a.getValue().stream())
-                .distinct()
-                .sorted(Comparator.comparing(scoreByFilms::get).reversed())
-                .collect(Collectors.toList());
-    }
-
-    private Map<Integer, Integer> getFilmsScore(Integer id) {
+    public Map<Integer, Integer> getFilmsScore(Integer id) {
         Map<Integer, Integer> filmsScore = new HashMap<>();
         jdbcTemplate.query("SELECT FILM_ID, COUNT(FILM_ID) SCORE " +
                         "FROM LIKES " +
@@ -132,7 +120,8 @@ public class UserDbStorage implements UserStorage {
         return filmsScore;
     }
 
-    private Map<Integer, List<Integer>> getDiffFilms(Integer id) {
+    @Override
+    public Map<Integer, List<Integer>> getDiffFilms(Integer id) {
         final Map<Integer, List<Integer>> filmLikeByUserId = new HashMap<>();
         jdbcTemplate.query(
                 "SELECT USER_ID, FILM_ID " +
@@ -153,7 +142,8 @@ public class UserDbStorage implements UserStorage {
         return filmLikeByUserId;
     }
 
-    private List<Integer> convertMaxCommonLikes(Integer id) {
+    @Override
+    public List<Integer> convertMaxCommonLikes(Integer id) {
         final List<Integer> scores = new ArrayList<>();
         final Map<Integer, Integer> scoreByUsersId = new HashMap<>();
         jdbcTemplate.query(
@@ -162,8 +152,7 @@ public class UserDbStorage implements UserStorage {
                         "WHERE USER_ID <> :ID " +
                         "AND FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :ID) " +
                         "GROUP BY USER_ID " +
-                        "ORDER BY SCORE DESC " +
-                        "LIMIT 1",
+                        "ORDER BY SCORE DESC",
                 new MapSqlParameterSource().addValue("ID", id),
                 (ResultSet rs) -> {
                     int score = rs.getInt("SCORE");
