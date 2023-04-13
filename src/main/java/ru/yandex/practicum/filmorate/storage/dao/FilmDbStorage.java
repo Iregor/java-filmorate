@@ -66,7 +66,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> searchFilms(String subString, List<String> by) {
         Collection<Film> films = null;
-        if(by.contains("director") && by.contains("title")){
+        if (by.contains("director") && by.contains("title")) {
             films = jdbcTemplate.query(
                     "SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
@@ -79,9 +79,9 @@ public class FilmDbStorage implements FilmStorage {
                             "OR LOWER(D.DIRECTOR_NAME) LIKE lower(:SUBSTRING)\n" +
                             "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
-                            .addValue("SUBSTRING", "%"+subString+"%"),
+                            .addValue("SUBSTRING", "%" + subString + "%"),
                     filmMapper);
-        } else if(by.contains("title")){
+        } else if (by.contains("title")) {
             films = jdbcTemplate.query(
                     " SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
@@ -90,9 +90,9 @@ public class FilmDbStorage implements FilmStorage {
                             "WHERE  LOWER( F.FILM_NAME) LIKE lower(:SUBSTRING) \n" +
                             "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
-                            .addValue("SUBSTRING", "%"+subString+"%"),
+                            .addValue("SUBSTRING", "%" + subString + "%"),
                     filmMapper);
-        }else if(by.contains("director")){
+        } else if (by.contains("director")) {
             films = jdbcTemplate.query(
                     "SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
@@ -104,7 +104,7 @@ public class FilmDbStorage implements FilmStorage {
                             "WHERE LOWER(D.DIRECTOR_NAME) LIKE lower(:SUBSTRING)\n" +
                             "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
-                            .addValue("SUBSTRING", "%"+subString+"%"),
+                            .addValue("SUBSTRING", "%" + subString + "%"),
                     filmMapper);
         }
         return films;
