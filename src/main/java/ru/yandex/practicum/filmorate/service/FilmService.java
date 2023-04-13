@@ -136,10 +136,15 @@ public class FilmService {
     }
 
     public List<Film> convertIdsToFilms(List<Integer> idFilmRecommended) {
+        List<Film> sortedFilm = new ArrayList<>();
         List<Film> resultAdvise = filmStorage.filmsByIds(idFilmRecommended);
         addDataFilms(resultAdvise);
+        Map<Long, Film> filmMap = resultAdvise.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+        for (Integer id : idFilmRecommended) {
+            sortedFilm.add(filmMap.get(id.longValue()));
+        }
         log.info("A list of recommended films, has been created.");
-        return resultAdvise;
+        return sortedFilm;
     }
 
     private void updateGenreByFilm(Film film) {
