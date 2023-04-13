@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -57,10 +56,10 @@ public class FilmService {
     }
 
     public Collection<Film> searchFilms(String subString, List<String> by) {
-        for (String s : by) {
-            if (!(s.equals("director") || s.equals("title"))) {
-                log.warn("Param %s is not correct.", s);
-                throw new ValidateException(String.format("Params %s is not correct.", s));
+        for (String param : by) {
+            if (!(param.equals("director") || param.equals("title"))) {
+                log.warn("Param {} is not correct.", param);
+                throw new IncorrectParameterException(String.format("Param %s is not correct.", param));
             }
         }
         Collection<Film> result = null;
