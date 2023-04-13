@@ -90,6 +90,7 @@ public class FilmService {
             throw new IncorrectObjectIdException(String.format("Film %d %s is not updated.",
                     film.getId(), film.getName()));
         }
+
         updateGenreByFilm(film);
         updateDirectorByFilm(film);
         addDataFilms(List.of(result.get()));
