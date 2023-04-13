@@ -60,39 +60,73 @@ public class FilmDbStorage implements FilmStorage {
     }
 
 
-    SELECT * FROM FILMS  where  LOWER( film_name) like '%f%'
-    SELECT * FROM FILMS f  left join likes l on f.film_id = l.film_id  where  LOWER( f.film_name) like '%f%' order
     @Override
     public Collection<Film> searchFilms(String subString, List<String> by) {
-        Collection<Film> films;
+        Collection<Film> films = null;
+        if(by.contains("director") && by.contains("title")){
+            films = jdbcTemplate.query(
+                    "SELECT * FROM FILMS F\n" +
+                            "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
+                            "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES \n" +
+                            "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID \n" +
+                            "LEFT JOIN \n" +
+                            "(FILM_DIRECTORS FD INNER JOIN DIRECTORS D ON FD. DIRECTOR_ID  = D. DIRECTOR_ID)\n" +
+                            "ON F.FILM_ID = FD.FILM_ID \n" +
+                            "WHERE LOWER(F.FILM_NAME) LIKE lower(:SUBSTRING)\n" +
+                            "OR LOWER(D.DIRECTOR_NAME) LIKE lower(:SUBSTRING)\n" +
+                            "ORDER BY R.RATE DESC",
+                    new MapSqlParameterSource()
+                            .addValue("SUBSTRING", "%"+subString+"%"),
+                    filmMapper);
+        } else if(by.contains("title")){
             films = jdbcTemplate.query(
                     " SELECT * FROM FILMS F\n" +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
                             "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES \n" +
                             "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID \n" +
-                            "WHERE  LOWER( F.FILM_NAME) LIKE :SUBSTRING \n" +
-                            "ORDER BY R.RATE DESC ",
+                            "WHERE  LOWER( F.FILM_NAME) LIKE lower(:SUBSTRING) \n" +
+                            "ORDER BY R.RATE DESC",
                     new MapSqlParameterSource()
                             .addValue("SUBSTRING", "%"+subString+"%"),
                     filmMapper);
+        }else if(by.contains("director")){
+            films = jdbcTemplate.query(
+                    "SELECT * FROM FILMS F\n" +
+                            "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID \n" +
+                            "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES \n" +
+                            "GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID \n" +
+                            "LEFT JOIN \n" +
+                            "(FILM_DIRECTORS FD INNER JOIN DIRECTORS D ON FD. DIRECTOR_ID  = D. DIRECTOR_ID)\n" +
+                            "ON F.FILM_ID = FD.FILM_ID \n" +
+                            "WHERE LOWER(D.DIRECTOR_NAME) LIKE lower(:SUBSTRING)\n" +
+                            "ORDER BY R.RATE DESC",
+                    new MapSqlParameterSource()
+                            .addValue("SUBSTRING", "%"+subString+"%"),
+                    filmMapper);
+        }
         return films;
     }
 
-
-//    SELECT count(l.user_id) as morelike, F.film_id, F.film_name, F.description, F.release_date, F.duration, F.rating_id, r.rating_name FROM FILMS F
-//    inner join rating r on r.rating_id = F.rating_id
-//    left join likes l on F.film_id = l.film_id
-//    where  LOWER( F.film_name) like '%%'
-//    GROUP BY  F.film_id
-//    order by morelike desc
-//
-//
+//- title
 //    SELECT * FROM FILMS F
 //    JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID
 //    LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES
 //    GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID
-//    WHERE  LOWER( F.FILM_NAME) LIKE '%:SUBSTRING%'
+//    WHERE  LOWER( F.FILM_NAME) LIKE lower( '%n%')
 //    ORDER BY R.RATE DESC
+
+//-директор +   TITLE
+//    SELECT * FROM FILMS F
+//    JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID
+//    LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE FROM LIKES
+//    GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID
+//    LEFT JOIN
+//    (FILM_DIRECTORS FD INNER JOIN DIRECTORS D ON FD. DIRECTOR_ID  = D. DIRECTOR_ID)
+//    on F.FILM_ID = FD.FILM_ID
+//    WHERE  LOWER( F.FILM_NAME) LIKE lower( '%n%')
+//OR LOWER( D.DIRECTOR_NAME) LIKE lower( '%n%')
+//    ORDER BY R.RATE DESC
+
 
     @Override
     public Collection<Film> findPopularFilmsByGenreId(int size, Long genreId) {
