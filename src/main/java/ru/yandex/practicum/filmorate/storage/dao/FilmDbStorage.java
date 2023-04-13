@@ -46,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findPopularFilms(int size, Long genreId, String year) {
+    public Collection<Film> findPopularFilms(int size) {
         return jdbcTemplate.query(
                 "SELECT * FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
