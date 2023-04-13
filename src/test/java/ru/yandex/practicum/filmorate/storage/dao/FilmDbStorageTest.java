@@ -22,7 +22,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTest {
 
-    @Qualifier("filmDb")
     private final FilmStorage filmStorage;
     private final JdbcTemplate jdbcTemplate;
 

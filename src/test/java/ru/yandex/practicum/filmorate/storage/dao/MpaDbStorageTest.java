@@ -18,7 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class MpaDbStorageTest {
 
-    @Qualifier("mpaDb") private final MpaStorage mpaStorage;
+    private final MpaStorage mpaStorage;
 
     @Test
     void findAll_return5Mpa_adding5Mpa() {

@@ -19,7 +19,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class GenreDbStorageTest {
-    @Qualifier("genreDb")
     private final GenreStorage genreStorage;
     private final JdbcTemplate jdbcTemplate;
 
@@ -65,3 +64,4 @@ class GenreDbStorageTest {
                 "('Боевик')");
     }
 }
+
