@@ -55,6 +55,26 @@ public class FilmService {
         return result;
     }
 
+    public Collection<Film> searchFilms(String subString, List<String> by) {
+        for (String param : by) {
+            if (!(param.equals("director") || param.equals("title"))) {
+                log.warn("Param {} is not correct.", param);
+                throw new IncorrectParameterException(String.format("Param %s is not correct.", param));
+            }
+        }
+        Collection<Film> result = null;
+        if (by.contains("director") && by.contains("title")) {
+            result = filmStorage.searchFilmsByTitleAndDirector(subString, by);
+        } else if (by.contains("title")) {
+            result = filmStorage.searchFilmsByTitle(subString);
+        } else if (by.contains("director")) {
+            result = filmStorage.searchFilmsByDirector(subString);
+        }
+        addDataFilms(result);
+        log.info("Found {} film(s).", result.size());
+        return result;
+    }
+
     public Film findById(Long filmId) {
         Optional<Film> result = filmStorage.findById(filmId);
         if (result.isEmpty()) {
