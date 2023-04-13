@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -36,6 +37,11 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         return userService.update(user);
+    }
+
+    @DeleteMapping(value = "{userId}")
+    public void delete(@PathVariable Long userId) {
+        userService.delete(userId);
     }
 
     @GetMapping("/{userId}/friends")

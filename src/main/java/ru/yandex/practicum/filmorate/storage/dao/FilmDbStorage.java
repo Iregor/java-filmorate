@@ -166,6 +166,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void remove(Long filmId) {
+        jdbcTemplate.update(
+                "DELETE FROM films WHERE film_id = :FILM_ID",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId));
+    }
+
+    @Override
     public Collection<Film> findFilmsDirectorByYear(Long directorId) {
         return jdbcTemplate.query("SELECT * FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +

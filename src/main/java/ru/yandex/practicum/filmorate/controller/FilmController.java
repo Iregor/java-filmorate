@@ -14,6 +14,7 @@ import java.util.Collection;
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
+
     private final FilmService filmService;
 
     @GetMapping
@@ -42,6 +43,11 @@ public class FilmController {
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         return filmService.update(film);
+    }
+
+    @DeleteMapping(value = "{filmId}")
+    public void delete(@PathVariable Long filmId) {
+        filmService.delete(filmId);
     }
 
     @PutMapping("{filmId}/like/{userId}")
