@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -68,9 +67,8 @@ public class UserController {
         return userService.getCommonFriends(userId, friendId);
     }
 
-    @GetMapping("/{id}/recommendations")
-    public List<Film> getRecommendation(@PathVariable("id") Integer id) {
-        return filmService.convertIdsToFilms(userService.findAdviseFilmsIds(id));
+    @GetMapping("/{userId}/recommendations")
+    public Collection<Film> getRecommendation(@PathVariable Long userId) {
+        return filmService.convertIdsToFilms(userService.findAdviseFilmsIds(userId));
     }
-
 }

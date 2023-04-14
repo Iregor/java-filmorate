@@ -21,11 +21,11 @@ public interface UserStorage {
 
     Optional<User> update(User user);
 
-    List<Integer> convertMaxCommonLikes(Integer id);
+    Collection<Long> convertMaxCommonLikes(Long userId);
 
-    Map<Integer, List<Integer>> getDiffFilms(Integer id);
+    Map<Long, List<Long>> getDiffFilms(Long userId);
 
-    Map<Integer, Integer> getFilmsScore(Integer id);
+    Map<Long, Integer> getFilmsScore(Long userId);
 
     void remove(Long userId);
 }

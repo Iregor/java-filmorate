@@ -217,8 +217,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> filmsByIds(List<Integer> idFilmRecommended) {
-        SqlParameterSource ids = new MapSqlParameterSource("IDS", idFilmRecommended);
+    public Collection<Film> filmsByIds(Collection<Long> filmsIds) {
+        SqlParameterSource ids = new MapSqlParameterSource("IDS", filmsIds);
         return jdbcTemplate.query(
                 "SELECT * " +
                         "FROM FILMS F " +

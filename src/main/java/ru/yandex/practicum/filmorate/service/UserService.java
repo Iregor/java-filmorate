@@ -133,10 +133,10 @@ public class UserService {
         return result;
     }
 
-    public List<Integer> findAdviseFilmsIds(Integer id) {
-        final List<Integer> maxCommonUsersId = userStorage.convertMaxCommonLikes(id);
-        final Map<Integer, List<Integer>> filmDiffByUser = userStorage.getDiffFilms(id);
-        final Map<Integer, Integer> scoreByFilms = userStorage.getFilmsScore(id);
+    public Collection<Long> findAdviseFilmsIds(Long userId) {
+        final Collection<Long> maxCommonUsersId = userStorage.convertMaxCommonLikes(userId);
+        final Map<Long, List<Long>> filmDiffByUser = userStorage.getDiffFilms(userId);
+        final Map<Long, Integer> scoreByFilms = userStorage.getFilmsScore(userId);
         log.info("the prediction matrix, strongly-{} ,has been created", filmDiffByUser.size());
         return filmDiffByUser.entrySet().stream()
                 .filter(a -> maxCommonUsersId.contains(a.getKey()))
@@ -163,5 +163,4 @@ public class UserService {
             }
         });
     }
-
 }

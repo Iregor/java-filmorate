@@ -99,70 +99,67 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Map<Integer, Integer> getFilmsScore(Integer id) {
-        Map<Integer, Integer> filmsScore = new HashMap<>();
+    public Map<Long, Integer> getFilmsScore(Long userId) {
+        Map<Long, Integer> filmsScore = new HashMap<>();
         jdbcTemplate.query("SELECT FILM_ID, COUNT(FILM_ID) SCORE " +
                         "FROM LIKES " +
                         "WHERE USER_ID IN (SELECT DISTINCT USER_ID " +
                         "FROM LIKES " +
-                        "WHERE USER_ID <> :ID " +
+                        "WHERE USER_ID <> :USER_ID " +
                         "AND FILM_ID IN (SELECT FILM_ID " +
                         "FROM LIKES " +
-                        "WHERE USER_ID = :ID)) " +
+                        "WHERE USER_ID = :USER_ID)) " +
                         "GROUP BY FILM_ID " +
                         "ORDER BY SCORE DESC;",
-                new MapSqlParameterSource("ID", id),
+                new MapSqlParameterSource("USER_ID", userId),
                 (ResultSet rs) -> {
-                    int filmId = rs.getInt("FILM_ID");
-                    int score = rs.getInt("SCORE");
-                    filmsScore.put(filmId, score);
+                    filmsScore.put(rs.getLong("FILM_ID"), rs.getInt("SCORE"));
                 });
         return filmsScore;
     }
 
     @Override
-    public Map<Integer, List<Integer>> getDiffFilms(Integer id) {
-        final Map<Integer, List<Integer>> filmLikeByUserId = new HashMap<>();
+    public Map<Long, List<Long>> getDiffFilms(Long userId) {
+        final Map<Long, List<Long>> filmLikeByUserId = new HashMap<>();
         jdbcTemplate.query(
                 "SELECT USER_ID, FILM_ID " +
                         "FROM LIKES " +
                         "WHERE USER_ID IN (SELECT DISTINCT USER_ID " +
                         "FROM LIKES " +
-                        "WHERE USER_ID <> :ID " +
+                        "WHERE USER_ID <> :USER_ID " +
                         "AND FILM_ID IN (SELECT FILM_ID " +
                         "FROM LIKES " +
-                        "WHERE USER_ID = :ID)) " +
-                        "AND FILM_ID NOT IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :ID);",
-                new MapSqlParameterSource().addValue("ID", id),
+                        "WHERE USER_ID = :USER_ID)) " +
+                        "AND FILM_ID NOT IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :USER_ID);",
+                new MapSqlParameterSource().addValue("USER_ID", userId),
                 (ResultSet rs) -> {
-                    int userId = rs.getInt("USER_ID");
-                    int filmId = rs.getInt("FILM_ID");
-                    filmLikeByUserId.computeIfAbsent(userId, l -> new ArrayList<>()).add(filmId);
+                    filmLikeByUserId.computeIfAbsent(rs.getLong("USER_ID"), l -> new ArrayList<>())
+                            .add(rs.getLong("FILM_ID"));
                 });
         return filmLikeByUserId;
     }
 
     @Override
-    public List<Integer> convertMaxCommonLikes(Integer id) {
-        final List<Integer> scores = new ArrayList<>();
-        final Map<Integer, Integer> scoreByUsersId = new HashMap<>();
+    public Collection<Long> convertMaxCommonLikes(Long userId) {
+        final List<Long> scores = new ArrayList<>();
+        final Map<Long, Long> scoreByUsersId = new HashMap<>();
         jdbcTemplate.query(
                 "SELECT USER_ID, COUNT(FILM_ID) SCORE " +
                         "FROM LIKES " +
-                        "WHERE USER_ID <> :ID " +
-                        "AND FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :ID) " +
+                        "WHERE USER_ID <> :USER_ID " +
+                        "AND FILM_ID IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :USER_ID) " +
                         "GROUP BY USER_ID " +
                         "ORDER BY SCORE DESC",
-                new MapSqlParameterSource().addValue("ID", id),
+                new MapSqlParameterSource().addValue("USER_ID", userId),
                 (ResultSet rs) -> {
-                    int score = rs.getInt("SCORE");
+                    long score = rs.getLong("SCORE");
                     scores.add(score);
-                    scoreByUsersId.put(rs.getInt("USER_ID"), score);
+                    scoreByUsersId.put(rs.getLong("USER_ID"), score);
                 });
-        Optional<Integer> scoreMax = scores.stream().max(Comparator.naturalOrder());
-        return scoreMax.map(integer -> scoreByUsersId.entrySet()
+        Optional<Long> scoreMax = scores.stream().max(Comparator.naturalOrder());
+        return scoreMax.map(l -> scoreByUsersId.entrySet()
                 .stream()
-                .filter(e -> e.getValue().equals(integer))
+                .filter(e -> e.getValue().equals(l))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
