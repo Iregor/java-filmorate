@@ -1,30 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 
 @Data
+@Builder
 public class Review {
 
-    @Positive(message = "Идентификатор не может быть отрицательным.")
-    private Long id;
+    private Long reviewId;
 
     @NotBlank
     private String content;
 
+    @JsonProperty("isPositive")
     @NotNull(message = "Тип отзыва не может быть null.")
-    private boolean isPositive;
+    private Boolean positive;
 
-    @Positive(message = "Идентификатор не может быть отрицательным.")
+    @NotNull
     private Long userId;
 
-    @Positive(message = "Идентификатор не может быть отрицательным.")
+    @NotNull
     private Long filmId;
 
-    //ограничение не добавлять (может быть null)
     private Long useful;
 }
