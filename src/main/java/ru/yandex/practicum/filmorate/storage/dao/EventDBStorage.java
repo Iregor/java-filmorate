@@ -18,6 +18,7 @@ import ru.yandex.practicum.filmorate.storage.EventStorage;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class EventDBStorage implements EventStorage {
     static final RowMapper<Event> eventMapper = (rs, rowNum) -> Event.builder()
             .eventId(rs.getInt("EVENT_ID"))
             .userId(rs.getLong("USER_ID"))
-            .timestamp(Timestamp.valueOf(rs.getTimestamp("TIMESTAMP").toLocalDateTime()))
+            .timestamp(rs.getLong("TIMESTAMP"))
             .eventType(EventType.valueOf(rs.getString("EVENT_TYPE")))
             .operation(Operation.valueOf(rs.getString("OPERATION")))
             .entityId(rs.getLong("ENTITY_ID"))
@@ -82,7 +83,7 @@ public class EventDBStorage implements EventStorage {
                 .addValue("EVENT_TYPE", event.getEventType().name())
                 .addValue("OPERATION", event.getOperation())
                 .addValue("ENTITY_ID", event.getEntityId())
-                .addValue("TIMESTAMP", Timestamp.valueOf(LocalDateTime.now()));
+                .addValue("TIMESTAMP", Instant.now().toEpochMilli());
         SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("FEEDS")
                 .usingGeneratedKeyColumns("EVENT_ID");
         insert.execute(param);
