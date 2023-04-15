@@ -14,10 +14,7 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Repository("reviewDB")
 @RequiredArgsConstructor
@@ -38,7 +35,7 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Optional<Review> updateReview(Review review) {
         jdbcTemplate.update(
-                "UPDATE reviews` SET " +
+                "UPDATE reviews SET " +
                         "content = :content, " +
                         "is_positive = :is_positive " +
                         "WHERE review_id = :review_id; ",
@@ -76,7 +73,7 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Collection<Review> findAllReviews(Long filmId, Long count) {
         StringBuilder sqlQuery = new StringBuilder(
-                "SELECT * FROM reviews " +
+                "SELECT *, COALESCE(useful, 0) as likeRate FROM reviews " +
                         "LEFT OUTER JOIN " +
                         "(SELECT review_id, (SUM(is_like = true) - SUM(is_like = false)) AS useful " +
                         "FROM review_marks " +
@@ -86,16 +83,13 @@ public class ReviewDbStorage implements ReviewStorage {
             sqlQuery.append("WHERE reviews.film_id = :filmId ");
         }
         sqlQuery.append(
-                "ORDER BY review_marks.useful DESC " +
+                "ORDER BY likeRate DESC " +
                         "LIMIT :count; ");
-        try (Stream<Review> stream = jdbcTemplate.queryForStream(
-                sqlQuery.toString(),
+        return jdbcTemplate.query(sqlQuery.toString(),
                 new MapSqlParameterSource()
                         .addValue("filmId", filmId)
                         .addValue("count", count),
-                this::mapReview)) {
-            return stream.sorted(Comparator.comparingLong(Review::getUseful).reversed()).collect(Collectors.toList());
-        }
+                this::mapReview);
     }
 
     @Override
@@ -123,7 +117,7 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Optional<ReviewMark> deleteReviewLike(Long reviewId, Long userId) {
         jdbcTemplate.update(
-                "DELETE FROM review_marks WHERE review_id = :id AND user_id = :userId AND is_like = true;",
+                "DELETE FROM review_marks WHERE review_id = :review_id AND user_id = :user_id AND is_like = true;",
                 new MapSqlParameterSource().addValue("review_id", reviewId).addValue("user_id", userId));
         return findReviewMark(reviewId, userId, true);
     }
@@ -131,7 +125,7 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Optional<ReviewMark> deleteReviewDislike(Long reviewId, Long userId) {
         jdbcTemplate.update(
-                "DELETE FROM review_marks WHERE review_id = :id AND user_id = :userId AND is_like = false;",
+                "DELETE FROM review_marks WHERE review_id = :review_id AND user_id = :user_id AND is_like = false;",
                 new MapSqlParameterSource().addValue("review_id", reviewId).addValue("user_id", userId));
         return findReviewMark(reviewId, userId, false);
     }
