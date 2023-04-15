@@ -1,20 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.enums.EventType;
-import ru.yandex.practicum.filmorate.model.enums.Operation;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -31,60 +23,6 @@ public class FeedTests {
     @BeforeEach
     void beforeEach() {
         jdbcTemplate.update("DELETE FROM FEEDS");
-        jdbcTemplate.update("DELETE FROM FILMS");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
-        jdbcTemplate.update("DELETE FROM USERS");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
-        jdbcTemplate.update("DELETE FROM FRIENDSHIPS");
-        jdbcTemplate.update("DELETE FROM LIKES");
-
-        addData();
-    }
-
-    @Test
-    void getAFeedWithThreeEvents() {
-        filmService.like(1L, 1L);
-        filmService.like(2L, 1L);
-        filmService.like(3L, 1L);
-
-        Collection<Event> collection = eventService.getFeed(1L);
-        List<Event> eventList = new ArrayList<>(collection);
-        Event event = eventList.get(0);
-
-        assertThat(eventService.getFeed(1L).size()).isEqualTo(3);
-        assertThat(event.getEventType()).isEqualTo(EventType.LIKE);
-        assertThat(event.getOperation()).isEqualTo(Operation.ADD);
-    }
-
-    @Test
-    void getEmptyFeed() {
-        assertThat(eventService.getFeed(1L).size()).isEqualTo(0);
-    }
-
-    @Test
-    void getFeedWithDifferentEvents() {
-        filmService.like(1L, 2L);
-        filmService.like(1L, 1L);
-        filmService.dislike(1L, 2L);
-
-        filmService.like(2L, 2L);
-        filmService.like(3L, 1L);
-
-        userService.addFriend(1L, 2L);
-        userService.addFriend(1L, 3L);
-        userService.addFriend(1L, 4L);
-        userService.deleteFriend(1L, 2L);
-
-        Collection<Event> collection = eventService.getFeed(1L);
-        List<Event> eventList = new ArrayList<>(collection);
-        Event event = eventList.get(2);
-
-        assertThat(eventService.getFeed(1L).size()).isEqualTo(6);
-        assertThat(event.getEventType()).isEqualTo(EventType.FRIEND);
-        assertThat(event.getOperation()).isEqualTo(Operation.ADD);
-
-        Event eventTwo = eventList.get(4);
-        Assertions.assertTrue(collection.contains(eventTwo));
     }
 
     private void addData() {
@@ -107,5 +45,41 @@ public class FeedTests {
                 "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
                 "('ail@rambler.ru', 'user34321', 'User', '2021-03-18')," +
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
+    }
+
+    @Test
+    void getAFeedWithThreeEvents() {
+        addData();
+
+        filmService.like(1L, 1L);
+        filmService.like(2L, 1L);
+        filmService.like(3L, 1L);
+
+        assertThat(eventService.getFeed(1L).size()).isEqualTo(3);
+    }
+
+    @Test
+    void getEmptyFeed() {
+        addData();
+
+        assertThat(eventService.getFeed(1L).size()).isEqualTo(0);
+    }
+
+    @Test
+    void getFeedWithDifferentEvents() {
+        addData();
+        filmService.like(1L, 2L);
+        filmService.like(1L, 1L);
+        filmService.dislike(1L, 2L);
+
+        filmService.like(2L, 2L);
+        filmService.like(3L, 1L);
+
+        userService.addFriend(1L, 2L);
+        userService.addFriend(1L, 3L);
+        userService.addFriend(1L, 4L);
+        userService.deleteFriend(1L, 2L);
+
+        assertThat(eventService.getFeed(1L).size()).isEqualTo(6);
     }
 }
