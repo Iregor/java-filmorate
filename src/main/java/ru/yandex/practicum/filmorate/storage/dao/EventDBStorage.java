@@ -16,14 +16,9 @@ import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.storage.EventStorage;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+
 
 @Component("EventDBStorage")
 @Slf4j
@@ -53,28 +48,6 @@ public class EventDBStorage implements EventStorage {
         return jdbcTemplate.query(query, new Object[]{id}, eventMapper);
     }
 
-//    public void createEvent(Long userId, Long entityId, EventType eventType, Operation operation) {
-//        log.info("Добавление события в ленту пользователя с с id-{} ", userId);
-//        String sql = "INSERT INTO FEEDS (" +
-//                "TIMESTAMP" +
-//                ", USER_ID" +
-//                ", ENTITY_ID" +
-//                ", EVENT_TYPE" +
-//                ", OPERATION" +
-//                ") " +
-//                "VALUES (?,?,?,?,?)";
-//
-//        jdbcTemplate.update(connection -> {
-//            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"event_id"});
-//            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-//            stmt.setTimestamp(1, timestamp);
-//            stmt.setInt(2, Math.toIntExact(userId));
-//            stmt.setInt(3, Math.toIntExact(entityId));
-//            stmt.setString(4, eventType.toString());
-//            stmt.setString(5, operation.toString());
-//            return stmt;
-//        });
-//    }
 
     @Override
     public void addEvent(Event event) {
