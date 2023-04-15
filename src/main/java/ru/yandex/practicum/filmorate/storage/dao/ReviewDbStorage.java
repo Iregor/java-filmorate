@@ -38,7 +38,7 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Optional<Review> updateReview(Review review) {
         jdbcTemplate.update(
-                "UPDATE reviews SET " +
+                "UPDATE reviews` SET " +
                         "content = :content, " +
                         "is_positive = :is_positive " +
                         "WHERE review_id = :review_id; ",
@@ -47,15 +47,15 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Optional<Review> deleteReview(Long id) {
+    public Optional<Review> deleteReview(Long reviewId) {
         jdbcTemplate.update(
                 "DELETE FROM reviews WHERE review_id = :id",
-                new MapSqlParameterSource().addValue("id", id));
-        return findReviewById(id);
+                new MapSqlParameterSource().addValue("id", reviewId));
+        return findReviewById(reviewId);
     }
 
     @Override
-    public Optional<Review> findReviewById(Long id) {
+    public Optional<Review> findReviewById(Long reviewId) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
                     "SELECT * FROM reviews " +
@@ -66,7 +66,7 @@ public class ReviewDbStorage implements ReviewStorage {
                             "GROUP BY review_id) AS review_marks " +
                             "ON reviews.review_id = review_marks.review_id " +
                             "WHERE reviews.review_id = :review_id; ",
-                    new MapSqlParameterSource().addValue("review_id", id),
+                    new MapSqlParameterSource().addValue("review_id", reviewId),
                     this::mapReview));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -99,41 +99,41 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Optional<ReviewMark> addLikeToReview(Long id, Long userId) {
+    public Optional<ReviewMark> addLikeToReview(Long reviewId, Long userId) {
         new SimpleJdbcInsert(dataSource)
                 .withTableName("review_marks")
                 .execute(new MapSqlParameterSource()
-                        .addValue("review_id", id)
+                        .addValue("review_id", reviewId)
                         .addValue("user_id", userId)
                         .addValue("is_like", true));
-        return findReviewMark(id, userId, true);
+        return findReviewMark(reviewId, userId, true);
     }
 
     @Override
-    public Optional<ReviewMark> addDislikeToReview(Long id, Long userId) {
+    public Optional<ReviewMark> addDislikeToReview(Long reviewId, Long userId) {
         new SimpleJdbcInsert(dataSource)
                 .withTableName("review_marks")
                 .execute(new MapSqlParameterSource()
-                        .addValue("review_id", id)
+                        .addValue("review_id", reviewId)
                         .addValue("user_id", userId)
                         .addValue("is_like", false));
-        return findReviewMark(id, userId, false);
+        return findReviewMark(reviewId, userId, false);
     }
 
     @Override
-    public Optional<ReviewMark> deleteReviewLike(Long id, Long userId) {
+    public Optional<ReviewMark> deleteReviewLike(Long reviewId, Long userId) {
         jdbcTemplate.update(
                 "DELETE FROM review_marks WHERE review_id = :id AND user_id = :userId AND is_like = true;",
-                new MapSqlParameterSource().addValue("review_id", id).addValue("user_id", userId));
-        return findReviewMark(id, userId, true);
+                new MapSqlParameterSource().addValue("review_id", reviewId).addValue("user_id", userId));
+        return findReviewMark(reviewId, userId, true);
     }
 
     @Override
-    public Optional<ReviewMark> deleteReviewDislike(Long id, Long userId) {
+    public Optional<ReviewMark> deleteReviewDislike(Long reviewId, Long userId) {
         jdbcTemplate.update(
                 "DELETE FROM review_marks WHERE review_id = :id AND user_id = :userId AND is_like = false;",
-                new MapSqlParameterSource().addValue("review_id", id).addValue("user_id", userId));
-        return findReviewMark(id, userId, false);
+                new MapSqlParameterSource().addValue("review_id", reviewId).addValue("user_id", userId));
+        return findReviewMark(reviewId, userId, false);
     }
 
     @Override

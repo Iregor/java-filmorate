@@ -46,20 +46,20 @@ public class ReviewService {
         return result.get();
     }
 
-    public void deleteReview(Long id) {
-        assertReviewExists(id);
-        Optional<Review> result = reviewStorage.deleteReview(id);
+    public void deleteReview(Long reviewId) {
+        assertReviewExists(reviewId);
+        Optional<Review> result = reviewStorage.deleteReview(reviewId);
         if (result.isPresent()) {
-            log.warn("Review with id: {} is not deleted.", id);
-            throw new IncorrectObjectIdException(String.format("Review with id: %d is not deleted.", id));
+            log.warn("Review with id: {} is not deleted.", reviewId);
+            throw new IncorrectObjectIdException(String.format("Review with id: %d is not deleted.", reviewId));
         }
     }
 
-    public Review findReviewById(Long id) {
-        Optional<Review> result = reviewStorage.findReviewById(id);
+    public Review findReviewById(Long reviewId) {
+        Optional<Review> result = reviewStorage.findReviewById(reviewId);
         if (result.isEmpty()) {
-            log.warn("Review id: {} not found.", id);
-            throw new IncorrectObjectIdException(String.format("Review id: %d not found.", id));
+            log.warn("Review id: {} not found.", reviewId);
+            throw new IncorrectObjectIdException(String.format("Review id: %d not found.", reviewId));
         }
         return result.get();
     }
@@ -71,47 +71,47 @@ public class ReviewService {
         return reviewStorage.findAllReviews(filmId, count);
     }
 
-    public void addLikeToReview(Long id, Long userId) {
-        assertReviewExists(id);
+    public void addLikeToReview(Long reviewId, Long userId) {
+        assertReviewExists(reviewId);
         assertUserExists(userId);
-        assertReviewMarkNotExists(id, userId, true);
-        Optional<ReviewMark> result = reviewStorage.addLikeToReview(id, userId);
+        assertReviewMarkNotExists(reviewId, userId, true);
+        Optional<ReviewMark> result = reviewStorage.addLikeToReview(reviewId, userId);
         if (result.isEmpty()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not created.", id, userId, true);
+            log.warn("Mark of review id: {} from user id: {} with value {} is not created.", reviewId, userId, true);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not created.", id, userId, true));
+                    "Mark of review id: %d from user id: %d with value %b is not created.", reviewId, userId, true));
         }
     }
 
-    public void addDislikeToReview(Long id, Long userId) {
-        assertReviewExists(id);
+    public void addDislikeToReview(Long reviewId, Long userId) {
+        assertReviewExists(reviewId);
         assertUserExists(userId);
-        assertReviewMarkNotExists(id, userId, false);
-        Optional<ReviewMark> result = reviewStorage.addDislikeToReview(id, userId);
+        assertReviewMarkNotExists(reviewId, userId, false);
+        Optional<ReviewMark> result = reviewStorage.addDislikeToReview(reviewId, userId);
         if (result.isEmpty()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not created.", id, userId, false);
+            log.warn("Mark of review id: {} from user id: {} with value {} is not created.", reviewId, userId, false);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not created.", id, userId, false));
+                    "Mark of review id: %d from user id: %d with value %b is not created.", reviewId, userId, false));
         }
     }
 
-    public void deleteReviewLike(Long id, Long userId) {
-        assertReviewMarkExists(id, userId, true);
-        Optional<ReviewMark> result = reviewStorage.deleteReviewLike(id, userId);
+    public void deleteReviewLike(Long reviewId, Long userId) {
+        assertReviewMarkExists(reviewId, userId, true);
+        Optional<ReviewMark> result = reviewStorage.deleteReviewLike(reviewId, userId);
         if (result.isPresent()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.", id, userId, true);
+            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.", reviewId, userId, true);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not deleted.", id, userId, true));
+                    "Mark of review id: %d from user id: %d with value %b is not deleted.", reviewId, userId, true));
         }
     }
 
-    public void deleteReviewDislike(Long id, Long userId) {
-        assertReviewMarkExists(id, userId, false);
-        Optional<ReviewMark> result = reviewStorage.deleteReviewDislike(id, userId);
+    public void deleteReviewDislike(Long reviewId, Long userId) {
+        assertReviewMarkExists(reviewId, userId, false);
+        Optional<ReviewMark> result = reviewStorage.deleteReviewDislike(reviewId, userId);
         if (result.isPresent()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.", id, userId, false);
+            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.", reviewId, userId, false);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not deleted.", id, userId, false));
+                    "Mark of review id: %d from user id: %d with value %b is not deleted.", reviewId, userId, false));
         }
     }
 
@@ -123,19 +123,19 @@ public class ReviewService {
         }
     }
 
-    private void assertFilmExists(Long id) {
-        Optional<Film> existedFilm = filmStorage.findById(id);
+    private void assertFilmExists(Long filmId) {
+        Optional<Film> existedFilm = filmStorage.findById(filmId);
         if (existedFilm.isEmpty()) {
-            log.warn("Film id: {} not found.", id);
-            throw new IncorrectObjectIdException(String.format("Film id: %d not found.", id));
+            log.warn("Film id: {} not found.", filmId);
+            throw new IncorrectObjectIdException(String.format("Film id: %d not found.", filmId));
         }
     }
 
-    private void assertUserExists(Long id) {
-        Optional<User> existedUser = userStorage.findById(id);
+    private void assertUserExists(Long userId) {
+        Optional<User> existedUser = userStorage.findById(userId);
         if (existedUser.isEmpty()) {
-            log.warn("User id: {} not found.", id);
-            throw new IncorrectObjectIdException(String.format("User id: %d not found.", id));
+            log.warn("User id: {} not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User id: %d not found.", userId));
         }
     }
 
