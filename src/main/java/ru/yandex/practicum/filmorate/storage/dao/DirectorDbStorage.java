@@ -105,6 +105,18 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public void addInFilm(Long filmId, Long directorId) {
+        int count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM FILM_DIRECTORS " +
+                        "WHERE FILM_ID = :FILM_ID AND DIRECTOR_ID = :DIRECTOR_ID;",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("DIRECTOR_ID", directorId),
+                Integer.class);
+
+        if (count != 0) {
+            return;
+        }
+
         jdbcTemplate.update(
                 "INSERT INTO FILM_DIRECTORS VALUES (:FILM_ID,:DIRECTOR_ID);",
                 new MapSqlParameterSource()
