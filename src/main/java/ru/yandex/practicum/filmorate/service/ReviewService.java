@@ -36,7 +36,7 @@ public class ReviewService {
             throw new IncorrectObjectIdException(String.format("Review of user %d for film %d is not created.",
                     review.getUserId(), review.getFilmId()));
         }
-        if(rev.getUserId() != null && rev.getReviewId() != null){
+        if (rev.getUserId() != null && rev.getReviewId() != null) {
             log.info("Добавление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
             eventService.addEvent(Event.builder()
                     .eventId(null)
@@ -53,7 +53,7 @@ public class ReviewService {
         assertUserExists(review.getUserId());
         assertFilmExists(review.getFilmId());
         assertReviewExists(review.getReviewId());
-        if(review.getUserId() != null && review.getReviewId() != null){
+        if (review.getUserId() != null && review.getReviewId() != null) {
             log.info("Обновление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
             eventService.addEvent(Event.builder()
                     .eventId(null)
@@ -75,7 +75,7 @@ public class ReviewService {
             log.warn("Review with id: {} is not deleted.", reviewId);
             throw new IncorrectObjectIdException(String.format("Review with id: %d is not deleted.", reviewId));
         }
-        if(review.getUserId() != null && review.getReviewId() != null){
+        if (review.getUserId() != null && review.getReviewId() != null) {
             log.info("Удаление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
             eventService.addEvent(Event.builder()
                     .eventId(null)
