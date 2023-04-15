@@ -31,6 +31,7 @@ public class SearchFilmsTest {
 
     @BeforeEach
     void beforeEach() {
+        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS");
         jdbcTemplate.update("DELETE FROM directors");
         jdbcTemplate.execute("ALTER TABLE directors ALTER COLUMN director_id RESTART WITH 1");
         jdbcTemplate.update("DELETE FROM FILMS ");
