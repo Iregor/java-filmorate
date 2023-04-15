@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -21,6 +24,7 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final LikesStorage likesStorage;
+    private final EventStorage eventStorage;
 
     public Collection<User> findAll() {
         Collection<User> result = userStorage.findAll();
@@ -92,6 +96,8 @@ public class UserService {
         }
         friendStorage.add(userId, friendId);
         log.info("User {} added user {} to friends.", userId, friendId);
+        eventStorage.createEvent(userId, friendId, EventType.FRIEND, Operation.ADD);
+        log.info("Event - {} for the user {} has been added to the feed", EventType.FRIEND, userId);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -105,6 +111,8 @@ public class UserService {
         }
         friendStorage.remove(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
+        eventStorage.createEvent(userId, friendId, EventType.FRIEND, Operation.REMOVE);
+        log.info("Event - {} for the user {} has been added to the feed", EventType.FRIEND, userId);
     }
 
     public Collection<User> getFriends(Long userId) {
