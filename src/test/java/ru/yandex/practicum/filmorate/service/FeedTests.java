@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,45 @@ public class FeedTests {
     @BeforeEach
     void beforeEach() {
         jdbcTemplate.update("DELETE FROM FEEDS");
+        jdbcTemplate.update("DELETE FROM FILMS");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FRIENDSHIPS");
+        jdbcTemplate.update("DELETE FROM LIKES");
+
+        addData();
+    }
+
+    @Test
+    void getAFeedWithThreeEvents() {
+        filmService.like(1L, 1L);
+        filmService.like(2L, 1L);
+        filmService.like(3L, 1L);
+
+        assertThat(eventService.getFeed(1L).size()).isEqualTo(3);
+    }
+
+    @Test
+    void getEmptyFeed() {
+        assertThat(eventService.getFeed(1L).size()).isEqualTo(0);
+    }
+
+    @Test
+    void getFeedWithDifferentEvents() {
+        filmService.like(1L, 2L);
+        filmService.like(1L, 1L);
+        filmService.dislike(1L, 2L);
+
+        filmService.like(2L, 2L);
+        filmService.like(3L, 1L);
+
+        userService.addFriend(1L, 2L);
+        userService.addFriend(1L, 3L);
+        userService.addFriend(1L, 4L);
+        userService.deleteFriend(1L, 2L);
+
+        assertThat(eventService.getFeed(1L).size()).isEqualTo(6);
     }
 
     private void addData() {
@@ -45,41 +85,5 @@ public class FeedTests {
                 "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
                 "('ail@rambler.ru', 'user34321', 'User', '2021-03-18')," +
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
-    }
-
-    @Test
-    void getAFeedWithThreeEvents() {
-        addData();
-
-        filmService.like(1L, 1L);
-        filmService.like(2L, 1L);
-        filmService.like(3L, 1L);
-
-        assertThat(eventService.getFeed(1L).size()).isEqualTo(3);
-    }
-
-    @Test
-    void getEmptyFeed() {
-        addData();
-
-        assertThat(eventService.getFeed(1L).size()).isEqualTo(0);
-    }
-
-    @Test
-    void getFeedWithDifferentEvents() {
-        addData();
-        filmService.like(1L, 2L);
-        filmService.like(1L, 1L);
-        filmService.dislike(1L, 2L);
-
-        filmService.like(2L, 2L);
-        filmService.like(3L, 1L);
-
-        userService.addFriend(1L, 2L);
-        userService.addFriend(1L, 3L);
-        userService.addFriend(1L, 4L);
-        userService.deleteFriend(1L, 2L);
-
-        assertThat(eventService.getFeed(1L).size()).isEqualTo(6);
     }
 }
