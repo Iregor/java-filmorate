@@ -20,6 +20,7 @@ public class EventService {
     private final UserStorage userStorage;
 
     public Collection<Event> getFeed(long userId) {
+        log.info("Requested event feed of a user with id {}", userId);
         Optional<User> result = userStorage.findById(userId);
         if (result.isEmpty()) {
             log.warn("User {} is not found.", userId);
@@ -30,7 +31,7 @@ public class EventService {
 
     public void addEvent(Event event) {
         eventStorage.addEvent(event);
-        log.info("Добавлен ивент в ленту событий со следующими значениями: " +
+        log.info("Added an event to the feed: " +
                         "userId: {}, eventType: {}, operation: {}, entityId: {}", event.getUserId(), event.getEventType(),
                 event.getOperation(), event.getEntityId());
     }
