@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -47,7 +46,6 @@ public class EventDBStorage implements EventStorage {
         String query = "SELECT * FROM FEEDS WHERE USER_ID = ?";
         return jdbcTemplate.query(query, new Object[]{id}, eventMapper);
     }
-
 
     @Override
     public void addEvent(Event event) {

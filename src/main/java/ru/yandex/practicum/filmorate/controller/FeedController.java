@@ -19,7 +19,7 @@ public class FeedController {
     private final EventService eventService;
 
     @GetMapping("/{id}/feed")
-    public Collection<Event> getFeed(@PathVariable Long id){
+    public Collection<Event> getFeed(@PathVariable Long id) {
         Collection<Event> events = eventService.getFeed(id);
         log.info("Запрошена лента событий пользователя с id {}: {}", id, events);
         return events;
