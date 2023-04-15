@@ -42,8 +42,7 @@ public class ReviewService {
         assertUserExists(review.getUserId());
         assertFilmExists(review.getFilmId());
         assertReviewExists(review.getReviewId());
-        Optional<Review> result = reviewStorage.updateReview(review);
-        return result.get();
+        return reviewStorage.updateReview(review).orElseThrow();
     }
 
     public void deleteReview(Long reviewId) {
