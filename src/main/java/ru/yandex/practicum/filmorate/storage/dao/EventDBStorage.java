@@ -59,5 +59,4 @@ public class EventDBStorage implements EventStorage {
                 .usingGeneratedKeyColumns("EVENT_ID");
         insert.execute(param);
     }
-
 }
