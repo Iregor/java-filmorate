@@ -14,7 +14,14 @@ import java.util.Collection;
 public class EventService {
     private final EventDBStorage eventStorage;
 
-    public Collection<Event> getFeed(long id){
-        return eventStorage.getFeed(id);
+    public Collection<Event> getFeed(long userId){
+        return eventStorage.getFeed(userId);
+    }
+
+    public void addEvent(Event event) {
+        eventStorage.addEvent(event);
+        log.info("Добавлен ивент в ленту событий со следующими значениями: " +
+                        "userId: {}, eventType: {}, operation: {}, entityId: {}", event.getUserId(), event.getEventType(),
+                event.getOperation(), event.getEntityId());
     }
 }
