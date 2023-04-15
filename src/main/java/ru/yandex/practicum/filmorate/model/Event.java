@@ -2,11 +2,10 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.yandex.practicum.filmorate.model.enums.EventType;
-import ru.yandex.practicum.filmorate.model.enums.Operation;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Data
 @Getter
@@ -16,7 +15,7 @@ import java.io.Serializable;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Event implements Serializable {
-    Long timestamp;
+    Timestamp timestamp;
     Integer eventId;
     @NotEmpty(message = "Идентификатор пользователя не может быть пустым.")
     Long userId;
