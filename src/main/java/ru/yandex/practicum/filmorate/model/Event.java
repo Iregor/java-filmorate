@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Event implements Serializable {
-    Timestamp timestamp;
+    Long timestamp;
     Integer eventId;
     @NotEmpty(message = "Идентификатор пользователя не может быть пустым.")
     Long userId;
