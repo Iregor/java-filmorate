@@ -10,20 +10,25 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class CommonFilmsTest {
+public class GetRecommendedFilmsTest {
 
     private final FilmService filmService;
     private final JdbcTemplate jdbcTemplate;
+    private final UserService userService;
 
     @BeforeEach
     void beforeEach() {
         jdbcTemplate.update("DELETE FROM LIKES ");
+        jdbcTemplate.update("DELETE FROM FILM_GENRES ");
 
         jdbcTemplate.update("DELETE FROM FILMS ");
         jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
@@ -33,49 +38,42 @@ class CommonFilmsTest {
     }
 
     @Test
-    void getCommonFilms_return2Films_2usersLikes3Films() {
+    void getRecommendedFilmsIdsTest() {
         addData();
-
-        filmService.like(1L, 1L);
-        filmService.like(2L, 1L);
-        filmService.like(3L, 1L);
-
-        filmService.like(2L, 3L);
-        filmService.like(3L, 3L);
-        filmService.like(4L, 3L);
-
-        Film secondFilm = filmService.findById(2L);
-        Film thirdFilm = filmService.findById(3L);
-
-        Collection<Film> collection = filmService.getCommonFilms(1L, 3L);
-        assertThat(collection.size()).isEqualTo(2);
-        assertThat(collection).asList().containsAnyOf(secondFilm, thirdFilm);
+        collectLikeModel();
+        assertEquals(userService.findAdviseFilmsIds(1L).size(), 1, "prediction doesn't work");
+        assertTrue(userService.findAdviseFilmsIds(1L).contains(3L), "prediction doesn't work");
+        filmService.like(1L, 3L);
+        assertEquals(userService.findAdviseFilmsIds(1L).size(), 2, "prediction doesn't work");
+        assertTrue(userService.findAdviseFilmsIds(1L).contains(1L), "prediction doesn't work");
     }
 
     @Test
-    void getCommonFilms_return1Film_2usersLikes3FilmsAndUserDislikeFilm() {
+    void getFilmsFromRecommendedFilmsIdsTest() {
         addData();
+        collectLikeModel();
+        filmService.like(1L, 3L);
+        Collection<Long> testIdModelCollection = userService.findAdviseFilmsIds(1L);
+        Map<Long, Film> predictionFilms = filmService.convertIdsToFilms(testIdModelCollection)
+                .stream()
+                .collect(Collectors.toMap(Film::getId, Function.identity()));
+        assertEquals(predictionFilms.get(1L), filmService.findById(1L), "prediction doesn't work");
+        assertEquals(predictionFilms.get(3L), filmService.findById(3L), "prediction doesn't work");
+    }
 
-        filmService.like(1L, 1L);
-        filmService.like(2L, 1L);
-        filmService.like(3L, 1L);
-
-        filmService.like(2L, 3L);
-        filmService.like(3L, 3L);
+    private void collectLikeModel() {
+        filmService.like(5L, 1L);
+        filmService.like(5L, 2L);
+        filmService.like(5L, 3L);
+        filmService.like(4L, 1L);
+        filmService.like(4L, 2L);
         filmService.like(4L, 3L);
-
-        Film secondFilm = filmService.findById(2L);
-        Film thirdFilm = filmService.findById(3L);
-
-        Collection<Film> collection1 = filmService.getCommonFilms(1L, 3L);
-        assertThat(collection1.size()).isEqualTo(2);
-        assertThat(collection1).asList().containsAnyOf(secondFilm, thirdFilm);
-
-        filmService.dislike(3L, 1L);
-
-        Collection<Film> collection2 = filmService.getCommonFilms(1L, 3L);
-        assertThat(collection2.size()).isEqualTo(1);
-        assertThat(collection2).asList().containsAnyOf(secondFilm);
+        filmService.like(3L, 2L);
+        filmService.like(3L, 3L);
+        filmService.like(2L, 4L);
+        filmService.like(2L, 5L);
+        filmService.like(1L, 4L);
+        filmService.like(1L, 5L);
     }
 
     private void addData() {
@@ -98,5 +96,8 @@ class CommonFilmsTest {
                 "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
                 "('ail@rambler.ru', 'user34321', 'User', '2021-03-18')," +
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
+
+        jdbcTemplate.update("INSERT INTO FILM_GENRES " +
+                "VALUES (1, 1), (1, 2), (2, 2), (2, 3), (3, 3), (3, 4) ;");
     }
 }

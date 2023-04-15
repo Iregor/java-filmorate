@@ -60,6 +60,18 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public void add(Long filmId, Long userId) {
+        int count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM LIKES " +
+                        "WHERE FILM_ID = :FILM_ID AND USER_ID = :USER_ID;",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("USER_ID", userId),
+                Integer.class);
+
+        if (count != 0) {
+            return;
+        }
+
         jdbcTemplate.update(
                 "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID);",
                 new MapSqlParameterSource()

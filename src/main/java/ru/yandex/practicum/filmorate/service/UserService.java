@@ -71,6 +71,16 @@ public class UserService {
         return result.get();
     }
 
+    public void delete(Long userId) {
+        Optional<User> result = userStorage.findById(userId);
+        if (result.isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        userStorage.remove(userId);
+        log.info("User {} removed.", result.get().getLogin());
+    }
+
     public void addFriend(Long userId, Long friendId) {
         if (userStorage.findById(userId).isEmpty()) {
             log.warn("User {} is not found.", userId);
@@ -98,6 +108,10 @@ public class UserService {
     }
 
     public Collection<User> getFriends(Long userId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
         Collection<User> result = userStorage.findFriends(userId);
         log.info("Found {} friend(s).", result.size());
         addDataUsers(result);
@@ -105,12 +119,32 @@ public class UserService {
     }
 
     public Collection<User> getCommonFriends(Long userId, Long friendId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        if (userStorage.findById(friendId).isEmpty()) {
+            log.warn("Friend {} is not found.", friendId);
+            throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
+        }
         Collection<User> result = userStorage.findCommonFriends(userId, friendId);
         log.info("Found {} friend(s).", result.size());
         addDataUsers(result);
         return result;
     }
 
+    public Collection<Long> findAdviseFilmsIds(Long userId) {
+        final Collection<Long> maxCommonUsersId = userStorage.convertMaxCommonLikes(userId);
+        final Map<Long, List<Long>> filmDiffByUser = userStorage.getDiffFilms(userId);
+        final Map<Long, Integer> scoreByFilms = userStorage.getFilmsScore(userId);
+        log.info("the prediction matrix, strongly-{} ,has been created", filmDiffByUser.size());
+        return filmDiffByUser.entrySet().stream()
+                .filter(a -> maxCommonUsersId.contains(a.getKey()))
+                .flatMap(a -> a.getValue().stream())
+                .distinct()
+                .sorted(Comparator.comparing(scoreByFilms::get).reversed())
+                .collect(Collectors.toList());
+    }
 
     private void addDataUsers(Collection<User> users) {
         Map<Long, User> usersMap = users
