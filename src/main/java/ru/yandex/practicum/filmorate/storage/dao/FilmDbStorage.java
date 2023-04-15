@@ -5,6 +5,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -213,6 +214,21 @@ public class FilmDbStorage implements FilmStorage {
                         "WHERE FILM_ID = :FILM_ID; ",
                 getFilmParams(film));
         return findById(film.getId());
+    }
+
+    @Override
+    public Collection<Film> filmsByIds(Collection<Long> filmsIds) {
+        SqlParameterSource ids = new MapSqlParameterSource("IDS", filmsIds);
+        return jdbcTemplate.query(
+                "SELECT * " +
+                        "FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) RATE " +
+                        "FROM LIKES GROUP BY FILM_ID) R ON R.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (:IDS) " +
+                        "ORDER BY R.RATE DESC",
+                ids,
+                filmMapper);
     }
 
     @Override

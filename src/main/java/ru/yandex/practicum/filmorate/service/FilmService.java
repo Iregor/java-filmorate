@@ -155,6 +155,18 @@ public class FilmService {
         log.info("User {} disliked film {}.", userId, filmId);
     }
 
+    public Collection<Film> convertIdsToFilms(Collection<Long> filmsIds) {
+        Collection<Film> sortedFilm = new ArrayList<>();
+        Collection<Film> resultAdvise = filmStorage.filmsByIds(filmsIds);
+        addDataFilms(resultAdvise);
+        Map<Long, Film> filmMap = resultAdvise.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+        for (Long id : filmsIds) {
+            sortedFilm.add(filmMap.get(id));
+        }
+        log.info("A list of recommended films, has been created.");
+        return sortedFilm;
+    }
+
     private void updateGenreByFilm(Film film) {
         Set<Genre> removedGenre = genreStorage.findByFilmId(film.getId())
                 .stream()

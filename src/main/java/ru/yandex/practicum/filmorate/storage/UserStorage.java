@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserStorage {
@@ -18,6 +20,12 @@ public interface UserStorage {
     Optional<User> create(User user);
 
     Optional<User> update(User user);
+
+    Collection<Long> convertMaxCommonLikes(Long userId);
+
+    Map<Long, List<Long>> getDiffFilms(Long userId);
+
+    Map<Long, Integer> getFilmsScore(Long userId);
 
     void remove(Long userId);
 }

@@ -133,6 +133,18 @@ public class UserService {
         return result;
     }
 
+    public Collection<Long> findAdviseFilmsIds(Long userId) {
+        final Collection<Long> maxCommonUsersId = userStorage.convertMaxCommonLikes(userId);
+        final Map<Long, List<Long>> filmDiffByUser = userStorage.getDiffFilms(userId);
+        final Map<Long, Integer> scoreByFilms = userStorage.getFilmsScore(userId);
+        log.info("the prediction matrix, strongly-{} ,has been created", filmDiffByUser.size());
+        return filmDiffByUser.entrySet().stream()
+                .filter(a -> maxCommonUsersId.contains(a.getKey()))
+                .flatMap(a -> a.getValue().stream())
+                .distinct()
+                .sorted(Comparator.comparing(scoreByFilms::get).reversed())
+                .collect(Collectors.toList());
+    }
 
     private void addDataUsers(Collection<User> users) {
         Map<Long, User> usersMap = users

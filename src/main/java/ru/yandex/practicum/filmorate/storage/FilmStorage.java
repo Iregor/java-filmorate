@@ -32,6 +32,8 @@ public interface FilmStorage {
 
     Optional<Film> update(Film film);
 
+    Collection<Film> filmsByIds(Collection<Long> idFilmRecommended);
+
     void remove(Long filmId);
 
     Collection<Film> findFilmsDirectorByYear(Long directorId);
