@@ -32,7 +32,7 @@ public interface FilmStorage {
 
     Optional<Film> update(Film film);
 
-    Collection<Film> filmsByIds(Collection<Long> idFilmRecommended);
+    Collection<Film> filmsByIds(Collection<Long> filmsIds);
 
     void remove(Long filmId);
 
