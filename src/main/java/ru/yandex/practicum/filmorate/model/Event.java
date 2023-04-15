@@ -5,7 +5,6 @@ import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 @Data
 @Getter
