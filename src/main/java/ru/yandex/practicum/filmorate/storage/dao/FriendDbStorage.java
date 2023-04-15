@@ -19,7 +19,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FriendDbStorage implements FriendStorage {
     private final NamedParameterJdbcTemplate jdbcTemplate;
-
     static final ResultSetExtractor<Map<Long, Set<Long>>> friendsExtractor = rs -> {
         Map<Long, Set<Long>> filmLikes = new HashMap<>();
         while (rs.next()) {

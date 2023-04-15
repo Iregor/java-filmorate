@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -23,17 +25,12 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public class EventDBStorage implements EventStorage {
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
 
-    @Autowired
-    public EventDBStorage(DataSource dataSource) {
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
     static final RowMapper<Event> eventMapper = (rs, rowNum) -> Event.builder()
-            .eventId(rs.getInt("EVENT_ID"))
+            .eventId(rs.getLong("EVENT_ID"))
             .userId(rs.getLong("USER_ID"))
             .timestamp(rs.getLong("TIMESTAMP"))
             .eventType(EventType.valueOf(rs.getString("EVENT_TYPE")))
@@ -42,9 +39,11 @@ public class EventDBStorage implements EventStorage {
             .build();
 
     @Override
-    public Collection<Event> getFeed(Long id) {
-        String query = "SELECT * FROM FEEDS WHERE USER_ID = ?";
-        return jdbcTemplate.query(query, new Object[]{id}, eventMapper);
+    public Collection<Event> getFeed(Long userId) {
+        return jdbcTemplate.query("SELECT * FROM FEEDS WHERE USER_ID = :USER_ID;",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId),
+        eventMapper);
     }
 
     @Override

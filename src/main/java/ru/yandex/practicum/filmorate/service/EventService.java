@@ -19,7 +19,7 @@ public class EventService {
     private final EventDBStorage eventStorage;
     private final UserStorage userStorage;
 
-    public Collection<Event> getFeed(long userId) {
+    public Collection<Event> getFeed(Long userId) {
         log.info("Requested event feed of a user with id {}", userId);
         Optional<User> result = userStorage.findById(userId);
         if (result.isEmpty()) {

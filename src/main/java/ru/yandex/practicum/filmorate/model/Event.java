@@ -9,15 +9,13 @@ import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Event implements Serializable {
     Long timestamp;
-    Integer eventId;
+    Long eventId;
     @NotEmpty(message = "Идентификатор пользователя не может быть пустым.")
     Long userId;
     @NotEmpty(message = "Идентификатор сущности не может быть пустым.")
