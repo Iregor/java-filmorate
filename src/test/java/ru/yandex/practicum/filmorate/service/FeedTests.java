@@ -1,12 +1,20 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -39,7 +47,13 @@ public class FeedTests {
         filmService.like(2L, 1L);
         filmService.like(3L, 1L);
 
+        Collection<Event> collection = eventService.getFeed(1L);
+        List<Event> eventList = new ArrayList<>(collection);
+        Event event = eventList.get(0);
+
         assertThat(eventService.getFeed(1L).size()).isEqualTo(3);
+        assertThat(event.getEventType()).isEqualTo(EventType.LIKE);
+        assertThat(event.getOperation()).isEqualTo(Operation.ADD);
     }
 
     @Test
@@ -61,7 +75,16 @@ public class FeedTests {
         userService.addFriend(1L, 4L);
         userService.deleteFriend(1L, 2L);
 
+        Collection<Event> collection = eventService.getFeed(1L);
+        List<Event> eventList = new ArrayList<>(collection);
+        Event event = eventList.get(2);
+
         assertThat(eventService.getFeed(1L).size()).isEqualTo(6);
+        assertThat(event.getEventType()).isEqualTo(EventType.FRIEND);
+        assertThat(event.getOperation()).isEqualTo(Operation.ADD);
+
+        Event event_2 = eventList.get(4);
+        Assertions.assertTrue(collection.contains(event_2));
     }
 
     private void addData() {
