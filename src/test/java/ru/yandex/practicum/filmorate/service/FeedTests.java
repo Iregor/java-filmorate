@@ -83,8 +83,8 @@ public class FeedTests {
         assertThat(event.getEventType()).isEqualTo(EventType.FRIEND);
         assertThat(event.getOperation()).isEqualTo(Operation.ADD);
 
-        Event event_2 = eventList.get(4);
-        Assertions.assertTrue(collection.contains(event_2));
+        Event eventTwo = eventList.get(4);
+        Assertions.assertTrue(collection.contains(eventTwo));
     }
 
     private void addData() {
