@@ -12,19 +12,19 @@ public interface ReviewStorage {
 
     Optional<Review> updateReview(Review review);
 
-    Optional<Review> deleteReview(Long id);
+    Optional<Review> deleteReview(Long reviewId);
 
     Optional<Review> findReviewById(Long userId);
 
     Collection<Review> findAllReviews(Long filmId, Long count);
 
-    Optional<ReviewMark> addLikeToReview(Long id, Long userId);
+    Optional<ReviewMark> addLikeToReview(Long reviewId, Long userId);
 
-    Optional<ReviewMark> addDislikeToReview(Long id, Long userId);
+    Optional<ReviewMark> addDislikeToReview(Long reviewId, Long userId);
 
-    Optional<ReviewMark> deleteReviewLike(Long id, Long userId);
+    Optional<ReviewMark> deleteReviewLike(Long reviewId, Long userId);
 
-    Optional<ReviewMark> deleteReviewDislike(Long id, Long userId);
+    Optional<ReviewMark> deleteReviewDislike(Long reviewId, Long userId);
 
     Optional<ReviewMark> findReviewMark(Long reviewId, Long userId, boolean isLike);
 }
