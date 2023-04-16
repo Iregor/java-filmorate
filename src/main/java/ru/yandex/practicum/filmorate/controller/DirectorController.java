@@ -21,8 +21,8 @@ public class DirectorController {
         return service.getAll();
     }
 
-    @GetMapping("/{id}")
-    public Director getById(@PathVariable("id") Long directorId) {
+    @GetMapping("/{directorId}")
+    public Director getById(@PathVariable("directorId") Long directorId) {
         return service.getById(directorId);
     }
 
@@ -36,8 +36,8 @@ public class DirectorController {
         return service.updateDirector(director);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteDirector(@PathVariable("id") Long directorId) {
+    @DeleteMapping("/{directorId}")
+    public void deleteDirector(@PathVariable Long directorId) {
         service.deleteDirector(directorId);
     }
 }

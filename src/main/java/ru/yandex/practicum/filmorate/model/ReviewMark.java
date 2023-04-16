@@ -1,20 +1,21 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReviewMark {
 
     @NotNull
-    private Long reviewId;
-
+    Long reviewId;
     @NotNull
-    private Long userId;
-
+    Long userId;
     @NotNull
-    private boolean isLike;
+    boolean isLike;
 }

@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.*;
@@ -24,6 +24,7 @@ public class FilmService {
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
+    private final EventService eventService;
 
     public Collection<Film> findAll() {
         Collection<Film> result = filmStorage.findAll();
@@ -116,6 +117,7 @@ public class FilmService {
         addDataFilms(List.of(result.get()));
         log.info("Film {} {} updated.",
                 result.get().getId(), result.get().getName());
+
         return result.get();
     }
 
@@ -140,6 +142,13 @@ public class FilmService {
         }
         likesStorage.add(filmId, userId);
         log.info("User {} liked film {}.", userId, filmId);
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .entityId(filmId)
+                .build());
     }
 
     public void dislike(Long filmId, Long userId) {
@@ -153,6 +162,13 @@ public class FilmService {
         }
         likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(Operation.REMOVE)
+                .entityId(filmId)
+                .build());
     }
 
     public Collection<Film> convertIdsToFilms(Collection<Long> filmsIds) {

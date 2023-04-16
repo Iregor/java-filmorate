@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -21,6 +25,8 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final LikesStorage likesStorage;
+    private final EventStorage eventStorage;
+    private final EventService eventService;
 
     public Collection<User> findAll() {
         Collection<User> result = userStorage.findAll();
@@ -91,7 +97,13 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
         friendStorage.add(userId, friendId);
-        log.info("User {} added user {} to friends.", userId, friendId);
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                .userId(userId)
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
+                .entityId(friendId)
+                .build());
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -105,6 +117,13 @@ public class UserService {
         }
         friendStorage.remove(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                .userId(userId)
+                .eventType(EventType.FRIEND)
+                .operation(Operation.REMOVE)
+                .entityId(friendId)
+                .build());
     }
 
     public Collection<User> getFriends(Long userId) {

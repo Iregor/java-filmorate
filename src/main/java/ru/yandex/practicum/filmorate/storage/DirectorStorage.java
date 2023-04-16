@@ -10,13 +10,13 @@ import java.util.Set;
 public interface DirectorStorage {
     Collection<Director> findAll();
 
-    Optional<Director> findById(Long id);
+    Optional<Director> findById(Long directorId);
 
     Optional<Director> addDirector(Director director);
 
     Optional<Director> updateDirector(Director director);
 
-    void removeDirector(Long id);
+    void removeDirector(Long directorId);
 
     Collection<Director> findByFilmId(Long filmId);
 
