@@ -263,7 +263,7 @@ public class ReviewTest {
                 .build();
         rev4 = Review.builder()
                 .content("Думаю не посоветую на него идти.")
-                .userId(1L)
+                .userId(3L)
                 .filmId(1L)
                 .positive(false)
                 .build();
