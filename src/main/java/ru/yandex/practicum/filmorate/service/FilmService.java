@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.*;
@@ -56,24 +59,23 @@ public class FilmService {
         return result;
     }
 
-    public Collection<Film> searchFilms(String subString, List<String> by) {
+    public Set<Film> searchFilms(String subString, Set<String> by) {
         for (String param : by) {
             if (!(param.equals("director") || param.equals("title"))) {
                 log.warn("Param {} is not correct.", param);
                 throw new IncorrectParameterException(String.format("Param %s is not correct.", param));
             }
         }
-        Collection<Film> result = null;
-        if (by.contains("director") && by.contains("title")) {
-            result = filmStorage.searchFilmsByTitleAndDirector(subString, by);
-        } else if (by.contains("title")) {
-            result = filmStorage.searchFilmsByTitle(subString);
-        } else if (by.contains("director")) {
-            result = filmStorage.searchFilmsByDirector(subString);
+        Set<Film> mergeCollect = new HashSet<>();
+        if (by.contains("title")) {
+            mergeCollect.addAll(filmStorage.searchFilmsByTitle(subString));
         }
-        addDataFilms(result);
-        log.info("Found {} film(s).", result.size());
-        return result;
+        if (by.contains("director")) {
+            mergeCollect.addAll(filmStorage.searchFilmsByDirector(subString));
+        }
+        addDataFilms(mergeCollect);
+        log.info("Found {} film(s).", mergeCollect.size());
+        return mergeCollect;
     }
 
     public Film findById(Long filmId) {

@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -68,8 +68,8 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public Collection<Film> searchFilms(@RequestParam(name = "query") String subString,
-                                        @RequestParam(defaultValue = "title") List<String> by) {
+    public Set<Film> searchFilms(@RequestParam(name = "query") String subString,
+                                 @RequestParam(defaultValue = "title") Set<String> by) {
         return filmService.searchFilms(subString, by);
     }
 
