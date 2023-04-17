@@ -73,7 +73,8 @@ public class LikesDbStorage implements LikesStorage {
         }
 
         jdbcTemplate.update(
-                "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID);",
+                "INSERT INTO LIKES " +
+                        "VALUES (:FILM_ID, :USER_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("USER_ID", userId));
