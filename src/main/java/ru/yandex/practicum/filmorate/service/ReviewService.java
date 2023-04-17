@@ -30,22 +30,20 @@ public class ReviewService {
         assertUserExists(review.getUserId());
         assertFilmExists(review.getFilmId());
         Optional<Review> result = reviewStorage.createReview(review);
-        Review rev = result.get();
         if (result.isEmpty()) {
             log.warn("Review of user: {} for film: {} is not created.", review.getUserId(), review.getFilmId());
             throw new IncorrectObjectIdException(String.format("Review of user %d for film %d is not created.",
                     review.getUserId(), review.getFilmId()));
         }
-        if (rev.getUserId() != null && rev.getReviewId() != null) {
-            log.info("Добавление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-            eventService.addEvent(Event.builder()
-                    .eventId(null)
-                    .userId(rev.getUserId())
-                    .eventType(EventType.REVIEW)
-                    .operation(Operation.ADD)
-                    .entityId(rev.getReviewId())
-                    .build());
-        }
+        Review rev = result.get();
+        log.info("Добавление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                .userId(rev.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .entityId(rev.getReviewId())
+                .build());
         return result.get();
     }
 
@@ -53,17 +51,16 @@ public class ReviewService {
         assertUserExists(review.getUserId());
         assertFilmExists(review.getFilmId());
         assertReviewExists(review.getReviewId());
-        if (review.getUserId() != null && review.getReviewId() != null) {
-            log.info("Обновление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-            eventService.addEvent(Event.builder()
-                    .eventId(null)
-                    //.userId(review.getUserId())
-                    .userId(1L) //ВНИМАНИЕ! КОСТЫЛЬ! ОШИБКА В ТЕСТАХ ПОСТМАНА!
-                    .eventType(EventType.REVIEW)
-                    .operation(Operation.UPDATE)
-                    .entityId(review.getReviewId())
-                    .build());
-        }
+
+        log.info("Обновление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                //.userId(review.getUserId())
+                .userId(1L) //ВНИМАНИЕ! КОСТЫЛЬ! ОШИБКА В ТЕСТАХ ПОСТМАНА!
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .entityId(review.getReviewId())
+                .build());
         return reviewStorage.updateReview(review).orElseThrow();
     }
 
@@ -75,16 +72,15 @@ public class ReviewService {
             log.warn("Review with id: {} is not deleted.", reviewId);
             throw new IncorrectObjectIdException(String.format("Review with id: %d is not deleted.", reviewId));
         }
-        if (review.getUserId() != null && review.getReviewId() != null) {
-            log.info("Удаление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-            eventService.addEvent(Event.builder()
-                    .eventId(null)
-                    .userId(review.getUserId())
-                    .eventType(EventType.REVIEW)
-                    .operation(Operation.REMOVE)
-                    .entityId(review.getReviewId())
-                    .build());
-        }
+
+        log.info("Удаление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
+        eventService.addEvent(Event.builder()
+                .eventId(null)
+                .userId(review.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .entityId(review.getReviewId())
+                .build());
     }
 
     public Review findReviewById(Long reviewId) {

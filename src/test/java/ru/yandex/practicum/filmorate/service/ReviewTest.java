@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -114,6 +115,15 @@ public class ReviewTest {
     }
 
     @Test
+    void deleteReviewWithMarksTest() {
+        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        rs.addLikeToReview(rev1Id, user1Id);
+        rs.addDislikeToReview(rev1Id, user2Id);
+        rs.deleteReview(rev1Id);
+        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(2);
+    }
+
+    @Test
     void findReviewById() {
         assertThat(rs.findReviewById(rev1Id).getContent().equals(rev1.getContent()));
         assertThat(rs.findReviewById(rev2Id).getContent().equals(rev1.getContent()));
@@ -129,17 +139,17 @@ public class ReviewTest {
 
     @Test
     void findAllReviewsOrderTest() {
-        assertThat(List.of(rs.findAllReviews(null, 10L)).get(0).equals(rev1.getContent()));
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L)).get(0).getContent()).isEqualTo(rev1.getContent());
         rs.addLikeToReview(rev2Id, user1Id);
-        assertThat(List.of(rs.findAllReviews(null, 10L)).get(0).equals(rev2.getContent()));
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L)).get(0).getContent()).isEqualTo(rev2.getContent());
         rs.addLikeToReview(rev3Id, user1Id);
         rs.addLikeToReview(rev3Id, user2Id);
-        assertThat(List.of(rs.findAllReviews(null, 10L)).get(0).equals(rev3.getContent()));
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L)).get(0).getContent()).isEqualTo(rev3.getContent());
         rs.deleteReviewLike(rev3Id, user2Id);
-        assertThat(List.of(rs.findAllReviews(null, 10L)).get(0).equals(rev2.getContent()));
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L)).get(0).getContent()).isEqualTo(rev2.getContent());
         rs.deleteReviewLike(rev3Id, user1Id);
         rs.deleteReviewLike(rev2Id, user1Id);
-        assertThat(List.of(rs.findAllReviews(null, 10L)).get(0).equals(rev1.getContent()));
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L)).get(0).getContent()).isEqualTo(rev1.getContent());
     }
 
     @Test
