@@ -327,7 +327,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void remove(Long filmId) {
         jdbcTemplate.update(
-                "DELETE FROM films WHERE film_id = :FILM_ID",
+                "DELETE FROM FILMS " +
+                        "WHERE FILM_ID = :FILM_ID",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId));
     }

@@ -33,7 +33,8 @@ public class FriendDbStorage implements FriendStorage {
     public Map<Long, Set<Long>> findByUsers(Set<Long> userIds) {
         SqlParameterSource ids = new MapSqlParameterSource("IDS", userIds);
         return jdbcTemplate.query(
-                "SELECT U.USER_ID F_ID, FS.USER_ID U_ID FROM USERS U " +
+                "SELECT U.USER_ID F_ID, " +
+                        "FS.USER_ID U_ID FROM USERS U " +
                         "JOIN FRIENDSHIPS FS ON U.USER_ID = FS.FRIEND_ID " +
                         "WHERE FS.USER_ID IN (:IDS) " +
                         "ORDER BY U.USER_ID;",
@@ -44,7 +45,8 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     public void add(Long userId, Long friendId) {
         jdbcTemplate.update(
-                "INSERT INTO FRIENDSHIPS VALUES (:USER_ID, :FRIEND_ID, false);",
+                "INSERT INTO FRIENDSHIPS " +
+                        "VALUES (:USER_ID, :FRIEND_ID, false);",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId)
                         .addValue("FRIEND_ID", friendId));
@@ -53,7 +55,9 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     public void remove(Long userId, Long friendId) {
         jdbcTemplate.update(
-                "DELETE FROM FRIENDSHIPS WHERE USER_ID = :USER_ID AND FRIEND_ID = :FRIEND_ID;",
+                "DELETE FROM FRIENDSHIPS " +
+                        "WHERE USER_ID = :USER_ID " +
+                        "AND FRIEND_ID = :FRIEND_ID;",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId)
                         .addValue("FRIEND_ID", friendId));
