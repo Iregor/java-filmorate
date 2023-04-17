@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,10 +43,10 @@ public class SearchFilmsTest {
     void getMoviBySearchInTitle() {
         addDataDirectors();
         addDataFilms();
-        Collection<Film> collection = filmService.searchFilms("шО", List.of("title"));
+        Set<Film> collection = filmService.searchFilms("шО", Set.of("title"));
         assertThat(collection.size()).isEqualTo(1);
         Film film1 = filmService.findById(1L);
-        assertThat(collection).asList().contains(film1);
+        assertThat(collection.contains(film1));
         assertTrue(film1.getName().toLowerCase().contains("шо"));
     }
 
@@ -53,11 +54,12 @@ public class SearchFilmsTest {
     void getMoviBySearchInDirector() {
         addDataDirectors();
         addDataFilms();
-        Collection<Film> collection = filmService.searchFilms("vano", List.of("director"));
+        Set<Film> collection = filmService.searchFilms("vano", Set.of("director"));
         assertThat(collection.size()).isEqualTo(2);
         Film film1 = filmService.findById(1L);
         Film film2 = filmService.findById(2L);
-        assertThat(collection).asList().contains(film1, film2);
+        assertThat(collection.contains(film1));
+        assertThat(collection.contains(film2));
         assertTrue(film1.getDirectors().contains(new Director(1L, "Ivanov Ivan")));
     }
 
@@ -65,12 +67,13 @@ public class SearchFilmsTest {
     void getMovisBySearchInTitleAndDirector() {
         addDataDirectors();
         addDataFilms();
-        Collection<Film> collection = filmService.searchFilms("Карт", List.of("title", "director"));
+        Set<Film> collection = filmService.searchFilms("Карт", Set.of("title", "director"));
         assertThat(collection.size()).isEqualTo(2);
         Film film1 = filmService.findById(2L);
         Film film2 = filmService.findById(3L);
 
-        assertThat(collection).asList().contains(film1, film2);
+        assertThat(collection.contains(film1));
+        assertThat(collection.contains(film2));
         assertTrue(film1.getName().toLowerCase().contains("карт"));
         assertTrue(film2.getDirectors().contains(new Director(3L, "Василий Картапов")));
     }
@@ -79,7 +82,7 @@ public class SearchFilmsTest {
     void noFoundBySearch() throws IncorrectObjectIdException {
         addDataDirectors();
         addDataFilms();
-        Collection<Film> collection = filmService.searchFilms("какой-то текст", List.of("title", "director"));
+        Collection<Film> collection = filmService.searchFilms("какой-то текст", Set.of("title", "director"));
         assertTrue(collection.size() == 0);
     }
 
