@@ -18,13 +18,9 @@ public interface ReviewStorage {
 
     Collection<Review> findAllReviews(Long filmId, Long count);
 
-    Optional<ReviewMark> addLikeToReview(Long reviewId, Long userId);
+    Optional<ReviewMark> createReviewMark(Long reviewId, Long userId, Boolean isLike);
 
-    Optional<ReviewMark> addDislikeToReview(Long reviewId, Long userId);
+    Optional<ReviewMark> removeReviewMark(Long reviewId, Long userId, Boolean isLike);
 
-    Optional<ReviewMark> deleteReviewLike(Long reviewId, Long userId);
-
-    Optional<ReviewMark> deleteReviewDislike(Long reviewId, Long userId);
-
-    Optional<ReviewMark> findReviewMark(Long reviewId, Long userId, boolean isLike);
+    Optional<ReviewMark> findReviewMark(Long reviewId, Long userId, Boolean isLike);
 }

@@ -111,8 +111,8 @@ public class ReviewTest {
     @Test
     void deleteReviewWithMarksTest() {
         assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
-        rs.addLikeToReview(rev1Id, user1Id);
-        rs.addDislikeToReview(rev1Id, user2Id);
+        rs.addReviewMark(rev1Id, user1Id, true);
+        rs.addReviewMark(rev1Id, user2Id, false);
         rs.deleteReview(rev1Id);
         assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(2);
     }
@@ -137,18 +137,18 @@ public class ReviewTest {
     void findAllReviewsOrderTest() {
         assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
                 .get(0).getContent()).isEqualTo(rev1.getContent());
-        rs.addLikeToReview(rev2Id, user1Id);
+        rs.addReviewMark(rev2Id, user1Id, true);
         assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
                 .get(0).getContent()).isEqualTo(rev2.getContent());
-        rs.addLikeToReview(rev3Id, user1Id);
-        rs.addLikeToReview(rev3Id, user2Id);
+        rs.addReviewMark(rev3Id, user1Id, true);
+        rs.addReviewMark(rev3Id, user2Id, true);
         assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
                 .get(0).getContent()).isEqualTo(rev3.getContent());
-        rs.deleteReviewLike(rev3Id, user2Id);
+        rs.deleteReviewMark(rev3Id, user2Id, true);
         assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
                 .get(0).getContent()).isEqualTo(rev2.getContent());
-        rs.deleteReviewLike(rev3Id, user1Id);
-        rs.deleteReviewLike(rev2Id, user1Id);
+        rs.deleteReviewMark(rev3Id, user1Id, true);
+        rs.deleteReviewMark(rev2Id, user1Id, true);
         assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
                 .get(0).getContent()).isEqualTo(rev1.getContent());
     }
@@ -156,56 +156,56 @@ public class ReviewTest {
     @Test
     void addLikeToReviewTest() {
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addLikeToReview(rev1Id, user1Id);
+        rs.addReviewMark(rev1Id, user1Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
-        rs.addLikeToReview(rev1Id, user2Id);
+        rs.addReviewMark(rev1Id, user2Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(2L);
     }
 
     @Test
     void addDuplicateLikeToReviewTest() {
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addLikeToReview(rev1Id, user1Id);
+        rs.addReviewMark(rev1Id, user1Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
         assertThatThrownBy(() ->
-                rs.addLikeToReview(rev1Id, user1Id))
+                rs.addReviewMark(rev1Id, user1Id, true))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
     void addDisLikeToReviewTest() {
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addLikeToReview(rev1Id, user1Id);
+        rs.addReviewMark(rev1Id, user1Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
-        rs.addLikeToReview(rev1Id, user2Id);
+        rs.addReviewMark(rev1Id, user2Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(2L);
     }
 
     @Test
     void addDuplicateDislikeToReviewTest() {
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addLikeToReview(rev1Id, user1Id);
+        rs.addReviewMark(rev1Id, user1Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
         assertThatThrownBy(() ->
-                rs.addLikeToReview(rev1Id, user1Id))
+                rs.addReviewMark(rev1Id, user1Id, true))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
     void deleteReviewLikeTest() {
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addLikeToReview(rev1Id, user1Id);
+        rs.addReviewMark(rev1Id, user1Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
-        rs.deleteReviewLike(rev1Id, user1Id);
+        rs.deleteReviewMark(rev1Id, user1Id, true);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
     }
 
     @Test
     void deleteReviewDislike() {
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addDislikeToReview(rev1Id, user1Id);
+        rs.addReviewMark(rev1Id, user1Id, false);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(-1L);
-        rs.deleteReviewDislike(rev1Id, user1Id);
+        rs.deleteReviewMark(rev1Id, user1Id, false);
         assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
     }
 

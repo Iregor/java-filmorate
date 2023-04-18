@@ -99,48 +99,30 @@ public class ReviewService {
         return reviewStorage.findAllReviews(filmId, count);
     }
 
-    public void addLikeToReview(Long reviewId, Long userId) {
+    public void addReviewMark(Long reviewId, Long userId, Boolean isLike) {
         assertReviewExists(reviewId);
         assertUserExists(userId);
-        assertReviewMarkNotExists(reviewId, userId, true);
-        Optional<ReviewMark> result = reviewStorage.addLikeToReview(reviewId, userId);
+        assertReviewMarkNotExists(reviewId, userId, isLike);
+        Optional<ReviewMark> result = reviewStorage.createReviewMark(reviewId, userId, isLike);
         if (result.isEmpty()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not created.", reviewId, userId, true);
+            log.warn("Mark of review id: {} from user id: {} with value {} is not created.",
+                    reviewId, userId, isLike);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not created.", reviewId, userId, true));
+                    "Mark of review id: %d from user id: %d with value %b is not created.",
+                    reviewId, userId, isLike));
         }
     }
 
-    public void addDislikeToReview(Long reviewId, Long userId) {
-        assertReviewExists(reviewId);
-        assertUserExists(userId);
-        assertReviewMarkNotExists(reviewId, userId, false);
-        Optional<ReviewMark> result = reviewStorage.addDislikeToReview(reviewId, userId);
-        if (result.isEmpty()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not created.", reviewId, userId, false);
-            throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not created.", reviewId, userId, false));
-        }
-    }
-
-    public void deleteReviewLike(Long reviewId, Long userId) {
-        assertReviewMarkExists(reviewId, userId, true);
-        Optional<ReviewMark> result = reviewStorage.deleteReviewLike(reviewId, userId);
+    public void deleteReviewMark(Long reviewId, Long userId, Boolean isLike) {
+        assertReviewMarkExists(reviewId, userId, isLike);
+        Optional<ReviewMark> result = reviewStorage.removeReviewMark(reviewId, userId, isLike);
 
         if (result.isPresent()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.", reviewId, userId, true);
+            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.",
+                    reviewId, userId, isLike);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not deleted.", reviewId, userId, true));
-        }
-    }
-
-    public void deleteReviewDislike(Long reviewId, Long userId) {
-        assertReviewMarkExists(reviewId, userId, false);
-        Optional<ReviewMark> result = reviewStorage.deleteReviewDislike(reviewId, userId);
-        if (result.isPresent()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} is not deleted.", reviewId, userId, false);
-            throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b is not deleted.", reviewId, userId, false));
+                    "Mark of review id: %d from user id: %d with value %b is not deleted.",
+                    reviewId, userId, isLike));
         }
     }
 
@@ -168,23 +150,26 @@ public class ReviewService {
         }
     }
 
-    private void assertReviewMarkExists(Long reviewId, Long userId, boolean isPositive) {
-        Optional<ReviewMark> existedMark = reviewStorage.findReviewMark(reviewId, userId, isPositive);
+    private void assertReviewMarkExists(Long reviewId, Long userId, Boolean isLike) {
+        Optional<ReviewMark> existedMark = reviewStorage.findReviewMark(reviewId, userId, isLike);
         if (existedMark.isEmpty()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} not found.", reviewId, userId, isPositive);
+            log.warn("Mark of review id: {} from user id: {} with value {} not found.",
+                    reviewId, userId, isLike);
             throw new IncorrectObjectIdException(String.format(
-                    "Mark of review id: %d from user id: %d with value %b not found.", reviewId, userId, isPositive)
+                    "Mark of review id: %d from user id: %d with value %b not found.",
+                    reviewId, userId, isLike)
             );
         }
     }
 
-    private void assertReviewMarkNotExists(Long reviewId, Long userId, boolean isPositive) {
-        Optional<ReviewMark> existedMark = reviewStorage.findReviewMark(reviewId, userId, isPositive);
+    private void assertReviewMarkNotExists(Long reviewId, Long userId, Boolean isLike) {
+        Optional<ReviewMark> existedMark = reviewStorage.findReviewMark(reviewId, userId, isLike);
         if (existedMark.isPresent()) {
-            log.warn("Mark of review id: {} from user id: {} with value {} already created.", reviewId, userId, isPositive);
+            log.warn("Mark of review id: {} from user id: {} with value {} already created.",
+                    reviewId, userId, isLike);
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Mark of review id: %d from user id: %d with value %b already created.",
-                            reviewId, userId, isPositive));
+                            reviewId, userId, isLike));
         }
     }
 }

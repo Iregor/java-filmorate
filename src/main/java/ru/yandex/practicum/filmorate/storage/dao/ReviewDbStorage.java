@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -11,8 +12,6 @@ import ru.yandex.practicum.filmorate.model.ReviewMark;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -22,32 +21,52 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+    static final RowMapper<Review> reviewMapper =
+            (rs, rowNum) -> Review.builder()
+                    .reviewId(rs.getLong("REVIEW_ID"))
+                    .content(rs.getString("CONTENT"))
+                    .positive(rs.getBoolean("IS_POSITIVE"))
+                    .userId(rs.getLong("USER_ID"))
+                    .filmId(rs.getLong("FILM_ID"))
+                    .useful(rs.getLong("USEFUL"))
+                    .build();
+
+    static final RowMapper<ReviewMark> reviewMarkMapper =
+            (rs, rowNum) -> new ReviewMark(
+                    rs.getLong("REVIEW_ID"),
+                    rs.getLong("USER_ID"),
+                    rs.getBoolean("IS_LIKE"));
+
 
     @Override
     public Optional<Review> createReview(Review review) {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
-                .withTableName("reviews")
-                .usingGeneratedKeyColumns("review_id");
-        Long id = insert.executeAndReturnKey(getReviewParams(review)).longValue();
+                .withTableName("REVIEWS")
+                .usingGeneratedKeyColumns("REVIEW_ID");
+        Long id = insert
+                .executeAndReturnKey(getReviewParams(review))
+                .longValue();
         return findReviewById(id);
     }
 
     @Override
     public Optional<Review> updateReview(Review review) {
         jdbcTemplate.update(
-                "UPDATE reviews SET " +
-                        "content = :content, " +
-                        "is_positive = :is_positive " +
-                        "WHERE review_id = :review_id; ",
-                getReviewParams(review).addValue("review_id", review.getReviewId()));
+                "UPDATE REVIEWS SET " +
+                        "CONTENT = :CONTENT, " +
+                        "IS_POSITIVE = :IS_POSITIVE " +
+                        "WHERE REVIEW_ID = :REVIEW_ID;",
+                getReviewParams(review));
         return findReviewById(review.getReviewId());
     }
 
     @Override
     public Optional<Review> deleteReview(Long reviewId) {
         jdbcTemplate.update(
-                "DELETE FROM reviews WHERE review_id = :id",
-                new MapSqlParameterSource().addValue("id", reviewId));
+                "DELETE FROM REVIEWS " +
+                        "WHERE REVIEW_ID = :REVIEW_ID",
+                new MapSqlParameterSource()
+                        .addValue("REVIEW_ID", reviewId));
         return findReviewById(reviewId);
     }
 
@@ -55,16 +74,16 @@ public class ReviewDbStorage implements ReviewStorage {
     public Optional<Review> findReviewById(Long reviewId) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT * FROM reviews " +
+                    "SELECT * FROM REVIEWS R " +
                             "LEFT OUTER JOIN " +
-                            "(SELECT review_id, (SUM(is_like = true) - SUM(is_like = false)) as useful " +
-                            "FROM review_marks " +
-                            "WHERE review_id = :review_id " +
-                            "GROUP BY review_id) AS review_marks " +
-                            "ON reviews.review_id = review_marks.review_id " +
-                            "WHERE reviews.review_id = :review_id; ",
-                    new MapSqlParameterSource().addValue("review_id", reviewId),
-                    this::mapReview));
+                            "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
+                            "FROM REVIEW_MARKS " +
+                            "WHERE REVIEW_ID = :REVIEW_ID " +
+                            "GROUP BY REVIEW_ID) RM " +
+                            "ON R.REVIEW_ID = RM.REVIEW_ID " +
+                            "WHERE R.REVIEW_ID = :REVIEW_ID; ",
+                    new MapSqlParameterSource().addValue("REVIEW_ID", reviewId),
+                    reviewMapper));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -73,75 +92,55 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Collection<Review> findAllReviews(Long filmId, Long count) {
         StringBuilder sqlQuery = new StringBuilder(
-                "SELECT *, COALESCE(useful, 0) as likeRate FROM reviews " +
+                "SELECT *, COALESCE(useful, 0) LR FROM REVIEWS R " +
                         "LEFT OUTER JOIN " +
-                        "(SELECT review_id, (SUM(is_like = true) - SUM(is_like = false)) AS useful " +
-                        "FROM review_marks " +
-                        "GROUP BY review_id) AS review_marks " +
-                        "ON reviews.review_id = review_marks.review_id ");
+                        "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
+                        "FROM REVIEW_MARKS " +
+                        "GROUP BY REVIEW_ID) RM " +
+                        "ON R.REVIEW_ID = RM.REVIEW_ID ");
         if (filmId != null) {
-            sqlQuery.append("WHERE reviews.film_id = :filmId ");
+            sqlQuery.append("WHERE R.FILM_ID = :FILM_ID ");
         }
         sqlQuery.append(
-                "ORDER BY likeRate DESC " +
-                        "LIMIT :count; ");
+                "ORDER BY LR DESC " +
+                        "LIMIT :COUNT; ");
         return jdbcTemplate.query(sqlQuery.toString(),
                 new MapSqlParameterSource()
-                        .addValue("filmId", filmId)
-                        .addValue("count", count),
-                this::mapReview);
+                        .addValue("FILM_ID", filmId)
+                        .addValue("COUNT", count),
+                reviewMapper);
     }
 
     @Override
-    public Optional<ReviewMark> addLikeToReview(Long reviewId, Long userId) {
+    public Optional<ReviewMark> createReviewMark(Long reviewId, Long userId, Boolean isLike) {
         new SimpleJdbcInsert(dataSource)
-                .withTableName("review_marks")
-                .execute(new MapSqlParameterSource()
-                        .addValue("review_id", reviewId)
-                        .addValue("user_id", userId)
-                        .addValue("is_like", true));
+                .withTableName("REVIEW_MARKS")
+                .execute(getReviewMarkParams(new ReviewMark(reviewId, userId, isLike)));
+        return findReviewMark(reviewId, userId, isLike);
+    }
+
+    @Override
+    public Optional<ReviewMark> removeReviewMark(Long reviewId, Long userId, Boolean isLike) {
+        jdbcTemplate.update(
+                "DELETE FROM REVIEW_MARKS " +
+                        "WHERE REVIEW_ID = :REVIEW_ID " +
+                        "AND USER_ID = :USER_ID " +
+                        "AND IS_LIKE = :IS_LIKE;",
+                getReviewMarkParams(new ReviewMark(reviewId, userId, isLike)));
         return findReviewMark(reviewId, userId, true);
     }
 
     @Override
-    public Optional<ReviewMark> addDislikeToReview(Long reviewId, Long userId) {
-        new SimpleJdbcInsert(dataSource)
-                .withTableName("review_marks")
-                .execute(new MapSqlParameterSource()
-                        .addValue("review_id", reviewId)
-                        .addValue("user_id", userId)
-                        .addValue("is_like", false));
-        return findReviewMark(reviewId, userId, false);
-    }
-
-    @Override
-    public Optional<ReviewMark> deleteReviewLike(Long reviewId, Long userId) {
-        jdbcTemplate.update(
-                "DELETE FROM review_marks WHERE review_id = :review_id AND user_id = :user_id AND is_like = true;",
-                new MapSqlParameterSource().addValue("review_id", reviewId).addValue("user_id", userId));
-        return findReviewMark(reviewId, userId, true);
-    }
-
-    @Override
-    public Optional<ReviewMark> deleteReviewDislike(Long reviewId, Long userId) {
-        jdbcTemplate.update(
-                "DELETE FROM review_marks WHERE review_id = :review_id AND user_id = :user_id AND is_like = false;",
-                new MapSqlParameterSource().addValue("review_id", reviewId).addValue("user_id", userId));
-        return findReviewMark(reviewId, userId, false);
-    }
-
-    @Override
-    public Optional<ReviewMark> findReviewMark(Long reviewId, Long userId, boolean isLike) {
+    public Optional<ReviewMark> findReviewMark(Long reviewId, Long userId, Boolean isLike) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
                     "SELECT * " +
-                            "FROM review_marks " +
-                            "WHERE review_id = :reviewId AND user_id = :userId AND is_like = :isLike;",
-                    new MapSqlParameterSource()
-                            .addValue("reviewId", reviewId)
-                            .addValue("userId", userId)
-                            .addValue("isLike", isLike),
-                    this::mapReviewMark
+                            "FROM REVIEW_MARKS " +
+                            "WHERE REVIEW_ID = :REVIEW_ID " +
+                            "AND USER_ID = :USER_ID " +
+                            "AND IS_LIKE = :IS_LIKE;",
+                    getReviewMarkParams(new ReviewMark(reviewId, userId, isLike)),
+                    reviewMarkMapper
             ));
         } catch (EmptyResultDataAccessException exc) {
             return Optional.empty();
@@ -150,28 +149,17 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private MapSqlParameterSource getReviewParams(Review review) {
         return new MapSqlParameterSource()
-                .addValue("content", review.getContent())
-                .addValue("is_positive", review.getPositive())
-                .addValue("user_id", review.getUserId())
-                .addValue("film_id", review.getFilmId());
+                .addValue("REVIEW_ID", review.getReviewId())
+                .addValue("CONTENT", review.getContent())
+                .addValue("IS_POSITIVE", review.getPositive())
+                .addValue("USER_ID", review.getUserId())
+                .addValue("FILM_ID", review.getFilmId());
     }
 
-    private Review mapReview(ResultSet rs, int rowNum) throws SQLException {
-        return Review.builder()
-                .reviewId(rs.getLong("reviews.review_id"))
-                .content(rs.getString("reviews.content"))
-                .positive(rs.getBoolean("reviews.is_positive"))
-                .userId(rs.getLong("reviews.user_id"))
-                .filmId(rs.getLong("reviews.film_id"))
-                .useful(rs.getLong("review_marks.useful"))
-                .build();
-    }
-
-    private ReviewMark mapReviewMark(ResultSet rs, int rowNum) throws SQLException {
-        return ReviewMark.builder()
-                .reviewId(rs.getLong("review_id"))
-                .userId(rs.getLong("user_id"))
-                .isLike(rs.getBoolean("is_like"))
-                .build();
+    private MapSqlParameterSource getReviewMarkParams(ReviewMark reviewMark) {
+        return new MapSqlParameterSource()
+                .addValue("REVIEW_ID", reviewMark.getReviewId())
+                .addValue("USER_ID", reviewMark.getUserId())
+                .addValue("IS_LIKE", reviewMark.isLike());
     }
 }
