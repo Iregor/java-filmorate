@@ -144,13 +144,7 @@ public class FilmService {
         }
         likesStorage.add(filmId, userId);
         log.info("User {} liked film {}.", userId, filmId);
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(userId)
-                .eventType(EventType.LIKE)
-                .operation(Operation.ADD)
-                .entityId(filmId)
-                .build());
+        eventService.addEvent(userId, filmId, EventType.LIKE, Operation.ADD);
     }
 
     public void dislike(Long filmId, Long userId) {
@@ -164,13 +158,7 @@ public class FilmService {
         }
         likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(userId)
-                .eventType(EventType.LIKE)
-                .operation(Operation.REMOVE)
-                .entityId(filmId)
-                .build());
+        eventService.addEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
     }
 
     public Collection<Film> convertIdsToFilms(Collection<Long> filmsIds) {

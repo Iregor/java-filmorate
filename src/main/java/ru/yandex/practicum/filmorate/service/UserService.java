@@ -97,13 +97,7 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
         friendStorage.add(userId, friendId);
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(userId)
-                .eventType(EventType.FRIEND)
-                .operation(Operation.ADD)
-                .entityId(friendId)
-                .build());
+        eventService.addEvent(userId, friendId, EventType.FRIEND, Operation.ADD);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -117,13 +111,7 @@ public class UserService {
         }
         friendStorage.remove(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(userId)
-                .eventType(EventType.FRIEND)
-                .operation(Operation.REMOVE)
-                .entityId(friendId)
-                .build());
+        eventService.addEvent(userId, friendId, EventType.FRIEND, Operation.REMOVE);
     }
 
     public Collection<User> getFriends(Long userId) {
