@@ -107,17 +107,15 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Map<Long, Integer> getFilmsScore(Long userId) {
         Map<Long, Integer> filmsScore = new HashMap<>();
-        jdbcTemplate.query(
-                "SELECT L.FILM_ID, " +
-                        "COUNT(L.FILM_ID) SCORE " +
-                        "FROM LIKES L " +
-                        "JOIN LIKES LA ON L.FILM_ID = LA.FILM_ID " +
-                        "JOIN LIKES LB ON L.FILM_ID = LB.FILM_ID " +
-                        "WHERE L.USER_ID <> :USER_ID " +
-                        "AND L.USER_ID = LA.USER_ID " +
-                        "AND L.USER_ID = LB.USER_ID " +
-                        "GROUP BY L.FILM_ID " +
-                        "ORDER BY SCORE DESC;",
+        jdbcTemplate.query("SELECT l1.FILM_ID, COUNT(l1.FILM_ID) SCORE " +
+                        "FROM LIKES l1 JOIN LIKES l2 ON l1.USER_ID = l2.USER_ID " +
+                        "AND l2.USER_ID <> :USER_ID " +
+                        "WHERE l2.FILM_ID IN ( " +
+                        "SELECT FILM_ID " +
+                        "FROM LIKES " +
+                        "WHERE USER_ID = :USER_ID) " +
+                        "GROUP BY l1.FILM_ID " +
+                        "ORDER BY SCORE DESC",
                 new MapSqlParameterSource("USER_ID", userId),
                 (ResultSet rs) -> {
                     filmsScore.put(rs.getLong("FILM_ID"), rs.getInt("SCORE"));
@@ -129,18 +127,12 @@ public class UserDbStorage implements UserStorage {
     public Map<Long, List<Long>> getDiffFilms(Long userId) {
         final Map<Long, List<Long>> filmLikeByUserId = new HashMap<>();
         jdbcTemplate.query(
-                "SELECT " +
-                        "DISTINCT L.USER_ID, L.FILM_ID " +
-                        "FROM LIKES L " +
-                        "JOIN LIKES LA ON L.USER_ID = LA.USER_ID " +
-                        "JOIN LIKES LB ON LA.FILM_ID = LB.FILM_ID " +
-                        "JOIN LIKES LC ON L.FILM_ID <> LC.FILM_ID " +
-                        "WHERE L.USER_ID != :USER_ID AND " +
-                        "L.FILM_ID != LA.FILM_ID AND " +
-                        "LA.FILM_ID = LB.FILM_ID AND " +
-                        "LB.USER_ID = :USER_ID AND " +
-                        "LC.USER_ID = :USER_ID AND " +
-                        "L.FILM_ID != LC.FILM_ID;",
+                "SELECT L1.USER_ID, L1.FILM_ID " +
+                        "FROM LIKES L1 " +
+                        "LEFT JOIN LIKES L2 ON L1.FILM_ID = L2.FILM_ID AND L2.USER_ID = :USER_ID " +
+                        "WHERE L1.USER_ID <> :USER_ID AND L2.USER_ID IS NULL " +
+                        "GROUP BY L1.USER_ID, L1.FILM_ID " +
+                        "ORDER BY L1.USER_ID, L1.FILM_ID",
                 new MapSqlParameterSource().addValue("USER_ID", userId),
                 (ResultSet rs) -> {
                     filmLikeByUserId.computeIfAbsent(rs.getLong("USER_ID"), l -> new ArrayList<>())
@@ -154,13 +146,11 @@ public class UserDbStorage implements UserStorage {
         final List<Long> scores = new ArrayList<>();
         final Map<Long, Long> scoreByUsersId = new HashMap<>();
         jdbcTemplate.query(
-                "SELECT L.USER_ID, " +
-                        "COUNT(LA.FILM_ID) SCORE " +
-                        "FROM LIKES L " +
-                        "JOIN LIKES LA ON L.FILM_ID = LA.FILM_ID " +
-                        "WHERE L.USER_ID <> :USER_ID AND LA.USER_ID = :USER_ID " +
+                "SELECT L.USER_ID, COUNT(LU.FILM_ID) SCORE " +
+                        "FROM LIKES L JOIN LIKES LU ON L.FILM_ID = LU.FILM_ID " +
+                        "WHERE L.USER_ID <> :USER_ID AND LU.USER_ID = :USER_ID " +
                         "GROUP BY L.USER_ID " +
-                        "ORDER BY SCORE DESC;",
+                        "ORDER BY SCORE DESC",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId),
                 (ResultSet rs) -> {

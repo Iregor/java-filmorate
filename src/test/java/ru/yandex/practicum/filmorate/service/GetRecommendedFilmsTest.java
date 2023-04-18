@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,11 +40,11 @@ public class GetRecommendedFilmsTest {
     void getRecommendedFilmsIdsTest() {
         addData();
         collectLikeModel();
-        assertEquals(userService.findAdviseFilmsIds(1L).size(), 3, "prediction doesn't work");
-        assertTrue(userService.findAdviseFilmsIds(1L).contains(3L), "prediction doesn't work");
+        assertEquals(userService.findAdviseFilms(1L).size(), 1, "prediction doesn't work");
+        assertTrue(userService.findAdviseFilms(1L).contains(filmService.findById(3L)), "prediction doesn't work");
         filmService.like(1L, 3L);
-        assertEquals(userService.findAdviseFilmsIds(1L).size(), 4, "prediction doesn't work");
-        assertTrue(userService.findAdviseFilmsIds(1L).contains(1L), "prediction doesn't work");
+        assertEquals(userService.findAdviseFilms(1L).size(), 2, "prediction doesn't work");
+        assertTrue(userService.findAdviseFilms(1L).contains(filmService.findById(1L)), "prediction doesn't work");
     }
 
     @Test
@@ -53,8 +52,7 @@ public class GetRecommendedFilmsTest {
         addData();
         collectLikeModel();
         filmService.like(1L, 3L);
-        Collection<Long> testIdModelCollection = userService.findAdviseFilmsIds(1L);
-        Map<Long, Film> predictionFilms = filmService.convertIdsToFilms(testIdModelCollection)
+        Map<Long, Film> predictionFilms = userService.findAdviseFilms(1L)
                 .stream()
                 .collect(Collectors.toMap(Film::getId, Function.identity()));
         assertEquals(predictionFilms.get(1L), filmService.findById(1L), "prediction doesn't work");
@@ -91,11 +89,11 @@ public class GetRecommendedFilmsTest {
                 " '2009-12-10', 162);");
 
         jdbcTemplate.update("INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY ) " +
-                "VALUES ('email@yandex.ru', 'trulala', 'Trexo', '2011-03-08')," +
+                "VALUES ('email@yandex.ru', 'trabecula', 'Tr-exo', '2011-03-08')," +
                 "('ema@mail.ru', 'login', 'Name', '2001-06-05')," +
-                "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
+                "('ema@yahoo.ru', 'originator', 'SurName', '1988-01-02')," +
                 "('ail@rambler.ru', 'user34321', 'User', '2021-03-18')," +
-                "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
+                "('eml@ms.ru', 'poison', 'Dbname', '1994-11-25')");
 
         jdbcTemplate.update("INSERT INTO FILM_GENRES " +
                 "VALUES (1, 1), (1, 2), (2, 2), (2, 3), (3, 3), (3, 4) ;");

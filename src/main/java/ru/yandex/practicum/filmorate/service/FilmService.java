@@ -160,7 +160,7 @@ public class FilmService {
         eventService.addEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
     }
 
-    public Collection<Film> convertIdsToFilms(Collection<Long> filmsIds) {
+    public Collection<Film> findFilmByIds(Collection<Long> filmsIds) {
         Collection<Film> sortedFilm = new ArrayList<>();
         Collection<Film> resultAdvise = filmStorage.filmsByIds(filmsIds);
         addDataFilms(resultAdvise);
