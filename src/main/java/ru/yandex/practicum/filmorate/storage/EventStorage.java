@@ -7,7 +7,7 @@ import java.util.Collection;
 
 @Component
 public interface EventStorage {
-    Collection<Event> getFeed(Long eventId);
+    Collection<Event> getFeed(Long userId);
 
     void addEvent(Event event);
 }
