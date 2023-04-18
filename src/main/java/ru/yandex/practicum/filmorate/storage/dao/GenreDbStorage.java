@@ -100,8 +100,8 @@ public class GenreDbStorage implements GenreStorage {
         jdbcTemplate.update(
                 "UPDATE GENRES " +
                         "SET GENRE_NAME = :GENRE_NAME " +
-                        "WHERE GENRE_ID = :GENRE_ID;"
-                , getGenreParams(genre));
+                        "WHERE GENRE_ID = :GENRE_ID;",
+                getGenreParams(genre));
         return findById(genre.getId());
     }
 
