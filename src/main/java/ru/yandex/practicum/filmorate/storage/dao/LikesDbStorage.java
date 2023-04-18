@@ -8,10 +8,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Repository("likesDb")
 @RequiredArgsConstructor
@@ -60,13 +57,13 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public void add(Long filmId, Long userId) {
-        int count = jdbcTemplate.queryForObject(
+        int count = Objects.requireNonNull(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM LIKES " +
                         "WHERE FILM_ID = :FILM_ID AND USER_ID = :USER_ID;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("USER_ID", userId),
-                Integer.class);
+                Integer.class));
 
         if (count != 0) {
             return;

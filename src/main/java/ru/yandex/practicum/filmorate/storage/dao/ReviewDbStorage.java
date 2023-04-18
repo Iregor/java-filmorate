@@ -37,7 +37,6 @@ public class ReviewDbStorage implements ReviewStorage {
                     rs.getLong("USER_ID"),
                     rs.getBoolean("IS_LIKE"));
 
-
     @Override
     public Optional<Review> createReview(Review review) {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
@@ -74,14 +73,16 @@ public class ReviewDbStorage implements ReviewStorage {
     public Optional<Review> findReviewById(Long reviewId) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT * FROM REVIEWS R " +
-                            "LEFT OUTER JOIN " +
-                            "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
-                            "FROM REVIEW_MARKS " +
-                            "WHERE REVIEW_ID = :REVIEW_ID " +
-                            "GROUP BY REVIEW_ID) RM " +
-                            "ON R.REVIEW_ID = RM.REVIEW_ID " +
-                            "WHERE R.REVIEW_ID = :REVIEW_ID; ",
+                    "SELECT R.REVIEW_ID," +
+                            "CONTENT," +
+                            "IS_POSITIVE," +
+                            "R.USER_ID," +
+                            "FILM_ID, " +
+                            "SUM(RM.IS_LIKE = TRUE) - SUM(RM.IS_LIKE = FALSE) USEFUL " +
+                            "FROM REVIEWS R " +
+                            "LEFT OUTER JOIN REVIEW_MARKS RM ON R.REVIEW_ID = RM.REVIEW_ID " +
+                            "WHERE R.REVIEW_ID = :REVIEW_ID " +
+                            "GROUP BY R.REVIEW_ID;",
                     new MapSqlParameterSource().addValue("REVIEW_ID", reviewId),
                     reviewMapper));
         } catch (EmptyResultDataAccessException e) {
@@ -91,14 +92,17 @@ public class ReviewDbStorage implements ReviewStorage {
 
     public Collection<Review> findAllReviewsByFilmId(Long filmId, Integer count) {
         return jdbcTemplate.query(
-                "SELECT *, COALESCE(USEFUL, 0) LR FROM REVIEWS R " +
-                        "LEFT OUTER JOIN " +
-                        "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
-                        "FROM REVIEW_MARKS " +
-                        "GROUP BY REVIEW_ID) RM " +
-                        "ON R.REVIEW_ID = RM.REVIEW_ID " +
+                "SELECT R.REVIEW_ID," +
+                        "CONTENT," +
+                        "IS_POSITIVE," +
+                        "R.USER_ID," +
+                        "FILM_ID, " +
+                        "COALESCE(SUM(RM.IS_LIKE = TRUE) - SUM(RM.IS_LIKE = FALSE), 0) USEFUL " +
+                        "FROM REVIEWS R " +
+                        "LEFT OUTER JOIN REVIEW_MARKS RM ON R.REVIEW_ID = RM.REVIEW_ID " +
                         "WHERE R.FILM_ID = :FILM_ID " +
-                        "ORDER BY LR DESC " +
+                        "GROUP BY R.REVIEW_ID " +
+                        "ORDER BY USEFUL DESC " +
                         "LIMIT :COUNT;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
@@ -109,13 +113,16 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Collection<Review> findAllReviews(Integer count) {
         return jdbcTemplate.query(
-                "SELECT *, COALESCE(useful, 0) LR FROM REVIEWS R " +
-                        "LEFT OUTER JOIN " +
-                        "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
-                        "FROM REVIEW_MARKS " +
-                        "GROUP BY REVIEW_ID) RM " +
-                        "ON R.REVIEW_ID = RM.REVIEW_ID " +
-                        "ORDER BY LR DESC " +
+                "SELECT R.REVIEW_ID," +
+                        "CONTENT," +
+                        "IS_POSITIVE," +
+                        "R.USER_ID," +
+                        "FILM_ID, " +
+                        "COALESCE(SUM(RM.IS_LIKE = TRUE) - SUM(RM.IS_LIKE = FALSE), 0) USEFUL " +
+                        "FROM REVIEWS R " +
+                        "LEFT OUTER JOIN REVIEW_MARKS RM ON R.REVIEW_ID = RM.REVIEW_ID " +
+                        "GROUP BY R.REVIEW_ID " +
+                        "ORDER BY USEFUL DESC " +
                         "LIMIT :COUNT;",
                 new MapSqlParameterSource()
                         .addValue("COUNT", count),

@@ -129,16 +129,18 @@ public class UserDbStorage implements UserStorage {
     public Map<Long, List<Long>> getDiffFilms(Long userId) {
         final Map<Long, List<Long>> filmLikeByUserId = new HashMap<>();
         jdbcTemplate.query(
-                "SELECT USER_ID, " +
-                        "FILM_ID " +
-                        "FROM LIKES " +
-                        "WHERE USER_ID IN (SELECT DISTINCT USER_ID " +
-                        "FROM LIKES " +
-                        "WHERE USER_ID <> :USER_ID " +
-                        "AND FILM_ID IN (SELECT FILM_ID " +
-                        "FROM LIKES " +
-                        "WHERE USER_ID = :USER_ID)) " +
-                        "AND FILM_ID NOT IN (SELECT FILM_ID FROM LIKES WHERE USER_ID = :USER_ID);",
+                "SELECT " +
+                        "DISTINCT L.USER_ID, L.FILM_ID " +
+                        "FROM LIKES L " +
+                        "JOIN LIKES LA ON L.USER_ID = LA.USER_ID " +
+                        "JOIN LIKES LB ON LA.FILM_ID = LB.FILM_ID " +
+                        "JOIN LIKES LC ON L.FILM_ID <> LC.FILM_ID " +
+                        "WHERE L.USER_ID != :USER_ID AND " +
+                        "L.FILM_ID != LA.FILM_ID AND " +
+                        "LA.FILM_ID = LB.FILM_ID AND " +
+                        "LB.USER_ID = :USER_ID AND " +
+                        "LC.USER_ID = :USER_ID AND " +
+                        "L.FILM_ID != LC.FILM_ID;",
                 new MapSqlParameterSource().addValue("USER_ID", userId),
                 (ResultSet rs) -> {
                     filmLikeByUserId.computeIfAbsent(rs.getLong("USER_ID"), l -> new ArrayList<>())
