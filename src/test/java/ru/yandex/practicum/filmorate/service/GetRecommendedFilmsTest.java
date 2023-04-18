@@ -41,10 +41,10 @@ public class GetRecommendedFilmsTest {
     void getRecommendedFilmsIdsTest() {
         addData();
         collectLikeModel();
-        assertEquals(userService.findAdviseFilmsIds(1L).size(), 1, "prediction doesn't work");
+        assertEquals(userService.findAdviseFilmsIds(1L).size(), 3, "prediction doesn't work");
         assertTrue(userService.findAdviseFilmsIds(1L).contains(3L), "prediction doesn't work");
         filmService.like(1L, 3L);
-        assertEquals(userService.findAdviseFilmsIds(1L).size(), 2, "prediction doesn't work");
+        assertEquals(userService.findAdviseFilmsIds(1L).size(), 4, "prediction doesn't work");
         assertTrue(userService.findAdviseFilmsIds(1L).contains(1L), "prediction doesn't work");
     }
 

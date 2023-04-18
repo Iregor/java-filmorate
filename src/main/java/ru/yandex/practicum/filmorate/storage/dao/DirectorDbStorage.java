@@ -38,14 +38,17 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Collection<Director> findAll() {
-        return jdbcTemplate.query("SELECT * FROM directors", directorRowMapper);
+        return jdbcTemplate.query(
+                "SELECT * FROM DIRECTORS",
+                directorRowMapper);
     }
 
     @Override
     public Optional<Director> findById(Long directorId) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT * FROM directors WHERE director_id = :DIRECTOR_ID",
+                    "SELECT * FROM DIRECTORS " +
+                            "WHERE DIRECTOR_ID = :DIRECTOR_ID",
                     new MapSqlParameterSource()
                             .addValue("DIRECTOR_ID", directorId),
                     directorRowMapper));
@@ -67,15 +70,19 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Optional<Director> updateDirector(Director director) {
-        jdbcTemplate.update("UPDATE directors SET director_name = :DIRECTOR_NAME " +
-                        "WHERE director_id = :DIRECTOR_ID",
+        jdbcTemplate.update(
+                "UPDATE DIRECTORS " +
+                        "SET DIRECTOR_NAME = :DIRECTOR_NAME " +
+                        "WHERE DIRECTOR_ID = :DIRECTOR_ID",
                 getDirectorParams(director));
         return findById(director.getId());
     }
 
     @Override
     public void removeDirector(Long directorId) {
-        jdbcTemplate.update("DELETE FROM directors WHERE director_id = :DIRECTOR_ID",
+        jdbcTemplate.update(
+                "DELETE FROM DIRECTORS " +
+                        "WHERE DIRECTOR_ID = :DIRECTOR_ID",
                 new MapSqlParameterSource()
                         .addValue("DIRECTOR_ID", directorId));
     }
@@ -83,11 +90,12 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Collection<Director> findByFilmId(Long filmId) {
         return new HashSet<>(jdbcTemplate.query(
-                "SELECT d.director_id, d.director_name " +
-                        "FROM directors AS d " +
-                        "JOIN film_directors AS fd ON d.director_id = fd.director_id " +
-                        "WHERE fd.film_id = :FILM_ID " +
-                        "ORDER BY d.director_id",
+                "SELECT D.DIRECTOR_ID, " +
+                        "D.DIRECTOR_NAME " +
+                        "FROM DIRECTORS D " +
+                        "JOIN FILM_DIRECTORS FD ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                        "WHERE FD.FILM_ID = :FILM_ID " +
+                        "ORDER BY D.DIRECTOR_ID",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId),
                 directorRowMapper));
@@ -96,29 +104,20 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Map<Long, Set<Director>> findByFilms(Set<Long> filmIds) {
         SqlParameterSource ids = new MapSqlParameterSource("IDS", filmIds);
-        return jdbcTemplate.query("SELECT * FROM film_directors AS fd " +
-                        "JOIN directors AS d ON d.director_id = fd.director_id " +
-                        "WHERE film_id IN (:IDS) " +
-                        "ORDER BY d.director_id",
-                ids, directorsExtractor);
+        return jdbcTemplate.query(
+                "SELECT * FROM FILM_DIRECTORS FD " +
+                        "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                        "WHERE FILM_ID IN (:IDS) " +
+                        "ORDER BY D.DIRECTOR_ID",
+                ids,
+                directorsExtractor);
     }
 
     @Override
     public void addInFilm(Long filmId, Long directorId) {
-        int count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM FILM_DIRECTORS " +
-                        "WHERE FILM_ID = :FILM_ID AND DIRECTOR_ID = :DIRECTOR_ID;",
-                new MapSqlParameterSource()
-                        .addValue("FILM_ID", filmId)
-                        .addValue("DIRECTOR_ID", directorId),
-                Integer.class);
-
-        if (count != 0) {
-            return;
-        }
-
         jdbcTemplate.update(
-                "INSERT INTO FILM_DIRECTORS VALUES (:FILM_ID,:DIRECTOR_ID);",
+                "INSERT INTO FILM_DIRECTORS " +
+                        "VALUES (:FILM_ID,:DIRECTOR_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("DIRECTOR_ID", directorId));
@@ -127,8 +126,9 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public void removeFromFilm(Long filmId, Long directorId) {
         jdbcTemplate.update(
-                "DELETE FROM film_directors " +
-                        "WHERE film_id = :FILM_ID AND director_id = :DIRECTOR_ID;",
+                "DELETE FROM FILM_DIRECTORS " +
+                        "WHERE FILM_ID = :FILM_ID " +
+                        "AND DIRECTOR_ID = :DIRECTOR_ID;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("DIRECTOR_ID", directorId));

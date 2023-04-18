@@ -23,18 +23,20 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public Collection<Mpa> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM RATING ORDER BY RATING_ID;",
+                "SELECT * FROM RATING " +
+                        "ORDER BY RATING_ID;",
                 mpaMapper);
     }
 
     @Override
     public Optional<Mpa> findById(Long id) {
         try {
-            return Optional.ofNullable(jdbcTemplate
-                    .queryForObject("SELECT * FROM RATING WHERE RATING_ID = :RATING_ID;",
-                            new MapSqlParameterSource()
-                                    .addValue("RATING_ID", id),
-                            mpaMapper));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
+                    "SELECT * FROM RATING " +
+                            "WHERE RATING_ID = :RATING_ID;",
+                    new MapSqlParameterSource()
+                            .addValue("RATING_ID", id),
+                    mpaMapper));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
