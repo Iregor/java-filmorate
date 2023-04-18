@@ -280,20 +280,11 @@ public class FilmDbStorage implements FilmStorage {
     public Collection<Film> filmsByIds(Collection<Long> filmsIds) {
         SqlParameterSource ids = new MapSqlParameterSource("IDS", filmsIds);
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "F.RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
-                        "RATING_NAME " +
+                "SELECT F.FILM_ID, FILM_NAME,DESCRIPTION,F.RELEASE_DATE,DURATION,COUNT(USER_ID) RATE,F.RATING_ID,RATING_NAME " +
                         "FROM FILMS F " +
-                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
-                        "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
-                        "WHERE F.FILM_ID IN (:IDS) " +
-                        "GROUP BY F.FILM_ID " +
-                        "ORDER BY RATE DESC",
+                        "    JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "    LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (:IDS) GROUP BY F.FILM_ID ORDER BY RATE DESC;",
                 ids,
                 filmMapper);
     }

@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final FilmService filmService;
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final LikesStorage likesStorage;
-    private final EventStorage eventStorage;
     private final EventService eventService;
 
     public Collection<User> findAll() {
@@ -139,17 +139,17 @@ public class UserService {
         return result;
     }
 
-    public Collection<Long> findAdviseFilmsIds(Long userId) {
+    public Collection<Film> findAdviseFilms(Long userId) {
         final Collection<Long> maxCommonUsersId = userStorage.convertMaxCommonLikes(userId);
         final Map<Long, List<Long>> filmDiffByUser = userStorage.getDiffFilms(userId);
         final Map<Long, Integer> scoreByFilms = userStorage.getFilmsScore(userId);
         log.info("the prediction matrix, strongly-{} ,has been created", filmDiffByUser.size());
-        return filmDiffByUser.entrySet().stream()
+        return filmService.findFilmByIds(filmDiffByUser.entrySet().stream()
                 .filter(a -> maxCommonUsersId.contains(a.getKey()))
                 .flatMap(a -> a.getValue().stream())
                 .distinct()
                 .sorted(Comparator.comparing(scoreByFilms::get).reversed())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     private void addDataUsers(Collection<User> users) {
