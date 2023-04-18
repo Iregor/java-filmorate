@@ -38,14 +38,16 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Collection<Genre> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM GENRES ORDER BY GENRE_ID;",
+                "SELECT * FROM GENRES " +
+                        "ORDER BY GENRE_ID;",
                 genreMapper);
     }
 
     @Override
     public Collection<Genre> findByFilmId(Long filmId) {
         return new HashSet<>(jdbcTemplate.query(
-                "SELECT G.GENRE_ID, G.GENRE_NAME " +
+                "SELECT G.GENRE_ID, " +
+                        "G.GENRE_NAME " +
                         "FROM GENRES G " +
                         "JOIN FILM_GENRES FG ON G.GENRE_ID = FG.GENRE_ID " +
                         "WHERE FG.FILM_ID = :FILM_ID " +
@@ -71,7 +73,9 @@ public class GenreDbStorage implements GenreStorage {
     public Optional<Genre> findById(Long id) {
         try {
             return Optional.ofNullable(jdbcTemplate
-                    .queryForObject("SELECT * FROM GENRES WHERE GENRE_ID = :GENRE_ID;",
+                    .queryForObject(
+                            "SELECT * FROM GENRES " +
+                                    "WHERE GENRE_ID = :GENRE_ID;",
                             new MapSqlParameterSource()
                                     .addValue("GENRE_ID", id),
                             genreMapper));
@@ -93,17 +97,19 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Optional<Genre> update(Genre genre) {
-        String sql = "UPDATE GENRES " +
-                "SET GENRE_NAME = :GENRE_NAME " +
-                "WHERE GENRE_ID = :GENRE_ID;";
-        jdbcTemplate.update(sql, getGenreParams(genre));
+        jdbcTemplate.update(
+                "UPDATE GENRES " +
+                        "SET GENRE_NAME = :GENRE_NAME " +
+                        "WHERE GENRE_ID = :GENRE_ID;",
+                getGenreParams(genre));
         return findById(genre.getId());
     }
 
     @Override
     public void add(Long filmId, Long genreId) {
         jdbcTemplate.update(
-                "INSERT INTO FILM_GENRES VALUES (:FILM_ID,:GENRE_ID);",
+                "INSERT INTO FILM_GENRES " +
+                        "VALUES (:FILM_ID,:GENRE_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("GENRE_ID", genreId));
@@ -112,7 +118,9 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public void remove(Long filmId, Long genreId) {
         jdbcTemplate.update(
-                "DELETE FROM FILM_GENRES WHERE FILM_ID = :FILM_ID AND GENRE_ID = :GENRE_ID;",
+                "DELETE FROM FILM_GENRES " +
+                        "WHERE FILM_ID = :FILM_ID " +
+                        "AND GENRE_ID = :GENRE_ID;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("GENRE_ID", genreId));

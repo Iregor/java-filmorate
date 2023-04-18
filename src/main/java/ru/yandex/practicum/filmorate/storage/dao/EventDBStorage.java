@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.Collection;
 
 
-@Component("EventDBStorage")
+@Component("EventDB")
 @Slf4j
 @RequiredArgsConstructor
 public class EventDBStorage implements EventStorage {
@@ -37,7 +37,9 @@ public class EventDBStorage implements EventStorage {
 
     @Override
     public Collection<Event> getFeed(Long userId) {
-        return jdbcTemplate.query("SELECT * FROM FEEDS WHERE USER_ID = :USER_ID;",
+        return jdbcTemplate.query(
+                "SELECT * FROM FEEDS " +
+                        "WHERE USER_ID = :USER_ID;",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId),
         eventMapper);
