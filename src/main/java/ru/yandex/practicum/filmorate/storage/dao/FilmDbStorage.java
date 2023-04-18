@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 
+
 @Repository("filmDb")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
@@ -117,31 +118,6 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN (FILM_DIRECTORS FD INNER JOIN DIRECTORS D ON FD.DIRECTOR_ID = D.DIRECTOR_ID) " +
                         "ON F.FILM_ID = FD.FILM_ID " +
                         "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(:SUBSTRING) " +
-                        "GROUP BY F.FILM_ID " +
-                        "ORDER BY RATE DESC",
-                new MapSqlParameterSource()
-                        .addValue("SUBSTRING", "%" + subString + "%"),
-                filmMapper);
-    }
-
-    @Override
-    public Collection<Film> searchFilmsByTitleAndDirector(String subString, List<String> by) {
-        return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
-                        "RATING_NAME " +
-                        "FROM FILMS F " +
-                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
-                        "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
-                        "LEFT JOIN (FILM_DIRECTORS FD INNER JOIN DIRECTORS D ON FD.DIRECTOR_ID = D.DIRECTOR_ID) " +
-                        "ON F.FILM_ID = FD.FILM_ID " +
-                        "WHERE LOWER(F.FILM_NAME) LIKE LOWER(:SUBSTRING) " +
-                        "OR LOWER(D.DIRECTOR_NAME) LIKE LOWER(:SUBSTRING) " +
                         "GROUP BY F.FILM_ID " +
                         "ORDER BY RATE DESC",
                 new MapSqlParameterSource()
