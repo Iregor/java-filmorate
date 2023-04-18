@@ -92,11 +92,12 @@ public class ReviewService {
         return result.get();
     }
 
-    public Collection<Review> findAllReviews(Long filmId, Long count) {
+    public Collection<Review> findAllReviews(Long filmId, Integer count) {
         if (filmId != null) {
             assertFilmExists(filmId);
+            return reviewStorage.findAllReviewsByFilmId(filmId, count);
         }
-        return reviewStorage.findAllReviews(filmId, count);
+        return reviewStorage.findAllReviews(count);
     }
 
     public void addReviewMark(Long reviewId, Long userId, Boolean isLike) {

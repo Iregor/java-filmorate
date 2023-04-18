@@ -71,50 +71,50 @@ public class ReviewTest {
 
     @Test
     void createReviewTest() {
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
         rs.createReview(rev4);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(4);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(4);
     }
 
     @Test
     void updateReviewTest() {
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
 
         String updatedContent = "Обязательно посмотреть!";
         rev3 = rs.findReviewById(rev3Id);
         rev3.setContent(updatedContent);
         rs.updateReview(rev3);
 
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
         assertThat(rs.findReviewById(rev3Id).getContent()).isEqualTo(updatedContent);
     }
 
     @Test
     void deleteReviewTest() {
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
         rs.deleteReview(rev1Id);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(2);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(2);
         rs.deleteReview(rev2Id);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(1);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(1);
         rs.deleteReview(rev3Id);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(0);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(0);
     }
 
     @Test
     void deleteRepeatableReviewTest() {
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
         rs.deleteReview(rev1Id);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(2);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(2);
         assertThatThrownBy(() -> rs.deleteReview(rev1Id)).isInstanceOf(IncorrectObjectIdException.class);
     }
 
     @Test
     void deleteReviewWithMarksTest() {
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
         rs.addReviewMark(rev1Id, user1Id, true);
         rs.addReviewMark(rev1Id, user2Id, false);
         rs.deleteReview(rev1Id);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(2);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(2);
     }
 
     @Test
@@ -126,30 +126,30 @@ public class ReviewTest {
 
     @Test
     void findAllReviewsTest() {
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(3);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
         rs.deleteReview(1L);
         rs.deleteReview(2L);
         rs.deleteReview(3L);
-        assertThat(rs.findAllReviews(null, 10L).size()).isEqualTo(0);
+        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(0);
     }
 
     @Test
     void findAllReviewsOrderTest() {
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev1.getContent());
         rs.addReviewMark(rev2Id, user1Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev2.getContent());
         rs.addReviewMark(rev3Id, user1Id, true);
         rs.addReviewMark(rev3Id, user2Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev3.getContent());
         rs.deleteReviewMark(rev3Id, user2Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev2.getContent());
         rs.deleteReviewMark(rev3Id, user1Id, true);
         rs.deleteReviewMark(rev2Id, user1Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10L))
+        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev1.getContent());
     }
 

@@ -16,7 +16,9 @@ public interface ReviewStorage {
 
     Optional<Review> findReviewById(Long userId);
 
-    Collection<Review> findAllReviews(Long filmId, Long count);
+    Collection<Review> findAllReviewsByFilmId(Long filmId, Integer count);
+
+    Collection<Review> findAllReviews(Integer count);
 
     Optional<ReviewMark> createReviewMark(Long reviewId, Long userId, Boolean isLike);
 

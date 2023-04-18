@@ -89,24 +89,35 @@ public class ReviewDbStorage implements ReviewStorage {
         }
     }
 
+    public Collection<Review> findAllReviewsByFilmId(Long filmId, Integer count) {
+        return jdbcTemplate.query(
+                "SELECT *, COALESCE(USEFUL, 0) LR FROM REVIEWS R " +
+                        "LEFT OUTER JOIN " +
+                        "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
+                        "FROM REVIEW_MARKS " +
+                        "GROUP BY REVIEW_ID) RM " +
+                        "ON R.REVIEW_ID = RM.REVIEW_ID " +
+                        "WHERE R.FILM_ID = :FILM_ID " +
+                        "ORDER BY LR DESC " +
+                        "LIMIT :COUNT;",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("COUNT", count),
+                reviewMapper);
+    }
+
     @Override
-    public Collection<Review> findAllReviews(Long filmId, Long count) {
-        StringBuilder sqlQuery = new StringBuilder(
+    public Collection<Review> findAllReviews(Integer count) {
+        return jdbcTemplate.query(
                 "SELECT *, COALESCE(useful, 0) LR FROM REVIEWS R " +
                         "LEFT OUTER JOIN " +
                         "(SELECT REVIEW_ID, (SUM(IS_LIKE = TRUE) - SUM(IS_LIKE = FALSE)) USEFUL " +
                         "FROM REVIEW_MARKS " +
                         "GROUP BY REVIEW_ID) RM " +
-                        "ON R.REVIEW_ID = RM.REVIEW_ID ");
-        if (filmId != null) {
-            sqlQuery.append("WHERE R.FILM_ID = :FILM_ID ");
-        }
-        sqlQuery.append(
-                "ORDER BY LR DESC " +
-                        "LIMIT :COUNT; ");
-        return jdbcTemplate.query(sqlQuery.toString(),
+                        "ON R.REVIEW_ID = RM.REVIEW_ID " +
+                        "ORDER BY LR DESC " +
+                        "LIMIT :COUNT;",
                 new MapSqlParameterSource()
-                        .addValue("FILM_ID", filmId)
                         .addValue("COUNT", count),
                 reviewMapper);
     }
