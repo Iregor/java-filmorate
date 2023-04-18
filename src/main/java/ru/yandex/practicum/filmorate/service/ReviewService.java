@@ -37,13 +37,7 @@ public class ReviewService {
         }
         Review rev = result.get();
         log.info("Добавление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(rev.getUserId())
-                .eventType(EventType.REVIEW)
-                .operation(Operation.ADD)
-                .entityId(rev.getReviewId())
-                .build());
+        eventService.addEvent(rev.getUserId(), rev.getReviewId(), EventType.REVIEW, Operation.ADD);
         return result.get();
     }
 
@@ -51,16 +45,11 @@ public class ReviewService {
         assertUserExists(review.getUserId());
         assertFilmExists(review.getFilmId());
         assertReviewExists(review.getReviewId());
-
         log.info("Обновление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                //.userId(review.getUserId())
-                .userId(1L) //ВНИМАНИЕ! КОСТЫЛЬ! ОШИБКА В ТЕСТАХ ПОСТМАНА!
-                .eventType(EventType.REVIEW)
-                .operation(Operation.UPDATE)
-                .entityId(review.getReviewId())
-                .build());
+        eventService.addEvent(reviewStorage.findReviewById(review.getReviewId()).get().getUserId(),
+                review.getReviewId(),
+                EventType.REVIEW,
+                Operation.UPDATE);
         return reviewStorage.updateReview(review).orElseThrow();
     }
 
@@ -74,13 +63,7 @@ public class ReviewService {
         }
 
         log.info("Удаление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(review.getUserId())
-                .eventType(EventType.REVIEW)
-                .operation(Operation.REMOVE)
-                .entityId(review.getReviewId())
-                .build());
+        eventService.addEvent(review.getUserId(), review.getReviewId(), EventType.REVIEW, Operation.REMOVE);
     }
 
     public Review findReviewById(Long reviewId) {

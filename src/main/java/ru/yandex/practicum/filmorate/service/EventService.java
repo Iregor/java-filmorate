@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.EventDBStorage;
 
@@ -29,10 +31,15 @@ public class EventService {
         return eventStorage.getFeed(userId);
     }
 
-    public void addEvent(Event event) {
-        eventStorage.addEvent(event);
+    public void addEvent(Long userId, Long entityId, EventType eventType, Operation operation) {
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(eventType)
+                .operation(operation)
+                .entityId(entityId)
+                .build());
         log.info("Added an event to the feed: " +
-                        "userId: {}, eventType: {}, operation: {}, entityId: {}", event.getUserId(), event.getEventType(),
-                event.getOperation(), event.getEntityId());
+                        "userId: {}, eventType: {}, operation: {}, entityId: {}", userId, eventType,
+                operation, entityId);
     }
 }

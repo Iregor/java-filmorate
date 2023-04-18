@@ -18,8 +18,8 @@ import java.util.Collection;
 public class FeedController {
     private final EventService eventService;
 
-    @GetMapping("/{eventId}/feed")
-    public Collection<Event> getFeed(@PathVariable Long eventId) {
-        return eventService.getFeed(eventId);
+    @GetMapping("/{userId}/feed")
+    public Collection<Event> getFeed(@PathVariable Long userId) {
+        return eventService.getFeed(userId);
     }
 }

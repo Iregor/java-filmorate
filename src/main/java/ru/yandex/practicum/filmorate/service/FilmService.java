@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
@@ -144,13 +143,7 @@ public class FilmService {
         }
         likesStorage.add(filmId, userId);
         log.info("User {} liked film {}.", userId, filmId);
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(userId)
-                .eventType(EventType.LIKE)
-                .operation(Operation.ADD)
-                .entityId(filmId)
-                .build());
+        eventService.addEvent(userId, filmId, EventType.LIKE, Operation.ADD);
     }
 
     public void dislike(Long filmId, Long userId) {
@@ -164,13 +157,7 @@ public class FilmService {
         }
         likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
-        eventService.addEvent(Event.builder()
-                .eventId(null)
-                .userId(userId)
-                .eventType(EventType.LIKE)
-                .operation(Operation.REMOVE)
-                .entityId(filmId)
-                .build());
+        eventService.addEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
     }
 
     public Collection<Film> convertIdsToFilms(Collection<Long> filmsIds) {
