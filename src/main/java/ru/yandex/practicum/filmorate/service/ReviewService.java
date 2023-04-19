@@ -89,7 +89,7 @@ public class ReviewService {
         assertReviewExists(reviewId);
         assertUserExists(userId);
         assertReviewMarkNotExists(reviewId, userId, isLike);
-        if(reviewStorage.findReviewMark(reviewId, userId, !(isLike)).isPresent()) {
+        if (reviewStorage.findReviewMark(reviewId, userId, !(isLike)).isPresent()) {
             updateReviewMark(reviewId, userId, isLike);
             return;
         }
