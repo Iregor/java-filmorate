@@ -26,18 +26,18 @@ class GetPopularFilmTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM LIKES ");
-        jdbcTemplate.update("DELETE FROM FILM_GENRES ");
+        jdbcTemplate.update("DELETE FROM LIKES;");
+        jdbcTemplate.update("DELETE FROM FILM_GENRES;");
 
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
 
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
     }
 
     @Test
-    void getPopularFilmsWith2Count_return2Films_added5FilmsWithLikes() {
+    void getPopularFilms_return2Films_added5FilmsWithLikes() {
         addData();
         addLikes();
 
@@ -52,7 +52,7 @@ class GetPopularFilmTest {
     }
 
     @Test
-    void getPopularFilmsWith1998Year_return1Film_added5FilmsWithLikes() {
+    void getPopularFilms_returnFilmWith1998Year_added5FilmsWithLikes() {
         addData();
         addLikes();
 
@@ -67,7 +67,7 @@ class GetPopularFilmTest {
     }
 
     @Test
-    void getPopularFilmsWith3GenreId_return2Film_added5FilmsWithLikes() {
+    void getPopularFilms_return2FilmWith3GenreId_added5FilmsWithLikes() {
         addData();
         addLikes();
 

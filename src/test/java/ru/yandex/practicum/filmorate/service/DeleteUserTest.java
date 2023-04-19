@@ -24,18 +24,18 @@ class DeleteUserTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM FRIENDSHIPS ");
-        jdbcTemplate.update("DELETE FROM LIKES ");
+        jdbcTemplate.update("DELETE FROM FRIENDSHIPS;");
+        jdbcTemplate.update("DELETE FROM LIKES;");
 
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
 
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
     }
 
     @Test
-    void delete3Users_return2Users_added5Users() {
+    void deleteUser_return2Users_added5Users() {
         addData();
         assertThat(userService.findAll().size()).isEqualTo(5);
         User firstUser = userService.findById(1L);

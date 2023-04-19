@@ -57,15 +57,16 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public void add(Long filmId, Long userId) {
-        int count = Objects.requireNonNull(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM LIKES " +
-                        "WHERE FILM_ID = :FILM_ID AND USER_ID = :USER_ID;",
+        boolean isExistLike = Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS" +
+                        "(SELECT * FROM LIKES " +
+                        "WHERE FILM_ID = :FILM_ID AND USER_ID = :USER_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
                         .addValue("USER_ID", userId),
-                Integer.class));
+                Boolean.class));
 
-        if (count != 0) {
+        if (isExistLike) {
             return;
         }
 

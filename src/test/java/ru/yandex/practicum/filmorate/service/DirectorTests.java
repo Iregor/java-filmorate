@@ -33,25 +33,25 @@ public class DirectorTests {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM LIKES ");
-        jdbcTemplate.update("DELETE FROM FILM_GENRES ");
-        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS");
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
-        jdbcTemplate.update("DELETE FROM directors");
-        jdbcTemplate.execute("ALTER TABLE directors ALTER COLUMN director_id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM LIKES;");
+        jdbcTemplate.update("DELETE FROM FILM_GENRES;");
+        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS;");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
+        jdbcTemplate.update("DELETE FROM DIRECTORS;");
+        jdbcTemplate.execute("ALTER TABLE DIRECTORS ALTER COLUMN director_id RESTART WITH 1;");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
     }
 
     @Test
-    void getAllDirectorsReturnEmptyListTest() {
+    void getAllDirectors_return0Director_withoutData() {
         Collection<Director> result = directorService.getAll();
         assertThat(result.size()).isEqualTo(0);
     }
 
     @Test
-    void getAllDirectorsReturn2DirectorsTest() {
+    void getAllDirectors_return0Director_added2Directors() {
         addDataDirectors();
         Collection<Director> result = directorService.getAll();
         assertThat(result.size()).isEqualTo(2);
@@ -60,14 +60,14 @@ public class DirectorTests {
     }
 
     @Test
-    void getByIdDirectorTest() {
+    void getByIdDirector_returnSecondDirector_added2Directors() {
         addDataDirectors();
         Director result = directorService.getById(2L);
         assertThat(result).isEqualTo(new Director(2L, "Petrov Petr"));
     }
 
     @Test
-    void getByFailIdDirectorReturnExceptionTest() {
+    void getByIdDirector_throwIncorrectParameterException_withoutData() {
         addDataDirectors();
         final IncorrectObjectIdException e = assertThrows(IncorrectObjectIdException.class,
                 () -> directorService.getById(3L));
@@ -75,20 +75,20 @@ public class DirectorTests {
     }
 
     @Test
-    void createDirectorTest() {
+    void createDirector_returnNewDirector_withoutData() {
         Director result = directorService.createDirector(new Director(10L, "Ivanov Ivan"));
         assertThat(result).isEqualTo(new Director(1L, "Ivanov Ivan"));
     }
 
     @Test
-    void updateDirectorTest() {
+    void updateDirector_returnUpdatedDirector_added2Directors() {
         addDataDirectors();
         Director result = directorService.updateDirector(new Director(1L, "Sidorov Ivan"));
         assertEquals(result.getName(), "Sidorov Ivan");
     }
 
     @Test
-    void updateFailDirectorTest() {
+    void updateDirector_throwIncorrectParameterException_withoutData() {
         addDataDirectors();
         final IncorrectObjectIdException e = assertThrows(IncorrectObjectIdException.class,
                 () -> directorService.updateDirector(new Director(3L, "Sidorov Ivan")));
@@ -96,7 +96,7 @@ public class DirectorTests {
     }
 
     @Test
-    void deleteDirectorTest() {
+    void deleteDirector_return1Director_added2Directors() {
         addDataDirectors();
         assertThat(directorService.getAll()).asList().size().isEqualTo(2);
         directorService.deleteDirector(1L);
@@ -105,13 +105,13 @@ public class DirectorTests {
     }
 
     @Test
-    void deleteFailDirectorTest() {
+    void deleteDirector_throwIncorrectParameterException_withoutData() {
         assertThrows(IncorrectParameterException.class,
                 () -> directorService.deleteDirector(1L));
     }
 
     @Test
-    void getFilmDirectorSortedByYearTest() {
+    void getFilmDirectorSorted_returnSortedByYearAndLikesFilms_added2DirectorsAnd5Films() {
         addDataDirectors();
         addDataFilms();
         Collection<Film> result = filmService.getFilmDirectorSorted(1L, "year");
@@ -126,8 +126,8 @@ public class DirectorTests {
     }
 
     private void addDataDirectors() {
-        jdbcTemplate.update("INSERT INTO DIRECTORS (director_id, director_name) " +
-                "VALUES (1, 'Ivanov Ivan'), (2, 'Petrov Petr')");
+        jdbcTemplate.update("INSERT INTO DIRECTORS (DIRECTOR_NAME) " +
+                "VALUES ('Ivanov Ivan'), ('Petrov Petr')");
     }
 
     private void addDataFilms() {

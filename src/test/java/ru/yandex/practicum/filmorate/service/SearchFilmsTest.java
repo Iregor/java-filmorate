@@ -26,69 +26,69 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class SearchFilmsTest {
-    private final DirectorService directorService;
+
     private final FilmService filmService;
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS");
-        jdbcTemplate.update("DELETE FROM directors");
-        jdbcTemplate.execute("ALTER TABLE directors ALTER COLUMN director_id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS;");
+        jdbcTemplate.update("DELETE FROM DIRECTORS;");
+        jdbcTemplate.execute("ALTER TABLE DIRECTORS ALTER COLUMN DIRECTOR_ID RESTART WITH 1;");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
     }
 
     @Test
-    void getMoviBySearchInTitle() {
+    void searchFilmsByTitle_return1Films_added3DirectorsAndFilms() {
         addDataDirectors();
         addDataFilms();
-        Set<Film> collection = filmService.searchFilms("шО", Set.of("title"));
+        List<Film> collection = filmService.searchFilms("шО", Set.of("title"));
         assertThat(collection.size()).isEqualTo(1);
         Film film1 = filmService.findById(1L);
-        assertThat(collection.contains(film1));
+        assertThat(collection).asList().contains(film1);
         assertTrue(film1.getName().toLowerCase().contains("шо"));
     }
 
     @Test
-    void getMoviBySearchInDirector() {
+    void searchFilmsByDirector_return1Film_added3DirectorsAndFilms() {
         addDataDirectors();
         addDataFilms();
-        Set<Film> collection = filmService.searchFilms("vano", Set.of("director"));
+        List<Film> collection = filmService.searchFilms("vano", Set.of("director"));
         assertThat(collection.size()).isEqualTo(2);
         Film film1 = filmService.findById(1L);
         Film film2 = filmService.findById(2L);
-        assertThat(collection.contains(film1));
-        assertThat(collection.contains(film2));
+        assertThat(collection).asList().contains(film1);
+        assertThat(collection).asList().contains(film2);
         assertTrue(film1.getDirectors().contains(new Director(1L, "Ivanov Ivan")));
     }
 
     @Test
-    void getMovisBySearchInTitleAndDirector() {
+    void searchFilmsByTitleAndDirector_return2Films_added3DirectorsAndFilms() {
         addDataDirectors();
         addDataFilms();
-        Set<Film> collection = filmService.searchFilms("Карт", Set.of("title", "director"));
+        List<Film> collection = filmService.searchFilms("Карт", Set.of("title", "director"));
         assertThat(collection.size()).isEqualTo(2);
         Film film1 = filmService.findById(2L);
         Film film2 = filmService.findById(3L);
 
-        assertThat(collection.contains(film1));
-        assertThat(collection.contains(film2));
+        assertThat(collection).asList().contains(film1);
+        assertThat(collection).asList().contains(film2);
         assertTrue(film1.getName().toLowerCase().contains("карт"));
         assertTrue(film2.getDirectors().contains(new Director(3L, "Василий Картапов")));
     }
 
     @Test
-    void noFoundBySearch() throws IncorrectObjectIdException {
+    void searchFilmsByTitleAndDirector_return0Films_searchByWrongData() throws IncorrectObjectIdException {
         addDataDirectors();
         addDataFilms();
         Collection<Film> collection = filmService.searchFilms("какой-то текст", Set.of("title", "director"));
-        assertTrue(collection.size() == 0);
+        assertThat(collection.size()).isEqualTo(0);
     }
 
     private void addDataDirectors() {
-        jdbcTemplate.update("INSERT INTO DIRECTORS (director_id, director_name) " +
-                "VALUES (1, 'Ivanov Ivan'), (2, 'Petrov Petr'), (3, 'Василий Картапов')");
+        jdbcTemplate.update("INSERT INTO DIRECTORS (DIRECTOR_NAME) " +
+                "VALUES ('Ivanov Ivan'), ('Petrov Petr'), ('Василий Картапов')");
     }
 
     private void addDataFilms() {

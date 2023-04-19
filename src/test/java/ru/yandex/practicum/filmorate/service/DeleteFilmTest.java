@@ -27,22 +27,22 @@ class DeleteFilmTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM FRIENDSHIPS ");
-        jdbcTemplate.update("DELETE FROM LIKES ");
-        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS ");
+        jdbcTemplate.update("DELETE FROM FRIENDSHIPS;");
+        jdbcTemplate.update("DELETE FROM LIKES;");
+        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS;");
 
-        jdbcTemplate.update("DELETE FROM DIRECTORS ");
-        jdbcTemplate.execute("ALTER TABLE DIRECTORS ALTER COLUMN DIRECTOR_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM DIRECTORS;");
+        jdbcTemplate.execute("ALTER TABLE DIRECTORS ALTER COLUMN DIRECTOR_ID RESTART WITH 1;");
 
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
 
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
     }
 
     @Test
-    void delete3Films_return2Films_added5Films() {
+    void deleteFilm_return2Films_added5Films() {
         addData();
         assertThat(filmService.findAll().size()).isEqualTo(5);
         Film firstFilm = filmService.findById(1L);

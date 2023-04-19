@@ -1,19 +1,18 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface UserStorage {
 
-    Collection<User> findAll();
+    List<User> findAll();
 
-    Collection<User> findFriends(Long userId);
+    List<User> findFriends(Long userId);
 
-    Collection<User> findCommonFriends(Long userId, Long friendId);
+    List<User> findCommonFriends(Long userId, Long friendId);
 
     Optional<User> findById(Long userId);
 
@@ -21,11 +20,7 @@ public interface UserStorage {
 
     Optional<User> update(User user);
 
-    Collection<Long> convertMaxCommonLikes(Long userId);
-
-    Map<Long, List<Long>> getDiffFilms(Long userId);
-
-    Map<Long, Integer> getFilmsScore(Long userId);
-
     void remove(Long userId);
+
+    List<Film> findRecommendedFilms(Long userId);
 }

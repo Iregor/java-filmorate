@@ -28,15 +28,15 @@ public class FilmService {
     private final DirectorStorage directorStorage;
     private final EventService eventService;
 
-    public Collection<Film> findAll() {
-        Collection<Film> result = filmStorage.findAll();
+    public List<Film> findAll() {
+        List<Film> result = filmStorage.findAll();
         log.info("Found {} movie(s).", result.size());
         addDataFilms(result);
         return result;
     }
 
-    public Collection<Film> getPopularFilms(Integer size, Long genreId, String year) {
-        Collection<Film> result;
+    public List<Film> getPopularFilms(Integer size, Long genreId, String year) {
+        List<Film> result;
         if (genreId != null && year != null) {
             result = filmStorage.findPopularFilmsByGenreIdAndYear(size, genreId, year);
         } else if (genreId != null) {
@@ -51,14 +51,14 @@ public class FilmService {
         return result;
     }
 
-    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
-        Collection<Film> result = filmStorage.findCommonFilms(userId, friendId);
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        List<Film> result = filmStorage.findCommonFilms(userId, friendId);
         log.info("Found {} film(s).", result.size());
         addDataFilms(result);
         return result;
     }
 
-    public Set<Film> searchFilms(String subString, Set<String> by) {
+    public List<Film> searchFilms(String subString, Set<String> by) {
         for (String param : by) {
             if (!(param.equals("director") || param.equals("title"))) {
                 log.warn("Param {} is not correct.", param);
@@ -74,7 +74,7 @@ public class FilmService {
         }
         addDataFilms(mergeCollect);
         log.info("Found {} film(s).", mergeCollect.size());
-        return mergeCollect;
+        return new ArrayList<>(mergeCollect);
     }
 
     public Film findById(Long filmId) {
@@ -143,7 +143,7 @@ public class FilmService {
         }
         likesStorage.add(filmId, userId);
         log.info("User {} liked film {}.", userId, filmId);
-        eventService.addEvent(userId, filmId, EventType.LIKE, Operation.ADD);
+        addFeed(userId, filmId, Operation.ADD);
     }
 
     public void dislike(Long filmId, Long userId) {
@@ -157,19 +157,29 @@ public class FilmService {
         }
         likesStorage.remove(filmId, userId);
         log.info("User {} disliked film {}.", userId, filmId);
-        eventService.addEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
+        addFeed(userId, filmId, Operation.REMOVE);
     }
 
-    public Collection<Film> findFilmByIds(Collection<Long> filmsIds) {
-        Collection<Film> sortedFilm = new ArrayList<>();
-        Collection<Film> resultAdvise = filmStorage.filmsByIds(filmsIds);
-        addDataFilms(resultAdvise);
-        Map<Long, Film> filmMap = resultAdvise.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
-        for (Long id : filmsIds) {
-            sortedFilm.add(filmMap.get(id));
+    public List<Film> getFilmDirectorSorted(Long directorId, String sortBy) {
+        log.info("Get Films by Director with id = {}, sorted by {}", directorId, sortBy);
+        if (directorStorage.findById(directorId).isEmpty()) {
+            throw new IncorrectObjectIdException(String.format("Director %s is not found.", directorId));
         }
-        log.info("A list of recommended films, has been created.");
-        return sortedFilm;
+        switch (sortBy) {
+            case "year": {
+                List<Film> result = filmStorage.findFilmsDirectorByYear(directorId);
+                addDataFilms(result);
+                return result;
+            }
+            case "likes": {
+                List<Film> result = filmStorage.findFilmsDirectorByLikes(directorId);
+                addDataFilms(result);
+                return result;
+            }
+            default:
+                throw new IncorrectParameterException(
+                        String.format("Invalid sort parameter %s .", sortBy));
+        }
     }
 
     private void updateGenreByFilm(Film film) {
@@ -185,28 +195,6 @@ public class FilmService {
         addedGenre.forEach(genre -> genreStorage.add(film.getId(), genre.getId()));
     }
 
-    public Collection<Film> getFilmDirectorSorted(Long directorId, String sortBy) {
-        log.info("Get Films by Director with id = {}, sorted by {}", directorId, sortBy);
-        if (directorStorage.findById(directorId).isEmpty()) {
-            throw new IncorrectObjectIdException(String.format("Director %s is not found.", directorId));
-        }
-        switch (sortBy) {
-            case "year": {
-                Collection<Film> result = filmStorage.findFilmsDirectorByYear(directorId);
-                addDataFilms(result);
-                return result;
-            }
-            case "likes": {
-                Collection<Film> result = filmStorage.findFilmsDirectorByLikes(directorId);
-                addDataFilms(result);
-                return result;
-            }
-            default:
-                throw new IncorrectParameterException(
-                        String.format("Invalid sort parameter %s .", sortBy));
-        }
-    }
-
     private void updateDirectorByFilm(Film film) {
         Set<Director> removedDirector = directorStorage.findByFilmId(film.getId())
                 .stream()
@@ -220,7 +208,11 @@ public class FilmService {
         addedDirector.forEach(director -> directorStorage.addInFilm(film.getId(), director.getId()));
     }
 
-    private void addDataFilms(Collection<Film> films) {
+    private void addFeed(Long userId, Long filmId, Operation operation) {
+        eventService.addEvent(userId, filmId, EventType.LIKE, operation);
+    }
+
+    public void addDataFilms(Collection<Film> films) {
         Map<Long, Film> filmsMap = films
                 .stream()
                 .collect(Collectors.toMap(Film::getId, Function.identity()));

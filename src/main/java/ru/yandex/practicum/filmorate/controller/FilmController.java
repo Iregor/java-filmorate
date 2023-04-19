@@ -7,7 +7,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -19,12 +20,12 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping
-    public Collection<Film> findAll() {
+    public List<Film> findAll() {
         return filmService.findAll();
     }
 
     @GetMapping(value = "/popular")
-    public Collection<Film> getPopularFilms(
+    public List<Film> getPopularFilms(
             @RequestParam(defaultValue = "10", required = false) Integer count,
             @RequestParam(required = false) Long genreId,
             @RequestParam(required = false) String year) {
@@ -62,19 +63,19 @@ public class FilmController {
     }
 
     @GetMapping(value = "/common")
-    public Collection<Film> getCommonFilms(@RequestParam Long userId,
+    public List<Film> getCommonFilms(@RequestParam Long userId,
                                            @RequestParam Long friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
 
     @GetMapping("/search")
-    public Set<Film> searchFilms(@RequestParam(name = "query") String subString,
+    public List<Film> searchFilms(@RequestParam(name = "query") String subString,
                                  @RequestParam(defaultValue = "title") Set<String> by) {
         return filmService.searchFilms(subString, by);
     }
 
     @GetMapping("/director/{directorId}")
-    public Collection<Film> getFilmsSortedByDirector(@PathVariable Long directorId, @RequestParam String sortBy) {
+    public List<Film> getFilmsSortedByDirector(@PathVariable Long directorId, @RequestParam String sortBy) {
         return filmService.getFilmDirectorSorted(directorId, sortBy);
     }
 }

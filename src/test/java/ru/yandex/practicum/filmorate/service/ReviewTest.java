@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ReviewTest {
     private final JdbcTemplate jdbcTemplate;
-    private final FilmService fs;
-    private final UserService us;
-    private final ReviewService rs;
+    private final FilmService filmService;
+    private final UserService userService;
+    private final ReviewService reviewService;
 
     private Film film1, film2, film3;
     private User user1, user2, user3;
@@ -38,19 +38,19 @@ public class ReviewTest {
     @BeforeEach
     void createInitialData() {
         createEntities();
-        film1 = fs.create(film1);
-        film2 = fs.create(film2);
-        film3 = fs.create(film3);
-        user1 = us.create(user1);
+        film1 = filmService.create(film1);
+        film2 = filmService.create(film2);
+        film3 = filmService.create(film3);
+        user1 = userService.create(user1);
         user1Id = user1.getId();
-        user2 = us.create(user2);
+        user2 = userService.create(user2);
         user2Id = user2.getId();
-        user3 = us.create(user3);
-        rev1 = rs.createReview(rev1);
+        user3 = userService.create(user3);
+        rev1 = reviewService.createReview(rev1);
         rev1Id = rev1.getReviewId();
-        rev2 = rs.createReview(rev2);
+        rev2 = reviewService.createReview(rev2);
         rev2Id = rev2.getReviewId();
-        rev3 = rs.createReview(rev3);
+        rev3 = reviewService.createReview(rev3);
         rev3Id = rev3.getReviewId();
     }
 
@@ -70,143 +70,152 @@ public class ReviewTest {
     }
 
     @Test
-    void createReviewTest() {
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
-        rs.createReview(rev4);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(4);
+    void createReview_return4Reviews_added3Reviews() {
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
+        reviewService.createReview(rev4);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(4);
     }
 
     @Test
-    void updateReviewTest() {
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
+    void updateReview_returnUpdatedReview_added3Reviews() {
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
 
         String updatedContent = "Обязательно посмотреть!";
-        rev3 = rs.findReviewById(rev3Id);
+        rev3 = reviewService.findReviewById(rev3Id);
         rev3.setContent(updatedContent);
-        rs.updateReview(rev3);
+        reviewService.updateReview(rev3);
 
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
-        assertThat(rs.findReviewById(rev3Id).getContent()).isEqualTo(updatedContent);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
+        assertThat(reviewService.findReviewById(rev3Id).getContent()).isEqualTo(updatedContent);
     }
 
     @Test
-    void deleteReviewTest() {
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
-        rs.deleteReview(rev1Id);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(2);
-        rs.deleteReview(rev2Id);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(1);
-        rs.deleteReview(rev3Id);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(0);
+    void deleteReview_return0Reviews_added3Reviews() {
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
+        reviewService.deleteReview(rev1Id);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(2);
+        reviewService.deleteReview(rev2Id);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(1);
+        reviewService.deleteReview(rev3Id);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(0);
     }
 
     @Test
-    void deleteRepeatableReviewTest() {
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
-        rs.deleteReview(rev1Id);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(2);
-        assertThatThrownBy(() -> rs.deleteReview(rev1Id)).isInstanceOf(IncorrectObjectIdException.class);
+    void deleteReview_throwIncorrectObjectIdException_deletedReview() {
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
+        reviewService.deleteReview(rev1Id);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(2);
+        assertThatThrownBy(() -> reviewService.deleteReview(rev1Id)).isInstanceOf(IncorrectObjectIdException.class);
     }
 
     @Test
-    void deleteReviewWithMarksTest() {
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
-        rs.addReviewMark(rev1Id, user1Id, true);
-        rs.addReviewMark(rev1Id, user2Id, false);
-        rs.deleteReview(rev1Id);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(2);
+    void deleteReview_return2Reviews_added3ReviewsWithMarks() {
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        reviewService.addReviewMark(rev1Id, user2Id, false);
+        reviewService.deleteReview(rev1Id);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(2);
     }
 
     @Test
-    void findReviewById() {
-        assertThat(rs.findReviewById(rev1Id).getContent()).isEqualTo(rev1.getContent());
-        assertThat(rs.findReviewById(rev2Id).getContent()).isEqualTo(rev2.getContent());
-        assertThat(rs.findReviewById(rev3Id).getContent()).isEqualTo(rev3.getContent());
+    void findReviewById_returnReviewsWithRightId_added3Reviews() {
+        assertThat(reviewService.findReviewById(rev1Id).getContent()).isEqualTo(rev1.getContent());
+        assertThat(reviewService.findReviewById(rev2Id).getContent()).isEqualTo(rev2.getContent());
+        assertThat(reviewService.findReviewById(rev3Id).getContent()).isEqualTo(rev3.getContent());
     }
 
     @Test
-    void findAllReviewsTest() {
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(3);
-        rs.deleteReview(1L);
-        rs.deleteReview(2L);
-        rs.deleteReview(3L);
-        assertThat(rs.findAllReviews(null, 10).size()).isEqualTo(0);
+    void findAllReviews_return3Reviews_added3Reviews() {
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(3);
+        reviewService.deleteReview(1L);
+        reviewService.deleteReview(2L);
+        reviewService.deleteReview(3L);
+        assertThat(reviewService.findAllReviews(null, 10).size()).isEqualTo(0);
     }
 
     @Test
     void findAllReviewsOrderTest() {
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
+        assertThat(new ArrayList<>(reviewService.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev1.getContent());
-        rs.addReviewMark(rev2Id, user1Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
+        reviewService.addReviewMark(rev2Id, user1Id, true);
+        assertThat(new ArrayList<>(reviewService.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev2.getContent());
-        rs.addReviewMark(rev3Id, user1Id, true);
-        rs.addReviewMark(rev3Id, user2Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
+        reviewService.addReviewMark(rev3Id, user1Id, true);
+        reviewService.addReviewMark(rev3Id, user2Id, true);
+        assertThat(new ArrayList<>(reviewService.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev3.getContent());
-        rs.deleteReviewMark(rev3Id, user2Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
+        reviewService.deleteReviewMark(rev3Id, user2Id, true);
+        assertThat(new ArrayList<>(reviewService.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev2.getContent());
-        rs.deleteReviewMark(rev3Id, user1Id, true);
-        rs.deleteReviewMark(rev2Id, user1Id, true);
-        assertThat(new ArrayList<>(rs.findAllReviews(null, 10))
+        reviewService.deleteReviewMark(rev3Id, user1Id, true);
+        reviewService.deleteReviewMark(rev2Id, user1Id, true);
+        assertThat(new ArrayList<>(reviewService.findAllReviews(null, 10))
                 .get(0).getContent()).isEqualTo(rev1.getContent());
     }
 
     @Test
-    void addLikeToReviewTest() {
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addReviewMark(rev1Id, user1Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
-        rs.addReviewMark(rev1Id, user2Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(2L);
+    void addLikeToReview_returnReviewsWithLikes_added3Reviews() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(1);
+        reviewService.addReviewMark(rev1Id, user2Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(2);
     }
 
     @Test
-    void addDuplicateLikeToReviewTest() {
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addReviewMark(rev1Id, user1Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
+    void addMarksToReview_returnReviewsWithUpdatedMarks_added3Reviews() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(1);
+        reviewService.addReviewMark(rev1Id, user1Id, false);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(-1);
+    }
+
+    @Test
+    void addLikeToReview_throwResponseStatusException_addedDuplicateLike() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(1);
         assertThatThrownBy(() ->
-                rs.addReviewMark(rev1Id, user1Id, true))
+                reviewService.addReviewMark(rev1Id, user1Id, true))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
-    void addDisLikeToReviewTest() {
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addReviewMark(rev1Id, user1Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
-        rs.addReviewMark(rev1Id, user2Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(2L);
+    void  addDisLikeToReview_returnReviewsWithDisLikes_added3Reviews() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(1);
+        reviewService.addReviewMark(rev1Id, user2Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(2);
     }
 
     @Test
-    void addDuplicateDislikeToReviewTest() {
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addReviewMark(rev1Id, user1Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
+    void addDisLikeToReview_throwResponseStatusException_addedDuplicateDisLike() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(1);
         assertThatThrownBy(() ->
-                rs.addReviewMark(rev1Id, user1Id, true))
+                reviewService.addReviewMark(rev1Id, user1Id, true))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
-    void deleteReviewLikeTest() {
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addReviewMark(rev1Id, user1Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(1L);
-        rs.deleteReviewMark(rev1Id, user1Id, true);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
+    void deleteLikeToReview_returnReviewsWithOutLikes_added3Reviews() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(1);
+        reviewService.deleteReviewMark(rev1Id, user1Id, true);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
     }
 
     @Test
-    void deleteReviewDislike() {
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
-        rs.addReviewMark(rev1Id, user1Id, false);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(-1L);
-        rs.deleteReviewMark(rev1Id, user1Id, false);
-        assertThat(rs.findReviewById(rev1Id).getUseful()).isEqualTo(0L);
+    void deleteDisLikeToReview_returnReviewsWithOutDisLikes_added3Reviews() {
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
+        reviewService.addReviewMark(rev1Id, user1Id, false);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(-1);
+        reviewService.deleteReviewMark(rev1Id, user1Id, false);
+        assertThat(reviewService.findReviewById(rev1Id).getUseful()).isEqualTo(0);
     }
 
 

@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.EventDBStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -21,7 +21,7 @@ public class EventService {
     private final EventDBStorage eventStorage;
     private final UserStorage userStorage;
 
-    public Collection<Event> getFeed(Long userId) {
+    public List<Event> getFeed(Long userId) {
         log.info("Requested event feed of a user with id {}", userId);
         Optional<User> result = userStorage.findById(userId);
         if (result.isEmpty()) {
