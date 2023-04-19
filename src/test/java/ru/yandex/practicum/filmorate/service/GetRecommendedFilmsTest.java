@@ -8,12 +8,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -26,52 +23,40 @@ public class GetRecommendedFilmsTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM LIKES ");
-        jdbcTemplate.update("DELETE FROM FILM_GENRES ");
+        jdbcTemplate.update("DELETE FROM LIKES;");
+        jdbcTemplate.update("DELETE FROM FILM_GENRES;");
 
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
 
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
     }
 
     @Test
-    void getRecommendedFilmsIdsTest() {
+    void getRecommendedFilms_return1Films_added3filmsAndUsers() {
         addData();
-        collectLikeModel();
-        assertEquals(userService.findAdviseFilms(1L).size(), 1, "prediction doesn't work");
-        assertTrue(userService.findAdviseFilms(1L).contains(filmService.findById(3L)), "prediction doesn't work");
-        filmService.like(1L, 3L);
-        assertEquals(userService.findAdviseFilms(1L).size(), 2, "prediction doesn't work");
-        assertTrue(userService.findAdviseFilms(1L).contains(filmService.findById(1L)), "prediction doesn't work");
-    }
+        User user1 = userService.findById(1L);
+        User user2 = userService.findById(2L);
+        User user3 = userService.findById(3L);
 
-    @Test
-    void getFilmsFromRecommendedFilmsIdsTest() {
-        addData();
-        collectLikeModel();
-        filmService.like(1L, 3L);
-        Map<Long, Film> predictionFilms = userService.findAdviseFilms(1L)
-                .stream()
-                .collect(Collectors.toMap(Film::getId, Function.identity()));
-        assertEquals(predictionFilms.get(1L), filmService.findById(1L), "prediction doesn't work");
-        assertEquals(predictionFilms.get(3L), filmService.findById(3L), "prediction doesn't work");
-    }
+        Film film1 = filmService.findById(1L);
+        Film film2 = filmService.findById(2L);
+        Film film3 = filmService.findById(3L);
 
-    private void collectLikeModel() {
-        filmService.like(5L, 1L);
-        filmService.like(5L, 2L);
-        filmService.like(5L, 3L);
-        filmService.like(4L, 1L);
-        filmService.like(4L, 2L);
-        filmService.like(4L, 3L);
-        filmService.like(3L, 2L);
-        filmService.like(3L, 3L);
-        filmService.like(2L, 4L);
-        filmService.like(2L, 5L);
-        filmService.like(1L, 4L);
-        filmService.like(1L, 5L);
+        filmService.like(user1.getId(), film1.getId());
+        filmService.like(user1.getId(), film3.getId());
+        filmService.like(user2.getId(), film2.getId());
+        filmService.like(user2.getId(), film3.getId());
+        filmService.like(user3.getId(), film1.getId());
+        filmService.like(user3.getId(), film2.getId());
+        filmService.like(user3.getId(), film3.getId());
+
+        assertThat(userService.getRecommendedFilms(user1.getId()).size()).isEqualTo(1);
+        assertThat(userService.getRecommendedFilms(user1.getId())).asList().contains(filmService.findById(2L));
+        assertThat(userService.getRecommendedFilms(user2.getId()).size()).isEqualTo(1);
+        assertThat(userService.getRecommendedFilms(user2.getId())).asList().contains(filmService.findById(1L));
+        assertThat(userService.getRecommendedFilms(user3.getId()).size()).isEqualTo(0);
     }
 
     private void addData() {

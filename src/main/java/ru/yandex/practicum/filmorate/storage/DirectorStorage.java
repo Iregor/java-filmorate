@@ -2,13 +2,10 @@ package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Director;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public interface DirectorStorage {
-    Collection<Director> findAll();
+    List<Director> findAll();
 
     Optional<Director> findById(Long directorId);
 
@@ -18,7 +15,7 @@ public interface DirectorStorage {
 
     void removeDirector(Long directorId);
 
-    Collection<Director> findByFilmId(Long filmId);
+    List<Director> findByFilmId(Long filmId);
 
     Map<Long, Set<Director>> findByFilms(Set<Long> filmIds);
 

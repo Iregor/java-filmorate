@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.service.EventService;
 
-import java.util.Collection;
+import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -19,7 +20,7 @@ public class FeedController {
     private final EventService eventService;
 
     @GetMapping("/{userId}/feed")
-    public Collection<Event> getFeed(@PathVariable Long userId) {
+    public List<Event> getFeed(@Valid @PathVariable Long userId) {
         return eventService.getFeed(userId);
     }
 }

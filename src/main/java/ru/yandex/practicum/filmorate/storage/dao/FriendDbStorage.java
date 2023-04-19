@@ -46,7 +46,7 @@ public class FriendDbStorage implements FriendStorage {
     public void add(Long userId, Long friendId) {
         jdbcTemplate.update(
                 "INSERT INTO FRIENDSHIPS " +
-                        "VALUES (:USER_ID, :FRIEND_ID, false);",
+                        "VALUES (:USER_ID, :FRIEND_ID, FALSE);",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId)
                         .addValue("FRIEND_ID", friendId));

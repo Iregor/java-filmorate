@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -17,8 +17,8 @@ public class MpaService {
 
     private final MpaStorage mpaStorage;
 
-    public Collection<Mpa> findAll() {
-        Collection<Mpa> result = mpaStorage.findAll();
+    public List<Mpa> findAll() {
+        List<Mpa> result = mpaStorage.findAll();
         log.info("Found {} MPA rating(s).",
                 result.size());
         return result;

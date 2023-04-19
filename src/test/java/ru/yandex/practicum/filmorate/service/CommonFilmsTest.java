@@ -23,13 +23,13 @@ class CommonFilmsTest {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM LIKES ");
+        jdbcTemplate.update("DELETE FROM LIKES;");
 
-        jdbcTemplate.update("DELETE FROM FILMS ");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
 
-        jdbcTemplate.update("DELETE FROM USERS ");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
     }
 
     @Test

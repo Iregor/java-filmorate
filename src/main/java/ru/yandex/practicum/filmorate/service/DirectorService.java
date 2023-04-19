@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -17,8 +17,8 @@ import java.util.Optional;
 public class DirectorService {
     private final DirectorStorage directorStorage;
 
-    public Collection<Director> getAll() {
-        Collection<Director> result = directorStorage.findAll();
+    public List<Director> getAll() {
+        List<Director> result = directorStorage.findAll();
         log.info("Found {} director(s)", result.size());
         return result;
     }

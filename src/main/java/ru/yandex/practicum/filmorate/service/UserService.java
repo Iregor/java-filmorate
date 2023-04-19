@@ -27,8 +27,8 @@ public class UserService {
     private final LikesStorage likesStorage;
     private final EventService eventService;
 
-    public Collection<User> findAll() {
-        Collection<User> result = userStorage.findAll();
+    public List<User> findAll() {
+        List<User> result = userStorage.findAll();
         log.info("Found {} user(s).", result.size());
         addDataUsers(result);
         return result;
@@ -96,7 +96,7 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
         friendStorage.add(userId, friendId);
-        eventService.addEvent(userId, friendId, EventType.FRIEND, Operation.ADD);
+        addFeed(userId, friendId, Operation.ADD);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -110,21 +110,21 @@ public class UserService {
         }
         friendStorage.remove(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
-        eventService.addEvent(userId, friendId, EventType.FRIEND, Operation.REMOVE);
+        addFeed(userId, friendId, Operation.REMOVE);
     }
 
-    public Collection<User> getFriends(Long userId) {
+    public List<User> getFriends(Long userId) {
         if (userStorage.findById(userId).isEmpty()) {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
         }
-        Collection<User> result = userStorage.findFriends(userId);
+        List<User> result = userStorage.findFriends(userId);
         log.info("Found {} friend(s).", result.size());
         addDataUsers(result);
         return result;
     }
 
-    public Collection<User> getCommonFriends(Long userId, Long friendId) {
+    public List<User> getCommonFriends(Long userId, Long friendId) {
         if (userStorage.findById(userId).isEmpty()) {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
@@ -133,26 +133,28 @@ public class UserService {
             log.warn("Friend {} is not found.", friendId);
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
-        Collection<User> result = userStorage.findCommonFriends(userId, friendId);
+        List<User> result = userStorage.findCommonFriends(userId, friendId);
         log.info("Found {} friend(s).", result.size());
         addDataUsers(result);
         return result;
     }
 
-    public Collection<Film> findAdviseFilms(Long userId) {
-        final Collection<Long> maxCommonUsersId = userStorage.convertMaxCommonLikes(userId);
-        final Map<Long, List<Long>> filmDiffByUser = userStorage.getDiffFilms(userId);
-        final Map<Long, Integer> scoreByFilms = userStorage.getFilmsScore(userId);
-        log.info("the prediction matrix, strongly-{} ,has been created", filmDiffByUser.size());
-        return filmService.findFilmByIds(filmDiffByUser.entrySet().stream()
-                .filter(a -> maxCommonUsersId.contains(a.getKey()))
-                .flatMap(a -> a.getValue().stream())
-                .distinct()
-                .sorted(Comparator.comparing(scoreByFilms::get).reversed())
-                .collect(Collectors.toList()));
+    public List<Film> getRecommendedFilms(Long userId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        List<Film> result = userStorage.findRecommendedFilms(userId);
+        log.info("Found {} film(s).", result.size());
+        filmService.addDataFilms(result);
+        return result;
     }
 
-    private void addDataUsers(Collection<User> users) {
+    private void addFeed(Long userId, Long friendId, Operation operation) {
+        eventService.addEvent(userId, friendId, EventType.FRIEND, operation);
+    }
+
+    private void addDataUsers(List<User> users) {
         Map<Long, User> usersMap = users
                 .stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));

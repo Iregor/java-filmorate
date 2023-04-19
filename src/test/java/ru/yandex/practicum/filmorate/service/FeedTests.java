@@ -30,19 +30,19 @@ public class FeedTests {
 
     @BeforeEach
     void beforeEach() {
-        jdbcTemplate.update("DELETE FROM FEEDS");
-        jdbcTemplate.update("DELETE FROM FILMS");
-        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
-        jdbcTemplate.update("DELETE FROM USERS");
-        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
-        jdbcTemplate.update("DELETE FROM FRIENDSHIPS");
-        jdbcTemplate.update("DELETE FROM LIKES");
+        jdbcTemplate.update("DELETE FROM FEEDS;");
+        jdbcTemplate.update("DELETE FROM FILMS;");
+        jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
+        jdbcTemplate.update("DELETE FROM USERS;");
+        jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1;");
+        jdbcTemplate.update("DELETE FROM FRIENDSHIPS;");
+        jdbcTemplate.update("DELETE FROM LIKES;");
 
         addData();
     }
 
     @Test
-    void getAFeedWithThreeEvents() {
+    void getFeed_return3Feeds_added3Feeds() {
         filmService.like(1L, 1L);
         filmService.like(2L, 1L);
         filmService.like(3L, 1L);
@@ -57,12 +57,12 @@ public class FeedTests {
     }
 
     @Test
-    void getEmptyFeed() {
+    void getFeed_return0Feeds_withoutData() {
         assertThat(eventService.getFeed(1L).size()).isEqualTo(0);
     }
 
     @Test
-    void getFeedWithDifferentEvents() {
+    void getFeed_return4DifferentFeeds_added4Feeds() {
         filmService.like(1L, 2L);
         filmService.like(1L, 1L);
         filmService.dislike(1L, 2L);

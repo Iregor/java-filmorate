@@ -5,7 +5,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,13 +12,14 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.sql.DataSource;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @Repository("filmDb")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     static final RowMapper<Film> filmMapper =
@@ -38,34 +38,34 @@ public class FilmDbStorage implements FilmStorage {
                     .build());
 
     @Override
-    public Collection<Film> findAll() {
+    public List<Film> findAll() {
         return jdbcTemplate.query(
                 "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
                         "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
                         "GROUP BY F.FILM_ID " +
-                        "ORDER BY F.FILM_ID; ",
+                        "ORDER BY F.FILM_ID;",
                 filmMapper);
     }
 
     @Override
-    public Collection<Film> findPopularFilms(int size) {
+    public List<Film> findPopularFilms(int size) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -79,37 +79,37 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> searchFilmsByTitle(String subString) {
+    public List<Film> searchFilmsByTitle(String subString) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
                         "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
                         "WHERE  LOWER( F.FILM_NAME) LIKE LOWER(:SUBSTRING) " +
                         "GROUP BY F.FILM_ID " +
-                        "ORDER BY RATE DESC",
+                        "ORDER BY RATE DESC;",
                 new MapSqlParameterSource()
                         .addValue("SUBSTRING", "%" + subString + "%"),
                 filmMapper);
     }
 
     @Override
-    public Collection<Film> searchFilmsByDirector(String subString) {
+    public List<Film> searchFilmsByDirector(String subString) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -118,22 +118,22 @@ public class FilmDbStorage implements FilmStorage {
                         "ON F.FILM_ID = FD.FILM_ID " +
                         "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(:SUBSTRING) " +
                         "GROUP BY F.FILM_ID " +
-                        "ORDER BY RATE DESC",
+                        "ORDER BY RATE DESC;",
                 new MapSqlParameterSource()
                         .addValue("SUBSTRING", "%" + subString + "%"),
                 filmMapper);
     }
 
     @Override
-    public Collection<Film> findPopularFilmsByGenreId(int size, Long genreId) {
+    public List<Film> findPopularFilmsByGenreId(int size, Long genreId) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -150,15 +150,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findPopularFilmsByYear(int size, String year) {
+    public List<Film> findPopularFilmsByYear(int size, String year) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -174,15 +174,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findPopularFilmsByGenreIdAndYear(int size, Long genreId, String year) {
+    public List<Film> findPopularFilmsByGenreIdAndYear(int size, Long genreId, String year) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -201,15 +201,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findCommonFilms(Long userId, Long friendId) {
+    public List<Film> findCommonFilms(Long userId, Long friendId) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(L.USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(L.USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME, " +
                         "LU.USER_ID, " +
                         "LF.USER_ID " +
@@ -221,7 +221,7 @@ public class FilmDbStorage implements FilmStorage {
                         "WHERE LU.USER_ID = :USER_ID AND " +
                         "LF.USER_ID = :FRIEND_ID " +
                         "GROUP BY F.FILM_ID " +
-                        "ORDER BY RATE DESC",
+                        "ORDER BY RATE DESC;",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId)
                         .addValue("FRIEND_ID", friendId),
@@ -232,13 +232,13 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> findById(Long id) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT F.FILM_ID," +
-                            "FILM_NAME," +
-                            "DESCRIPTION," +
-                            "RELEASE_DATE," +
-                            "DURATION," +
-                            "COUNT(USER_ID) RATE," +
-                            "F.RATING_ID," +
+                    "SELECT F.FILM_ID, " +
+                            "FILM_NAME, " +
+                            "DESCRIPTION, " +
+                            "RELEASE_DATE, " +
+                            "DURATION, " +
+                            "COUNT(USER_ID) RATE, " +
+                            "F.RATING_ID, " +
                             "RATING_NAME " +
                             "FROM FILMS F " +
                             "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -268,46 +268,35 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> update(Film film) {
         jdbcTemplate.update(
                 "UPDATE FILMS " +
-                        "SET FILM_NAME = :FILM_NAME, DESCRIPTION = :DESCRIPTION," +
-                        "RELEASE_DATE = :RELEASE_DATE, DURATION = :DURATION, " +
+                        "SET FILM_NAME = :FILM_NAME, " +
+                        "DESCRIPTION = :DESCRIPTION, " +
+                        "RELEASE_DATE = :RELEASE_DATE, " +
+                        "DURATION = :DURATION, " +
                         "RATING_ID = :RATING_ID " +
-                        "WHERE FILM_ID = :FILM_ID; ",
+                        "WHERE FILM_ID = :FILM_ID;",
                 getFilmParams(film));
         return findById(film.getId());
-    }
-
-    @Override
-    public Collection<Film> filmsByIds(Collection<Long> filmsIds) {
-        SqlParameterSource ids = new MapSqlParameterSource("IDS", filmsIds);
-        return jdbcTemplate.query(
-                "SELECT F.FILM_ID, FILM_NAME,DESCRIPTION,F.RELEASE_DATE,DURATION,COUNT(USER_ID) RATE,F.RATING_ID,RATING_NAME " +
-                        "FROM FILMS F " +
-                        "    JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
-                        "    LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
-                        "WHERE F.FILM_ID IN (:IDS) GROUP BY F.FILM_ID ORDER BY RATE DESC;",
-                ids,
-                filmMapper);
     }
 
     @Override
     public void remove(Long filmId) {
         jdbcTemplate.update(
                 "DELETE FROM FILMS " +
-                        "WHERE FILM_ID = :FILM_ID",
+                        "WHERE FILM_ID = :FILM_ID;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId));
     }
 
     @Override
-    public Collection<Film> findFilmsDirectorByYear(Long directorId) {
+    public List<Film> findFilmsDirectorByYear(Long directorId) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
@@ -322,15 +311,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findFilmsDirectorByLikes(Long directorId) {
+    public List<Film> findFilmsDirectorByLikes(Long directorId) {
         return jdbcTemplate.query(
-                "SELECT F.FILM_ID," +
-                        "FILM_NAME," +
-                        "DESCRIPTION," +
-                        "RELEASE_DATE," +
-                        "DURATION," +
-                        "COUNT(USER_ID) RATE," +
-                        "F.RATING_ID," +
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
                         "RATING_NAME " +
                         "FROM FILMS F " +
                         "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +

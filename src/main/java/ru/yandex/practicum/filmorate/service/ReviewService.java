@@ -13,7 +13,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,6 +29,7 @@ public class ReviewService {
     public Review createReview(Review review) {
         assertUserExists(review.getUserId());
         assertFilmExists(review.getFilmId());
+        assertReviewNotExists(review.getUserId(), review.getFilmId());
         Optional<Review> result = reviewStorage.createReview(review);
         if (result.isEmpty()) {
             log.warn("Review of user: {} for film: {} is not created.", review.getUserId(), review.getFilmId());
@@ -37,7 +38,8 @@ public class ReviewService {
         }
         Review rev = result.get();
         log.info("Добавление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-        eventService.addEvent(rev.getUserId(), rev.getReviewId(), EventType.REVIEW, Operation.ADD);
+
+        addFeed(rev.getUserId(), rev.getReviewId(), Operation.ADD);
         return result.get();
     }
 
@@ -46,9 +48,9 @@ public class ReviewService {
         assertFilmExists(review.getFilmId());
         assertReviewExists(review.getReviewId());
         log.info("Обновление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-        eventService.addEvent(reviewStorage.findReviewById(review.getReviewId()).get().getUserId(),
+
+        addFeed(reviewStorage.findReviewById(review.getReviewId()).orElseThrow().getUserId(),
                 review.getReviewId(),
-                EventType.REVIEW,
                 Operation.UPDATE);
         return reviewStorage.updateReview(review).orElseThrow();
     }
@@ -63,7 +65,7 @@ public class ReviewService {
         }
 
         log.info("Удаление отзыва. Пользователь {} Отзыв: {}", review.getUserId(), review.getReviewId());
-        eventService.addEvent(review.getUserId(), review.getReviewId(), EventType.REVIEW, Operation.REMOVE);
+        addFeed(review.getUserId(), review.getReviewId(), Operation.REMOVE);
     }
 
     public Review findReviewById(Long reviewId) {
@@ -75,7 +77,7 @@ public class ReviewService {
         return result.get();
     }
 
-    public Collection<Review> findAllReviews(Long filmId, Integer count) {
+    public List<Review> findAllReviews(Long filmId, Integer count) {
         if (filmId != null) {
             assertFilmExists(filmId);
             return reviewStorage.findAllReviewsByFilmId(filmId, count);
@@ -87,12 +89,30 @@ public class ReviewService {
         assertReviewExists(reviewId);
         assertUserExists(userId);
         assertReviewMarkNotExists(reviewId, userId, isLike);
+        if (reviewStorage.findReviewMark(reviewId, userId, !(isLike)).isPresent()) {
+            updateReviewMark(reviewId, userId, isLike);
+            return;
+        }
         Optional<ReviewMark> result = reviewStorage.createReviewMark(reviewId, userId, isLike);
         if (result.isEmpty()) {
             log.warn("Mark of review id: {} from user id: {} with value {} is not created.",
                     reviewId, userId, isLike);
             throw new IncorrectObjectIdException(String.format(
                     "Mark of review id: %d from user id: %d with value %b is not created.",
+                    reviewId, userId, isLike));
+        }
+    }
+
+    public void updateReviewMark(Long reviewId, Long userId, Boolean isLike) {
+        assertReviewExists(reviewId);
+        assertUserExists(userId);
+        assertReviewMarkNotExists(reviewId, userId, isLike);
+        Optional<ReviewMark> result = reviewStorage.updateReviewMark(reviewId, userId, isLike);
+        if (result.isEmpty()) {
+            log.warn("Mark of review id: {} from user id: {} with value {} is not updated.",
+                    reviewId, userId, isLike);
+            throw new IncorrectObjectIdException(String.format(
+                    "Mark of review id: %d from user id: %d with value %b is updates.",
                     reviewId, userId, isLike));
         }
     }
@@ -115,6 +135,14 @@ public class ReviewService {
         if (existedReview.isEmpty()) {
             log.warn("Review id: {} not found.", reviewId);
             throw new IncorrectObjectIdException(String.format("Review id: %d not found.", reviewId));
+        }
+    }
+
+    private void assertReviewNotExists(Long userId, Long filmId) {
+        if (reviewStorage.isExistReview(userId, filmId)) {
+            log.warn("Film {} already has a review from a user {}.", userId, filmId);
+            throw new IncorrectObjectIdException(String.format("Film %d already has a review from a user %d.",
+                    userId, filmId));
         }
     }
 
@@ -155,5 +183,9 @@ public class ReviewService {
                     String.format("Mark of review id: %d from user id: %d with value %b already created.",
                             reviewId, userId, isLike));
         }
+    }
+
+    private void addFeed(Long userId, Long reviewId, Operation operation) {
+        eventService.addEvent(userId, reviewId, EventType.REVIEW, operation);
     }
 }

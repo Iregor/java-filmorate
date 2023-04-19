@@ -7,13 +7,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository("userDb")
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class UserDbStorage implements UserStorage {
                     .build();
 
     @Override
-    public Collection<User> findAll() {
+    public List<User> findAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM USERS " +
                         "ORDER BY USER_ID;",
@@ -55,7 +54,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> findFriends(Long id) {
+    public List<User> findFriends(Long id) {
         return jdbcTemplate.query(
                 "SELECT * FROM USERS U " +
                         "JOIN FRIENDSHIPS FS ON U.USER_ID = FS.FRIEND_ID " +
@@ -67,7 +66,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> findCommonFriends(Long userId, Long friendId) {
+    public List<User> findCommonFriends(Long userId, Long friendId) {
         return jdbcTemplate.query(
                 "SELECT * FROM USERS U, " +
                         "FRIENDSHIPS F, " +
@@ -105,65 +104,32 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Map<Long, Integer> getFilmsScore(Long userId) {
-        Map<Long, Integer> filmsScore = new HashMap<>();
-        jdbcTemplate.query("SELECT l1.FILM_ID, COUNT(l1.FILM_ID) SCORE " +
-                        "FROM LIKES l1 JOIN LIKES l2 ON l1.USER_ID = l2.USER_ID " +
-                        "AND l2.USER_ID <> :USER_ID " +
-                        "WHERE l2.FILM_ID IN ( " +
-                        "SELECT FILM_ID " +
-                        "FROM LIKES " +
-                        "WHERE USER_ID = :USER_ID) " +
-                        "GROUP BY l1.FILM_ID " +
-                        "ORDER BY SCORE DESC",
-                new MapSqlParameterSource("USER_ID", userId),
-                (ResultSet rs) -> {
-                    filmsScore.put(rs.getLong("FILM_ID"), rs.getInt("SCORE"));
-                });
-        return filmsScore;
-    }
-
-    @Override
-    public Map<Long, List<Long>> getDiffFilms(Long userId) {
-        final Map<Long, List<Long>> filmLikeByUserId = new HashMap<>();
-        jdbcTemplate.query(
-                "SELECT L1.USER_ID, L1.FILM_ID " +
-                        "FROM LIKES L1 " +
-                        "LEFT JOIN LIKES L2 ON L1.FILM_ID = L2.FILM_ID AND L2.USER_ID = :USER_ID " +
-                        "WHERE L1.USER_ID <> :USER_ID AND L2.USER_ID IS NULL " +
-                        "GROUP BY L1.USER_ID, L1.FILM_ID " +
-                        "ORDER BY L1.USER_ID, L1.FILM_ID",
-                new MapSqlParameterSource().addValue("USER_ID", userId),
-                (ResultSet rs) -> {
-                    filmLikeByUserId.computeIfAbsent(rs.getLong("USER_ID"), l -> new ArrayList<>())
-                            .add(rs.getLong("FILM_ID"));
-                });
-        return filmLikeByUserId;
-    }
-
-    @Override
-    public Collection<Long> convertMaxCommonLikes(Long userId) {
-        final List<Long> scores = new ArrayList<>();
-        final Map<Long, Long> scoreByUsersId = new HashMap<>();
-        jdbcTemplate.query(
-                "SELECT L.USER_ID, COUNT(LU.FILM_ID) SCORE " +
-                        "FROM LIKES L JOIN LIKES LU ON L.FILM_ID = LU.FILM_ID " +
-                        "WHERE L.USER_ID <> :USER_ID AND LU.USER_ID = :USER_ID " +
-                        "GROUP BY L.USER_ID " +
-                        "ORDER BY SCORE DESC",
+    public List<Film> findRecommendedFilms(Long userId) {
+        String sql =
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
+                        "RATING_NAME " +
+                        "FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT LM.FILM_ID FROM LIKES LM " +
+                        "JOIN (SELECT LC.USER_ID FROM LIKES LB " +
+                        "LEFT JOIN LIKES LC ON LB.FILM_ID = LC.FILM_ID " +
+                        "WHERE LB.USER_ID = :USER_ID AND LC.USER_ID != LB.USER_ID " +
+                        "GROUP BY LC.USER_ID " +
+                        "ORDER BY COUNT(LC.FILM_ID) DESC LIMIT 1) LA ON LM.USER_ID = LA.USER_ID " +
+                        "WHERE LM.FILM_ID NOT IN (SELECT FILM_ID FROM LIKES " +
+                        "WHERE USER_ID = :USER_ID))" +
+                        "GROUP BY F.FILM_ID;";
+        return jdbcTemplate.query(sql,
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId),
-                (ResultSet rs) -> {
-                    long score = rs.getLong("SCORE");
-                    scores.add(score);
-                    scoreByUsersId.put(rs.getLong("USER_ID"), score);
-                });
-        Optional<Long> scoreMax = scores.stream().max(Comparator.naturalOrder());
-        return scoreMax.map(l -> scoreByUsersId.entrySet()
-                .stream()
-                .filter(e -> e.getValue().equals(l))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList())).orElseGet(ArrayList::new);
+                FilmDbStorage.filmMapper);
     }
 
     @Override

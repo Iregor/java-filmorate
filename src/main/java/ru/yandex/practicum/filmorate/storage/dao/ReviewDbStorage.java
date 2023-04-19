@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.model.ReviewMark;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import javax.sql.DataSource;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository("reviewDB")
@@ -51,8 +51,8 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Optional<Review> updateReview(Review review) {
         jdbcTemplate.update(
-                "UPDATE REVIEWS SET " +
-                        "CONTENT = :CONTENT, " +
+                "UPDATE REVIEWS " +
+                        "SET CONTENT = :CONTENT, " +
                         "IS_POSITIVE = :IS_POSITIVE " +
                         "WHERE REVIEW_ID = :REVIEW_ID;",
                 getReviewParams(review));
@@ -63,7 +63,7 @@ public class ReviewDbStorage implements ReviewStorage {
     public Optional<Review> deleteReview(Long reviewId) {
         jdbcTemplate.update(
                 "DELETE FROM REVIEWS " +
-                        "WHERE REVIEW_ID = :REVIEW_ID",
+                        "WHERE REVIEW_ID = :REVIEW_ID;",
                 new MapSqlParameterSource()
                         .addValue("REVIEW_ID", reviewId));
         return findReviewById(reviewId);
@@ -73,10 +73,10 @@ public class ReviewDbStorage implements ReviewStorage {
     public Optional<Review> findReviewById(Long reviewId) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT R.REVIEW_ID," +
-                            "CONTENT," +
-                            "IS_POSITIVE," +
-                            "R.USER_ID," +
+                    "SELECT R.REVIEW_ID, " +
+                            "CONTENT, " +
+                            "IS_POSITIVE, " +
+                            "R.USER_ID, " +
                             "FILM_ID, " +
                             "SUM(RM.IS_LIKE = TRUE) - SUM(RM.IS_LIKE = FALSE) USEFUL " +
                             "FROM REVIEWS R " +
@@ -90,12 +90,23 @@ public class ReviewDbStorage implements ReviewStorage {
         }
     }
 
-    public Collection<Review> findAllReviewsByFilmId(Long filmId, Integer count) {
+    @Override
+    public Boolean isExistReview(Long userId, Long filmId) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS(SELECT * FROM REVIEWS " +
+                        "WHERE USER_ID = :USER_ID AND FILM_ID = :FILM_ID);",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId)
+                        .addValue("FILM_ID", filmId),
+                Boolean.class));
+    }
+
+    public List<Review> findAllReviewsByFilmId(Long filmId, Integer count) {
         return jdbcTemplate.query(
-                "SELECT R.REVIEW_ID," +
-                        "CONTENT," +
-                        "IS_POSITIVE," +
-                        "R.USER_ID," +
+                "SELECT R.REVIEW_ID, " +
+                        "CONTENT, " +
+                        "IS_POSITIVE, " +
+                        "R.USER_ID, " +
                         "FILM_ID, " +
                         "COALESCE(SUM(RM.IS_LIKE = TRUE) - SUM(RM.IS_LIKE = FALSE), 0) USEFUL " +
                         "FROM REVIEWS R " +
@@ -111,12 +122,12 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Collection<Review> findAllReviews(Integer count) {
+    public List<Review> findAllReviews(Integer count) {
         return jdbcTemplate.query(
-                "SELECT R.REVIEW_ID," +
-                        "CONTENT," +
-                        "IS_POSITIVE," +
-                        "R.USER_ID," +
+                "SELECT R.REVIEW_ID, " +
+                        "CONTENT, " +
+                        "IS_POSITIVE, " +
+                        "R.USER_ID, " +
                         "FILM_ID, " +
                         "COALESCE(SUM(RM.IS_LIKE = TRUE) - SUM(RM.IS_LIKE = FALSE), 0) USEFUL " +
                         "FROM REVIEWS R " +
@@ -146,6 +157,16 @@ public class ReviewDbStorage implements ReviewStorage {
                         "AND IS_LIKE = :IS_LIKE;",
                 getReviewMarkParams(new ReviewMark(reviewId, userId, isLike)));
         return findReviewMark(reviewId, userId, true);
+    }
+
+    @Override
+    public Optional<ReviewMark> updateReviewMark(Long reviewId, Long userId, Boolean isLike) {
+        jdbcTemplate.update(
+                "UPDATE REVIEW_MARKS " +
+                        "SET IS_LIKE = :IS_LIKE " +
+                        "WHERE REVIEW_ID = :REVIEW_ID AND USER_ID = :USER_ID",
+                getReviewMarkParams(new ReviewMark(reviewId, userId, isLike)));
+        return findReviewMark(reviewId, userId, isLike);
     }
 
     @Override

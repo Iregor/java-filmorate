@@ -15,7 +15,7 @@ import ru.yandex.practicum.filmorate.storage.EventStorage;
 
 import javax.sql.DataSource;
 import java.time.Instant;
-import java.util.Collection;
+import java.util.List;
 
 
 @Component("EventDB")
@@ -36,13 +36,13 @@ public class EventDBStorage implements EventStorage {
             .build();
 
     @Override
-    public Collection<Event> getFeed(Long userId) {
+    public List<Event> getFeed(Long userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM FEEDS " +
                         "WHERE USER_ID = :USER_ID;",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId),
-        eventMapper);
+                eventMapper);
     }
 
     @Override

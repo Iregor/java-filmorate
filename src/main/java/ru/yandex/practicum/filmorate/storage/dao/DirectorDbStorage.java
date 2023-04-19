@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import javax.sql.DataSource;
 import java.util.*;
 
+
 @Repository
 @AllArgsConstructor
 public class DirectorDbStorage implements DirectorStorage {
@@ -37,7 +38,7 @@ public class DirectorDbStorage implements DirectorStorage {
     };
 
     @Override
-    public Collection<Director> findAll() {
+    public List<Director> findAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM DIRECTORS",
                 directorRowMapper);
@@ -88,17 +89,17 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Collection<Director> findByFilmId(Long filmId) {
-        return new HashSet<>(jdbcTemplate.query(
+    public List<Director> findByFilmId(Long filmId) {
+        return jdbcTemplate.query(
                 "SELECT D.DIRECTOR_ID, " +
                         "D.DIRECTOR_NAME " +
                         "FROM DIRECTORS D " +
                         "JOIN FILM_DIRECTORS FD ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
                         "WHERE FD.FILM_ID = :FILM_ID " +
-                        "ORDER BY D.DIRECTOR_ID",
+                        "ORDER BY D.DIRECTOR_ID;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId),
-                directorRowMapper));
+                directorRowMapper);
     }
 
     @Override
@@ -108,7 +109,7 @@ public class DirectorDbStorage implements DirectorStorage {
                 "SELECT * FROM FILM_DIRECTORS FD " +
                         "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
                         "WHERE FILM_ID IN (:IDS) " +
-                        "ORDER BY D.DIRECTOR_ID",
+                        "ORDER BY D.DIRECTOR_ID;",
                 ids,
                 directorsExtractor);
     }

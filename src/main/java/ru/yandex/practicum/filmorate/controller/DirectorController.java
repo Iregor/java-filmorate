@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -17,7 +17,7 @@ public class DirectorController {
     private final DirectorService service;
 
     @GetMapping
-    public Collection<Director> getAll() {
+    public List<Director> getAll() {
         return service.getAll();
     }
 

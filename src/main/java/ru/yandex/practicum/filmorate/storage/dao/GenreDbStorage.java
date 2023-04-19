@@ -36,7 +36,7 @@ public class GenreDbStorage implements GenreStorage {
     };
 
     @Override
-    public Collection<Genre> findAll() {
+    public List<Genre> findAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM GENRES " +
                         "ORDER BY GENRE_ID;",
@@ -44,8 +44,8 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Collection<Genre> findByFilmId(Long filmId) {
-        return new HashSet<>(jdbcTemplate.query(
+    public List<Genre> findByFilmId(Long filmId) {
+        return jdbcTemplate.query(
                 "SELECT G.GENRE_ID, " +
                         "G.GENRE_NAME " +
                         "FROM GENRES G " +
@@ -54,7 +54,7 @@ public class GenreDbStorage implements GenreStorage {
                         "ORDER BY G.GENRE_ID;",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId),
-                genreMapper));
+                genreMapper);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class GenreDbStorage implements GenreStorage {
                 "SELECT * FROM FILM_GENRES FG " +
                         "JOIN GENRES G on G.GENRE_ID = FG.GENRE_ID " +
                         "WHERE FILM_ID IN (:IDS) " +
-                        "ORDER BY G.GENRE_ID",
+                        "ORDER BY G.GENRE_ID;",
                 ids,
                 genresExtractor);
     }
