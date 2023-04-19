@@ -333,6 +333,34 @@ public class FilmDbStorage implements FilmStorage {
                 filmMapper);
     }
 
+    @Override
+    public List<Film> findRecommendedFilms(Long userId) {
+        return jdbcTemplate.query(
+                "SELECT F.FILM_ID, " +
+                        "FILM_NAME, " +
+                        "DESCRIPTION, " +
+                        "RELEASE_DATE, " +
+                        "DURATION, " +
+                        "COUNT(USER_ID) RATE, " +
+                        "F.RATING_ID, " +
+                        "RATING_NAME " +
+                        "FROM FILMS F " +
+                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
+                        "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
+                        "WHERE F.FILM_ID IN (SELECT LM.FILM_ID FROM LIKES LM " +
+                        "JOIN (SELECT LC.USER_ID FROM LIKES LB " +
+                        "LEFT JOIN LIKES LC ON LB.FILM_ID = LC.FILM_ID " +
+                        "WHERE LB.USER_ID = :USER_ID AND LC.USER_ID != LB.USER_ID " +
+                        "GROUP BY LC.USER_ID " +
+                        "ORDER BY COUNT(LC.FILM_ID) DESC LIMIT 1) LA ON LM.USER_ID = LA.USER_ID " +
+                        "WHERE LM.FILM_ID NOT IN (SELECT FILM_ID FROM LIKES " +
+                        "WHERE USER_ID = :USER_ID))" +
+                        "GROUP BY F.FILM_ID;",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId),
+                FilmDbStorage.filmMapper);
+    }
+
     private MapSqlParameterSource getFilmParams(Film film) {
         return new MapSqlParameterSource()
                 .addValue("FILM_ID", film.getId())

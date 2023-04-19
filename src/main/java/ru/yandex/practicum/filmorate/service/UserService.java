@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final FilmService filmService;
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final LikesStorage likesStorage;
     private final EventService eventService;
+    private final FilmService filmService;
 
     public List<User> findAll() {
         List<User> result = userStorage.findAll();
@@ -144,10 +144,7 @@ public class UserService {
             log.warn("User {} is not found.", userId);
             throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
         }
-        List<Film> result = userStorage.findRecommendedFilms(userId);
-        log.info("Found {} film(s).", result.size());
-        filmService.addDataFilms(result);
-        return result;
+        return filmService.getRecommendedFilms(userId);
     }
 
     private void addFeed(Long userId, Long friendId, Operation operation) {

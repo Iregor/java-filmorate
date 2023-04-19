@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -101,35 +100,6 @@ public class UserDbStorage implements UserStorage {
                         "WHERE USER_ID = :USER_ID;",
                 getUserParams(user));
         return findById(user.getId());
-    }
-
-    @Override
-    public List<Film> findRecommendedFilms(Long userId) {
-        String sql =
-                "SELECT F.FILM_ID, " +
-                        "FILM_NAME, " +
-                        "DESCRIPTION, " +
-                        "RELEASE_DATE, " +
-                        "DURATION, " +
-                        "COUNT(USER_ID) RATE, " +
-                        "F.RATING_ID, " +
-                        "RATING_NAME " +
-                        "FROM FILMS F " +
-                        "JOIN RATING MPA ON F.RATING_ID = MPA.RATING_ID " +
-                        "LEFT OUTER JOIN LIKES L ON L.FILM_ID = F.FILM_ID " +
-                        "WHERE F.FILM_ID IN (SELECT LM.FILM_ID FROM LIKES LM " +
-                        "JOIN (SELECT LC.USER_ID FROM LIKES LB " +
-                        "LEFT JOIN LIKES LC ON LB.FILM_ID = LC.FILM_ID " +
-                        "WHERE LB.USER_ID = :USER_ID AND LC.USER_ID != LB.USER_ID " +
-                        "GROUP BY LC.USER_ID " +
-                        "ORDER BY COUNT(LC.FILM_ID) DESC LIMIT 1) LA ON LM.USER_ID = LA.USER_ID " +
-                        "WHERE LM.FILM_ID NOT IN (SELECT FILM_ID FROM LIKES " +
-                        "WHERE USER_ID = :USER_ID))" +
-                        "GROUP BY F.FILM_ID;";
-        return jdbcTemplate.query(sql,
-                new MapSqlParameterSource()
-                        .addValue("USER_ID", userId),
-                FilmDbStorage.filmMapper);
     }
 
     @Override

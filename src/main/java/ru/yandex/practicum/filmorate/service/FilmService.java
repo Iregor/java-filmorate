@@ -182,6 +182,13 @@ public class FilmService {
         }
     }
 
+    public List<Film> getRecommendedFilms(Long userId) {
+        List<Film> result = filmStorage.findRecommendedFilms(userId);
+        addDataFilms(result);
+        log.info("Found {} film(s).", result.size());
+        return result;
+    }
+
     private void updateGenreByFilm(Film film) {
         Set<Genre> removedGenre = genreStorage.findByFilmId(film.getId())
                 .stream()
@@ -212,7 +219,7 @@ public class FilmService {
         eventService.addEvent(userId, filmId, EventType.LIKE, operation);
     }
 
-    public void addDataFilms(Collection<Film> films) {
+    private void addDataFilms(Collection<Film> films) {
         Map<Long, Film> filmsMap = films
                 .stream()
                 .collect(Collectors.toMap(Film::getId, Function.identity()));
