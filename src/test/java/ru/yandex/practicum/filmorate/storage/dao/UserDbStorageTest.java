@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,11 +19,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserDbStorageTest {
-    @Qualifier("userDb") private final UserStorage userStorage;
+    private final UserStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
+
+        jdbcTemplate.update("DELETE FROM LIKES ");
         jdbcTemplate.update("DELETE FROM USERS ");
         jdbcTemplate.execute("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1 ");
     }
@@ -68,11 +69,11 @@ class UserDbStorageTest {
                 .hasFieldOrPropertyWithValue("birthday", LocalDate.parse("2001-01-12"));
     }
 
-   @Test
+    @Test
     void update_returnUpdateUserId4_AllUser() {
         addData();
         userStorage.update(new User(4L, "dsafd@fdsaf.ru",
-               "fdasfd", "asdfas", "2000-01-12"));
+                "fdasfd", "asdfas", "2000-01-12"));
         assertThat(userStorage.findById(4L))
                 .isPresent()
                 .hasValueSatisfying(genre ->
@@ -92,6 +93,6 @@ class UserDbStorageTest {
                 "('ema@yahoo.ru', 'loginator', 'SurName', '1988-01-02')," +
                 "('ail@rambler.ru', 'user34321', 'User', '2021-03-18')," +
                 "('eml@ms.ru', 'kpoisk', 'Dbnjh', '1994-11-25')");
-
     }
 }
+

@@ -31,9 +31,10 @@ public class UserDbStorage implements UserStorage {
                     .build();
 
     @Override
-    public Collection<User> findAll() {
+    public List<User> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM USERS ORDER BY USER_ID;",
+                "SELECT * FROM USERS " +
+                        "ORDER BY USER_ID;",
                 userMapper);
     }
 
@@ -41,7 +42,8 @@ public class UserDbStorage implements UserStorage {
     public Optional<User> findById(Long id) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT * FROM USERS WHERE USER_ID = :USER_ID;",
+                    "SELECT * FROM USERS " +
+                            "WHERE USER_ID = :USER_ID;",
                     new MapSqlParameterSource()
                             .addValue("USER_ID", id),
                     userMapper));
@@ -51,7 +53,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> findFriends(Long id) {
+    public List<User> findFriends(Long id) {
         return jdbcTemplate.query(
                 "SELECT * FROM USERS U " +
                         "JOIN FRIENDSHIPS FS ON U.USER_ID = FS.FRIEND_ID " +
@@ -63,11 +65,15 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> findCommonFriends(Long userId, Long friendId) {
+    public List<User> findCommonFriends(Long userId, Long friendId) {
         return jdbcTemplate.query(
-                "SELECT * FROM USERS U, FRIENDSHIPS F, FRIENDSHIPS O " +
-                        "WHERE U.USER_ID = F.FRIEND_ID AND U.USER_ID = O.FRIEND_ID " +
-                        "AND F.USER_ID = :USER_ID AND O.USER_ID = :FRIEND_ID;",
+                "SELECT * FROM USERS U, " +
+                        "FRIENDSHIPS F, " +
+                        "FRIENDSHIPS O " +
+                        "WHERE U.USER_ID = F.FRIEND_ID " +
+                        "AND U.USER_ID = O.FRIEND_ID " +
+                        "AND F.USER_ID = :USER_ID " +
+                        "AND O.USER_ID = :FRIEND_ID;",
                 new MapSqlParameterSource()
                         .addValue("USER_ID", userId)
                         .addValue("FRIEND_ID", friendId),
@@ -94,6 +100,15 @@ public class UserDbStorage implements UserStorage {
                         "WHERE USER_ID = :USER_ID;",
                 getUserParams(user));
         return findById(user.getId());
+    }
+
+    @Override
+    public void remove(Long userId) {
+        jdbcTemplate.update(
+                "DELETE FROM USERS " +
+                        "WHERE USER_ID = :USER_ID",
+                new MapSqlParameterSource()
+                        .addValue("USER_ID", userId));
     }
 
     private MapSqlParameterSource getUserParams(User user) {

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,12 +21,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTest {
 
-    @Qualifier("filmDb")
     private final FilmStorage filmStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
+        jdbcTemplate.update("DELETE FROM LIKES ");
         jdbcTemplate.update("DELETE FROM FILMS ");
         jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1 ");
     }
@@ -110,7 +109,7 @@ class FilmDbStorageTest {
                 "RELEASE_DATE, DURATION) " +
                 "VALUES (1,'Евангелион 3.0+1.0', 'Мехи, гиганты и тд'," +
                 " '2021-03-08', 155)," +
-                "(5,'Карты, деньги, два ствола', 'Стейтем не бьет морды, '," +
+                "(5,'Карты, деньги, два ствола', 'Стейтем не бьет морды'," +
                 " '1998-08-23', 107)," +
                 "(2,'Большой куш', 'Борис Бритва вещает про надежность большого и тяжелого'," +
                 " '2000-08-23', 104)," +

@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
@@ -21,9 +24,11 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final LikesStorage likesStorage;
+    private final EventService eventService;
+    private final FilmService filmService;
 
-    public Collection<User> findAll() {
-        Collection<User> result = userStorage.findAll();
+    public List<User> findAll() {
+        List<User> result = userStorage.findAll();
         log.info("Found {} user(s).", result.size());
         addDataUsers(result);
         return result;
@@ -71,6 +76,16 @@ public class UserService {
         return result.get();
     }
 
+    public void delete(Long userId) {
+        Optional<User> result = userStorage.findById(userId);
+        if (result.isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        userStorage.remove(userId);
+        log.info("User {} removed.", result.get().getLogin());
+    }
+
     public void addFriend(Long userId, Long friendId) {
         if (userStorage.findById(userId).isEmpty()) {
             log.warn("User {} is not found.", userId);
@@ -81,7 +96,7 @@ public class UserService {
             throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
         }
         friendStorage.add(userId, friendId);
-        log.info("User {} added user {} to friends.", userId, friendId);
+        addFeed(userId, friendId, Operation.ADD);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -95,24 +110,48 @@ public class UserService {
         }
         friendStorage.remove(userId, friendId);
         log.info("User {} deleted user {} from friends.", userId, friendId);
+        addFeed(userId, friendId, Operation.REMOVE);
     }
 
-    public Collection<User> getFriends(Long userId) {
-        Collection<User> result = userStorage.findFriends(userId);
+    public List<User> getFriends(Long userId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        List<User> result = userStorage.findFriends(userId);
         log.info("Found {} friend(s).", result.size());
         addDataUsers(result);
         return result;
     }
 
-    public Collection<User> getCommonFriends(Long userId, Long friendId) {
-        Collection<User> result = userStorage.findCommonFriends(userId, friendId);
+    public List<User> getCommonFriends(Long userId, Long friendId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        if (userStorage.findById(friendId).isEmpty()) {
+            log.warn("Friend {} is not found.", friendId);
+            throw new IncorrectObjectIdException(String.format("Friend %s is not found.", friendId));
+        }
+        List<User> result = userStorage.findCommonFriends(userId, friendId);
         log.info("Found {} friend(s).", result.size());
         addDataUsers(result);
         return result;
     }
 
+    public List<Film> getRecommendedFilms(Long userId) {
+        if (userStorage.findById(userId).isEmpty()) {
+            log.warn("User {} is not found.", userId);
+            throw new IncorrectObjectIdException(String.format("User %s is not found.", userId));
+        }
+        return filmService.getRecommendedFilms(userId);
+    }
 
-    private void addDataUsers(Collection<User> users) {
+    private void addFeed(Long userId, Long friendId, Operation operation) {
+        eventService.addEvent(userId, friendId, EventType.FRIEND, operation);
+    }
+
+    private void addDataUsers(List<User> users) {
         Map<Long, User> usersMap = users
                 .stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));

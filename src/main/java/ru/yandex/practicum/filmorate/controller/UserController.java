@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public Collection<User> findAll() {
+    public List<User> findAll() {
         return userService.findAll();
     }
 
@@ -38,8 +38,13 @@ public class UserController {
         return userService.update(user);
     }
 
+    @DeleteMapping(value = "{userId}")
+    public void delete(@PathVariable Long userId) {
+        userService.delete(userId);
+    }
+
     @GetMapping("/{userId}/friends")
-    public Collection<User> getFriends(@PathVariable Long userId) {
+    public List<User> getFriends(@PathVariable Long userId) {
         return userService.getFriends(userId);
     }
 
@@ -54,7 +59,12 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends/common/{friendId}")
-    public Collection<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long friendId) {
+    public List<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long friendId) {
         return userService.getCommonFriends(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public List<Film> getRecommendedFilms(@PathVariable Long userId) {
+        return userService.getRecommendedFilms(userId);
     }
 }

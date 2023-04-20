@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectObjectIdException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -17,8 +17,8 @@ public class GenreService {
 
     private final GenreStorage genreStorage;
 
-    public Collection<Genre> findAll() {
-        Collection<Genre> result = genreStorage.findAll();
+    public List<Genre> findAll() {
+        List<Genre> result = genreStorage.findAll();
         log.info("Found {} genre(s).",
                 result.size());
         return result;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository("mpaDb")
@@ -21,20 +21,22 @@ public class MpaDbStorage implements MpaStorage {
             rs.getString("RATING_NAME"));
 
     @Override
-    public Collection<Mpa> findAll() {
+    public List<Mpa> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM RATING ORDER BY RATING_ID;",
+                "SELECT * FROM RATING " +
+                        "ORDER BY RATING_ID;",
                 mpaMapper);
     }
 
     @Override
     public Optional<Mpa> findById(Long id) {
         try {
-            return Optional.ofNullable(jdbcTemplate
-                    .queryForObject("SELECT * FROM RATING WHERE RATING_ID = :RATING_ID;",
-                            new MapSqlParameterSource()
-                                    .addValue("RATING_ID", id),
-                            mpaMapper));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
+                    "SELECT * FROM RATING " +
+                            "WHERE RATING_ID = :RATING_ID;",
+                    new MapSqlParameterSource()
+                            .addValue("RATING_ID", id),
+                    mpaMapper));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

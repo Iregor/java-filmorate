@@ -8,11 +8,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Repository("likesDb")
 @RequiredArgsConstructor
@@ -61,12 +57,25 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public void add(Long filmId, Long userId) {
-        jdbcTemplate.update(
-                "INSERT INTO LIKES VALUES (:FILM_ID, :USER_ID, :DATE);",
+        boolean isExistLike = Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS" +
+                        "(SELECT * FROM LIKES " +
+                        "WHERE FILM_ID = :FILM_ID AND USER_ID = :USER_ID);",
                 new MapSqlParameterSource()
                         .addValue("FILM_ID", filmId)
-                        .addValue("USER_ID", userId)
-                        .addValue("DATE", LocalDate.now()));
+                        .addValue("USER_ID", userId),
+                Boolean.class));
+
+        if (isExistLike) {
+            return;
+        }
+
+        jdbcTemplate.update(
+                "INSERT INTO LIKES " +
+                        "VALUES (:FILM_ID, :USER_ID);",
+                new MapSqlParameterSource()
+                        .addValue("FILM_ID", filmId)
+                        .addValue("USER_ID", userId));
     }
 
     @Override
