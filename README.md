@@ -1,56 +1,61 @@
-# Java-Filmorate
+# Приложение "Filmorate"
+<picture>
+    <img src="src/main/resources/logo.png">
+</picture>
+Фильмов много — и с каждым годом становится всё больше. Чем их больше, тем больше разных оценок. Чем больше оценок, тем сложнее сделать выбор. Теперь ни вам, ни вашим друзьям не придётся долго размышлять, что посмотреть вечером. 
+Наше REST приложение обрабатывает данные фильмов:clapper:, пользователей:office_worker: и дает все необходимые рекомендации.
 
-***
+## Стек
+- Java 11
+- Spring Boot
+- Apache Maven - управление зависимостями и сборка проекта
+- Spring JDBC - запросы к базам данных
+- PostgresSQL, H2 - реляционные базы данных
+- JUnit - тесты
 
-## Roles
+## Функционал приложения
+**Для управления пользователями доступны следующие команды**:
+<br>• Создать нового пользователя
+<br>• Изменить существующего пользователя
+<br>• Добавить в друзья
+<br>• Удалить из друзей
+<br>• Получить список всех пользователей
+<br>• Получить конкретного пользователя по его id
+<br>• Получить список друзей конкретного пользователя
+<br>• Получить список общих друзей пользователей
 
-### Team Lead
-> Aleksandr Golykh
+**Для управления фильмами доступны команды**:
+<br>• Добавить новый фильм
+<br>• Изменить существующий фильм
+<br>• Добавить лайк конкретному фильму
+<br>• Удалить лайк у конкретного фильма
+<br>• Получить список всех фильмов
+<br>• Получить фильм по его id
+<br>• Получить топ N фильмов, упорядоченных по убыванию рейтинга
+<br>• Получить список всех жанров фильмов, доступных в сервисе
+<br>• Получить список всех возрастных рейтингов фильмов, доступных в сервисе
 
-### Project members
-> Aleksandr Kiselev  
-> Nikita Garkusha  
-> Igor Mamontov  
-> Ivan Usov  
-> Pavel Ivanov
+### В ходе командной работы была реализована дополнительная функциональность:
+1. _add-reviews_ - Отзывы на фильмы, лайки, дизлайки и сортировка по рейтингу - [Iregor](https://github.com/Iregor)
+2. _add-feed_ - Возможность получения доступа к ленте событий на платформе - [nikita-garkusha](https://github.com/nikita-garkusha)
+3. _add-director_ - Вывод фильмов по режисеру с сортировкой по лайкам и годам - [IvanSPb85](https://github.com/IvanSPb85)
+4. _add-recommendations_ - Система рекомендаций по похожести расстановки лайков - [AlexKis](https://github.com/AleksandrKis)
+5. _add-search_ - Поиск фильмов по названию и режисеру - [PavelIvanov](https://github.com/exipse)
+6. _add-common-films_ - Вывод общих с другом фильмов с сортировкой по их популярности - [AGolykh](https://github.com/AGolykh)
+7. _add-remove-endpoint_ - Функциональность для удаления фильма и пользователя по идентификатору - [AGolykh](https://github.com/AGolykh)
+8. _add-most-populars_ - Возможность выводить топ-N фильмов по количеству лайков - [AGolykh](https://github.com/AGolykh)
+### Структура БД проекта :movie_camera:
+<picture>
+    <img src="src/main/resources/DB_diagram.png">
+</picture>
 
-***
-
-## Zone of responsibility
-
-### Aleksandr Golykh
->Functionality "Common Films": 
->> add-common-films  
-> 
-> ---
-> Functionality "Removing films and users":
->> add-remove-endpoint
->
-> ---
-> Functionality "Most popular films":
->> add-most-populars
-
-### Aleksandr Kiselev
->Functionality "Recommendations":
->> add-recommendations
-
-### Nikita Garkusha
->Functionality "Feeds":
->> add-feed
-
-### Igor Mamontov
->Functionality "Reviews":
->> add-reviews
-
-### Ivan Usov
->Functionality "Director":
->> add-director
-
-### Pavel Ivanov
->Functionality "Search":
->> add-search
-
-***
-## Schema of database
-
-![DB-Scheme](https://i.ibb.co/fSdLQ1Z/DB-scheme.jpg)
+## Установка и запуск проекта
+1. Установите Java Development Kit (JDK) версии 11 или выше, если у вас его еще нет.
+2. Установите PostgreSQL и создайте базу данных для проекта.
+3. Клонируйте репозиторий проекта на свою локальную машину.
+4. Настройте файл `application.properties`, расположенный в директории `src/main/resources`, чтобы указать данные для подключения к вашей базе данных PostgreSQL.
+5. Запустите приложение, выполнив следующую команду в корневой директории проекта:
+   ```
+   mvn spring-boot:run
+   ```
+6. Приложение будет запущено на порту 8080 и готово принимать http-запросы. 
