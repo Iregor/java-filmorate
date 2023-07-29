@@ -44,10 +44,6 @@
 6. _add-common-films_ - Вывод общих с другом фильмов с сортировкой по их популярности - [AGolykh](https://github.com/AGolykh)
 7. _add-remove-endpoint_ - Функциональность для удаления фильма и пользователя по идентификатору - [AGolykh](https://github.com/AGolykh)
 8. _add-most-populars_ - Возможность выводить топ-N фильмов по количеству лайков - [AGolykh](https://github.com/AGolykh)
-### Структура БД проекта :movie_camera:
-<picture>
-    <img src="src/main/resources/DB_diagram.png">
-</picture>
 
 ## Установка и запуск проекта
 1. Установите Java Development Kit (JDK) версии 11 или выше, если у вас его еще нет.
